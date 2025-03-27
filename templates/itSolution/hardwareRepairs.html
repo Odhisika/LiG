@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero bg-dark text-white py-5">
+    <div class="container text-center">
+        <h1 class="fw-bold">Professional IT Hardware Repair Services</h1>
+        <p class="lead">We diagnose, repair, and upgrade IT hardware to keep your business running smoothly.</p>
+        <a href="{% url 'hardwareServices' %}" class="btn btn-primary btn-lg mt-3">Explore Our Services</a>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="container py-5">
+    <h2 class="text-center mb-4">Why Choose Our IT Hardware Repair Services?</h2>
+    <p class="text-center">We offer reliable and efficient hardware repair services with expert technicians and the latest tools.</p>
+    
+    <div class="row text-center mt-4">
+        <div class="col-md-4">
+            <i class="fas fa-tools fa-3x text-primary"></i>
+            <h4 class="mt-3">Expert Technicians</h4>
+            <p>Certified professionals with years of experience in hardware troubleshooting.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fas fa-shield-alt fa-3x text-primary"></i>
+            <h4 class="mt-3">Secure & Reliable</h4>
+            <p>We ensure data safety and perform repairs using high-quality components.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fas fa-clock fa-3x text-primary"></i>
+            <h4 class="mt-3">Fast Turnaround</h4>
+            <p>Quick diagnostics and repairs to minimize downtime for businesses and individuals.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Our Services -->
+<section id="services" class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Our Hardware Repair Services</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-laptop fa-3x text-primary"></i>
+                    <h4 class="mt-3">Laptop & Desktop Repair</h4>
+                    <p>Fixing screen issues, battery replacements, motherboard repairs, and more.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-server fa-3x text-primary"></i>
+                    <h4 class="mt-3">Server Maintenance</h4>
+                    <p>Ensuring business servers run efficiently with component repairs and upgrades.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-network-wired fa-3x text-primary"></i>
+                    <h4 class="mt-3">Networking Equipment Repair</h4>
+                    <p>Diagnosing and fixing routers, switches, firewalls, and connectivity issues.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-print fa-3x text-primary"></i>
+                    <h4 class="mt-3">Printer & Peripheral Repair</h4>
+                    <p>Repairing office equipment like printers, scanners, and external drives.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-hdd fa-3x text-primary"></i>
+                    <h4 class="mt-3">Data Recovery</h4>
+                    <p>Recovering lost data from damaged storage devices and hard drives.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-memory fa-3x text-primary"></i>
+                    <h4 class="mt-3">Hardware Upgrades</h4>
+                    <p>Boosting performance with SSD upgrades, RAM expansion, and new GPUs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Custom CSS for animations and enhancements -->
+<style>
+  .hero-section {
+    background: linear-gradient(135deg, #4e73df 0%, #8a2be2 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/static/images/hero-bg.svg') center/cover;
+    opacity: 0.1;
+    z-index: 0;
+  }
+  
+  .floating-shapes {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+  
+  .shape {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: float 15s infinite ease-in-out;
+  }
+  
+  .shape:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+  
+  .shape:nth-child(2) {
+    width: 120px;
+    height: 120px;
+    top: 20%;
+    right: 15%;
+    animation-delay: 2s;
+  }
+  
+  .shape:nth-child(3) {
+    width: 60px;
+    height: 60px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+  }
+  
+  .shape:nth-child(4) {
+    width: 100px;
+    height: 100px;
+    bottom: 10%;
+    right: 10%;
+    animation-delay: 6s;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translatey(0) rotate(0deg);
+    }
+    50% {
+      transform: translatey(-20px) rotate(180deg);
+    }
+    100% {
+      transform: translatey(0) rotate(360deg);
+    }
+  }
+  
+  .service-card {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 100%;
+  }
+  
+  .service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .service-icon {
+    height: 64px;
+    width: 64px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4e73df 0%, #8a2be2 100%);
+    color: white;
+    font-size: 28px;
+  }
+  
+  .step-card {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    border-left: 5px solid #4e73df;
+    height: 100%;
+  }
+  
+  .step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .step-number {
+    background: linear-gradient(135deg, #4e73df 0%, #8a2be2 100%);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin: 0 auto 15px;
+  }
+  
+  .booking-form {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .form-label {
+    font-weight: 500;
+  }
+  
+  .btn-gradient {
+    background: linear-gradient(135deg, #4e73df 0%, #8a2be2 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-gradient:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(78, 115, 223, 0.6);
+  }
+  
+  .section-title {
+    position: relative;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .section-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(135deg, #4e73df 0%, #8a2be2 100%);
+  }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section py-5 py-md-6">
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+  <div class="container position-relative text-center py-5 text-white" style="z-index: 10;">
+    <h1 class="display-4 fw-bold text-shadow mb-3">Need Help with Your Final Year Project?</h1>
+    <p class="lead mb-4 mx-auto" style="max-width: 700px;">Complete project solutions, documentation, and expert guidance for students in Computer Science, IT, and Engineering.</p>
+    <a href="#booking" class="btn btn-light btn-lg px-4 py-2 fw-bold text-primary shadow-sm">Book Now</a>
+  </div>
+</section>
+
+<!-- Services Offered -->
+<section class="py-5 bg-light">
+  <div class="container text-center">
+    <h2 class="section-title display-5 fw-bold text-dark">Our Services</h2>
+    <div class="row g-4 mt-3">
+      <div class="col-md-4">
+        <div class="card service-card h-100 shadow-sm">
+          <div class="card-body p-4">
+            <div class="service-icon mb-3">
+              <i class="fas fa-laptop-code"></i>
+            </div>
+            <h3 class="card-title h4 fw-bold text-primary">Project Development</h3>
+            <p class="card-text text-muted">We build Web, Android, Networking, AI, and more.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card service-card h-100 shadow-sm">
+          <div class="card-body p-4">
+            <div class="service-icon mb-3">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <h3 class="card-title h4 fw-bold text-primary">Documentation & Report Writing</h3>
+            <p class="card-text text-muted">Get well-structured reports for your project.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card service-card h-100 shadow-sm">
+          <div class="card-body p-4">
+            <div class="service-icon mb-3">
+              <i class="fas fa-comments"></i>
+            </div>
+            <h3 class="card-title h4 fw-bold text-primary">One-on-One Consultation</h3>
+            <p class="card-text text-muted">Get expert guidance for your project development.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5">
+  <div class="container text-center">
+    <h2 class="section-title display-5 fw-bold text-dark">How It Works</h2>
+    <div class="row g-4 mt-3">
+      <div class="col-md-3">
+        <div class="card step-card h-100 shadow-sm">
+          <div class="card-body p-4">
+            <div class="step-number">1</div>
+            <h3 class="card-title h5 fw-bold">Submit Your Topic</h3>
+            <p class="card-text text-muted">Tell us your project idea and requirements.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card step-card h-100 shadow-sm">
+          <div class="card-body p-4">
+            <div class="step-number">2</div>
+            <h3 class="card-title h5 fw-bold">Get a Quote</h3>
+            <p class="card-text text-muted">We assess and give you an estimated price.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card step-card h-100 shadow-sm">
+          <div class="card-body p-4">
+            <div class="step-number">3</div>
+            <h3 class="card-title h5 fw-bold">Development</h3>
+            <p class="card-text text-muted">We create, test, and refine your project.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card step-card h-100 shadow-sm">
+          <div class="card-body p-4">
+            <div class="step-number">4</div>
+            <h3 class="card-title h5 fw-bold">Receive Your Work</h3>
+            <p class="card-text text-muted">Get your final project and documentation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Booking Form -->
+<section id="booking" class="py-5 position-relative">
+  <!-- Gradient Background -->
+  <div class="position-absolute w-100 h-100 top-0 start-0" 
+       style="background: linear-gradient(135deg, #4e73df 0%, #8a2be2 100%); z-index: 0;">
+  </div>
+
+  <!-- Floating Shapes -->
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="container position-relative text-center" style="z-index: 10;">
+    <h2 class="section-title display-5 fw-bold text-white">Book Your Project Now</h2>
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <!-- Booking Form -->
+        <form method="POST" id="projectBookingForm" class="booking-form p-4 p-md-5 shadow-lg bg-white rounded">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="name" class="form-label">Your Name</label>
+            <input type="text" class="form-control" name="name" id="name" placeholder="Enter your full name" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Your Email</label>
+            <input type="email" class="form-control" name="email" id="email" placeholder="Enter your email address" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="university" class="form-label">University & Course</label>
+            <input type="text" class="form-control" name="university" id="university" placeholder="Enter your university and course" required>
+          </div>
+
+          <div class="mb-4">
+            <label for="project_details" class="form-label">Project Topic & Details</label>
+            <textarea class="form-control" name="project_details" id="project_details" rows="4"
+                      placeholder="Describe your project needs in detail" required></textarea>
+          </div>
+
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-gradient btn-lg px-5 py-3 fw-bold">
+              Submit Booking
+            </button>
+          </div>
+        </form>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="alert alert-success mt-3 text-center" style="display: none;">
+          ✅ Project booked successfully! We’ll contact you very soon.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JavaScript -->
+<script>
+document.getElementById("projectBookingForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent actual form submission
+
+    // Clear the form fields
+    this.reset();
+
+    // Show success message
+    let successMessage = document.getElementById("successMessage");
+    successMessage.style.display = "block";
+
+    // Hide success message after 5 seconds (optional)
+    setTimeout(() => {
+        successMessage.style.display = "none";
+    }, 5000);
+});
+</script>
+
+<!-- Add FontAwesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+{% endblock %}
+

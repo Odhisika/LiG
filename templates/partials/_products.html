@@ -1,0 +1,75 @@
+<!-- Explore Popular Products Section -->
+{% load static %}
+<section class="py-5" style="background-color: #f0f8f7;">
+    <div class="container">
+        <!-- Section Heading -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold mb-4">Explore Popular Products</h2>
+            </div>
+        </div>
+        
+        <!-- Product Categories Grid -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4 justify-content-center">
+            <!-- Laptops -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'images/items/laptop.jpeg' %}" class="img-fluid mb-3" alt="Laptop" style="height: 100px; object-fit: contain;">
+                        <a href="{% url 'store' %}" class="card-title"> <h6><u>Laptops</u></h6></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Printers -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'images/items/printer.jpeg' %}" class="img-fluid mb-3" alt="Monitor" style="height: 100px; object-fit: contain;">
+                        <a href="{% url 'store' %}" class="card-title"> <h6><u>Printers</u></h6></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monitors -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'images/items/monitor.jpeg' %}" class="img-fluid mb-3" alt="iMac" style="height: 100px; object-fit: contain;">
+                        <a href="{% url 'store' %}" class="card-title"> <h6><u>Monitors</u></h6></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Networking -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'images/items/networking.jpeg' %}" class="img-fluid mb-3" alt="Network Cable" style="height: 100px; object-fit: contain;">
+                        <a href="{% url 'store' %}" class="card-title"> <h6> <u>Networking Devices</u> </h6></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Desktops -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'images/items/desktop.jpeg' %}" class="img-fluid mb-3" alt="Printer" style="height: 100px; object-fit: contain;">
+                        <a href="{% url 'store' %}" class="card-title"> <h6> <u>Desktops</u></h6></a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Software -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="{% static 'images/items/software.jpeg' %}" class="img-fluid mb-3" alt="Software" style="height: 100px; object-fit: contain;">
+                        <h6 class="card-title"><u>Software</u></h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

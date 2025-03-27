@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero bg-primary text-white py-5">
+    <div class="container text-center">
+        <h1 class="fw-bold">Professional Networking Solutions</h1>
+        <p class="lead">Reliable, secure, and high-speed networking for homes and businesses.</p>
+        <a href="{% url 'networkingServices' %}" class="btn btn-light btn-lg mt-3">Explore Our Services</a>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="container py-5">
+    <h2 class="text-center mb-4">Why Choose Our Networking Services?</h2>
+    <p class="text-center">We provide expert networking installation and support for businesses, homes, and enterprises.</p>
+    
+    <div class="row text-center mt-4">
+        <div class="col-md-4">
+            <i class="fas fa-network-wired fa-3x text-primary"></i>
+            <h4 class="mt-3">Seamless Connectivity</h4>
+            <p>Fast and stable network setups for businesses and homes.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fas fa-shield-alt fa-3x text-primary"></i>
+            <h4 class="mt-3">Advanced Security</h4>
+            <p>Protect your network with firewalls, VPNs, and encryption.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fas fa-tools fa-3x text-primary"></i>
+            <h4 class="mt-3">24/7 Support</h4>
+            <p>Reliable maintenance and troubleshooting for minimal downtime.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Our Services -->
+<section id="services" class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Our Networking Services</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-home fa-3x text-primary"></i>
+                    <h4 class="mt-3">Home & Office Networking</h4>
+                    <p>Complete Wi-Fi and Ethernet network installations.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-server fa-3x text-primary"></i>
+                    <h4 class="mt-3">Server Installation & Management</h4>
+                    <p>Reliable server solutions for businesses of all sizes.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-user-shield fa-3x text-primary"></i>
+                    <h4 class="mt-3">Network Security</h4>
+                    <p>Protect your data with firewalls, VPNs, and intrusion prevention.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-sitemap fa-3x text-primary"></i>
+                    <h4 class="mt-3">Structured Cabling</h4>
+                    <p>Organized and high-speed cabling solutions for businesses.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-exchange-alt fa-3x text-primary"></i>
+                    <h4 class="mt-3">Router & Switch Configuration</h4>
+                    <p>Optimize network traffic with expert router and switch setups.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4">
+                    <i class="fas fa-laptop-house fa-3x text-primary"></i>
+                    <h4 class="mt-3">Remote Network Solutions</h4>
+                    <p>Work from anywhere with secure and reliable remote networking.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

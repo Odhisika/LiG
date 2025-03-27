@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Searh result for  <Strong>{{ query }}</Strong></h2>
+  
+  {% if results %}
+    <ul>
+      {% for post in results %}
+        <li>
+          <a href="{% url 'research-detail' post.slug %}">{{ post.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No results found.</p>
+  {% endif %}
+{% endblock %}

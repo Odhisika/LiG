@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Service Details Hero Section -->
+<section class="hero bg-dark text-white py-5">
+    <div class="container text-center">
+        <h1 class="fw-bold">Our CCTV Installation Services</h1>
+        <p class="lead">Learn more about our professional security solutions tailored for your needs.</p>
+    </div>
+</section>
+
+<!-- Service Details Section -->
+<section class="container py-5">
+    
+    
+    <div class="row g-4">
+        <div class="col-md-6">
+            <img src="{% static 'images/items/home-security.jpg' %}" alt="Home Security Cameras" class="img-fluid rounded">
+        </div>
+        <div class="col-md-6">
+            <h3>Home Security Cameras</h3>
+            <p>Our high-definition indoor and outdoor cameras provide 24/7 surveillance for your home, ensuring safety and peace of mind.</p>
+        </div>
+    </div>
+    
+    <div class="row g-4 mt-5">
+        <div class="col-md-6 order-md-2">
+            <img src="{% static 'images/items/business-surveillance.jpg' %}" alt="Business Surveillance" class="img-fluid rounded">
+        </div>
+        <div class="col-md-6 order-md-1">
+            <h3>Business Surveillance</h3>
+            <p>Protect your office and commercial spaces with state-of-the-art surveillance systems designed for optimal security.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-5">
+        <div class="col-md-6">
+            <img src="{% static 'images/items/wireless-cctv.jpg' %}" alt="Wireless CCTV" class="img-fluid rounded">
+        </div>
+        <div class="col-md-6">
+            <h3>Wireless CCTV Installation</h3>
+            <p>Experience hassle-free security with wireless CCTV solutions, providing flexibility and remote access from anywhere.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-5">
+        <div class="col-md-6 order-md-2">
+            <img src="{% static 'images/items/night-vision.jpg' %}" alt="Night Vision Cameras" class="img-fluid rounded">
+        </div>
+        <div class="col-md-6 order-md-1">
+            <h3>Night Vision Cameras</h3>
+            <p>Get clear and detailed images even in complete darkness, ensuring round-the-clock security.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-5">
+        <div class="col-md-6">
+            <img src="{% static 'images/items/motion-detection.jpg' %}" alt="Motion Detection & Alerts" class="img-fluid rounded">
+        </div>
+        <div class="col-md-6">
+            <h3>Motion Detection & Smart Alerts</h3>
+            <p>Our AI-powered cameras send instant notifications whenever suspicious activity is detected.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-5">
+        <div class="col-md-6 order-md-2">
+            <img src="{% static 'images/items/maintenance.jpg' %}" alt="Maintenance & Upgrades" class="img-fluid rounded">
+        </div>
+        <div class="col-md-6 order-md-1">
+            <h3>Maintenance & Upgrades</h3>
+            <p>Keep your security system updated with our regular maintenance and upgrade services.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{% autoescape off %}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 80%; margin: auto; padding: 20px; border: 1px solid #ddd; background: #f9f9f9; }
+        h2 { text-align: center; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        .footer { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Order Invoice from LiG</h2>
+        <p>Hi {{ user.first_name }},</p>
+        <p>Thank you for your order! Your order details are below:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order_detail %}
+                <tr>
+                    <td>{{ item.product.product_name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₵{{ item.product_price }} GHS</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><th colspan="2">Sub Total:</th><td>₵{{ subtotal }} GHS</td></tr>
+                <tr><th colspan="2">Tax:</th><td>₵{{ order.tax }} GHS</td></tr>
+                <tr><th colspan="2">Grand Total:</th><td>₵{{ order.order_total }} GHS</td></tr>
+            </tfoot>
+        </table>
+
+        <p class="footer">Thank you for shopping with us!</p>
+    </div>
+</body>
+</html>
+{% endautoescape %}

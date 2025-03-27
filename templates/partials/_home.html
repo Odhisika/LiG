@@ -1,0 +1,368 @@
+{% load static %}
+<div class="container-fluid px-0">
+    <!-- Sliding Banner Section -->
+    <div class="banner-container">
+        <!-- Red curved accent -->
+        <svg class="red-accent" viewBox="0 0 200 400" preserveAspectRatio="none">
+            <path d="M200,0 Q100,200 200,400" fill="#e31837" />
+        </svg>
+        
+        <!-- Banner 1 - Lenovo Aura -->
+        <div class="banner-slide banner-active" id="banner1">
+            <div class="banner-content">
+                <div class="brand-logo">
+                    <img src="{% static 'images/banners/banner11.jpeg' %}" alt="Lenovo logo" />
+                    <img src="{% static 'images/banners/banner12.jpeg' %}" alt="Intel logo" />
+                </div>
+                <h2 class="banner-title">Amazing happens when the astonishing performance of AI PCs powers a new era.</h2>
+                <p class="banner-description">Gain incredible AI performance and unprecedented experiences with the latest Intel® Core™ Ultra processors when you partner with LiG. Skilled LiG technicians can configure your Lenovo Aura Edition Imagine9 with Intel® to deploy with ease.</p>
+                <button class="btn-red">Explore Lenovo Aura</button>
+            </div>
+            <div class="banner-image">
+                <img src="{% static 'images/banners/banner13.jpeg' %}" alt="Lenovo laptop" />
+            </div>
+        </div>
+        
+        <!-- Banner 2 - IT Hardware Services -->
+        <div class="banner-slide" id="banner2">
+            <div class="banner-content">
+                <div class="brand-logo">
+                    <img src="{% static 'images/banners/banner11.jpeg' %}" alt="Your company logo" />
+                </div>
+                <h2 class="banner-title">Expert IT Hardware Repair and Maintenance Services</h2>
+                <p class="banner-description">Keep your business running smoothly with our professional repair services. We diagnose and fix all types of IT hardware issues quickly and efficiently. Trust our certified technicians for all your hardware needs.</p>
+                <button class="btn-red">Our Repair Services</button>
+            </div>
+            <div class="banner-image">
+                <img src="{% static 'images/banners/banner12.jpeg' %}" alt="IT repair services" />
+            </div>
+        </div>
+        
+        <!-- Banner 3 - Hardware Upgrades -->
+        <div class="banner-slide" id="banner3">
+            <div class="banner-content">
+                <div class="brand-logo">
+                    <img src="{% static 'images/banners/cover.jpg' %}" alt="Your company logo" />
+                </div>
+                <h2 class="banner-title">Boost Performance with Professional Hardware Upgrades</h2>
+                <p class="banner-description">Transform your existing systems with our custom hardware upgrade solutions. We provide memory, storage, and processor upgrades that extend the life of your equipment and improve productivity for your team.</p>
+                <button class="btn-red">Upgrade Options</button>
+            </div>
+            <div class="banner-image">
+                <img src="{% static 'images/banners/cover.jpg' %}" alt="Hardware upgrades" />
+            </div>
+        </div>
+        
+        <!-- Banner 4 - Enterprise Solutions -->
+        <div class="banner-slide" id="banner4">
+            <div class="banner-content">
+                <div class="brand-logo">
+                    <img src="{% static 'images/banners/banner12.jpeg' %}" alt="Your company logo" />
+                </div>
+                <h2 class="banner-title">Enterprise-Grade Hardware Solutions for Business</h2>
+                <p class="banner-description">We provide customized hardware solutions designed specifically for enterprise environments. From server infrastructure to workstation deployment, our team delivers reliable equipment configured to your exact specifications.</p>
+                <button class="btn-red">Enterprise Solutions</button>
+            </div>
+            <div class="banner-image">
+                <img src="{% static 'images/banners/banner13.jpeg' %}" alt="Enterprise hardware" />
+            </div>
+        </div>
+        
+        <!-- Banner indicators -->
+        <div class="banner-indicators">
+            <div class="indicator active" data-target="banner1"></div>
+            <div class="indicator" data-target="banner2"></div>
+            <div class="indicator" data-target="banner3"></div>
+            <div class="indicator" data-target="banner4"></div>
+        </div>
+    </div>
+    
+    <!-- Welcome Back Section -->
+    <div class="container">
+        <div class="welcome-section">
+            <h3>Welcome Back!</h3>
+            <div class="action-links">
+                <p>LukyTech Innovations Grounds.</p>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this to your CSS in the head section -->
+<style>
+    .banner-container {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: 350px;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .banner-slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 1s ease, transform 1s ease;
+        transform: translateX(50px);
+        z-index: 1;
+    }
+    
+    .banner-active {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    
+    .banner-content {
+        width: 50%;
+        padding-left: 10%;
+        z-index: 2;
+    }
+    
+    .banner-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #212529;
+        line-height: 1.2;
+    }
+    
+    .banner-description {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        margin-bottom: 1.5rem;
+    }
+    
+    .banner-image {
+        width: 50%;
+        text-align: right;
+        padding-right: 5%;
+        z-index: 2;
+    }
+    
+    .banner-image img {
+        max-height: 250px;
+        object-fit: contain;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+    
+    .banner-image img:hover {
+        transform: scale(1.02);
+    }
+    
+    .brand-logo {
+        display: flex;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+    
+    .brand-logo img {
+        height: 30px;
+        margin-right: 10px;
+        border-radius: 4px;
+    }
+    
+    .btn-red {
+        background-color: #e31837;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 4px;
+        font-weight: 500;
+        margin-top: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(227, 24, 55, 0.3);
+    }
+    
+    .btn-red:hover {
+        background-color: #c1142e;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(227, 24, 55, 0.4);
+    }
+    
+    .welcome-section {
+        text-align: center;
+        padding: 25px 0;
+        border-bottom: 1px solid #eee;
+        background-color: #fff;
+        margin-bottom: 20px;
+    }
+    
+    .action-links {
+        margin: 15px 0;
+    }
+    
+    .btn-signin {
+        background-color: #000;
+        color: white;
+        padding: 7px 18px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-signin:hover {
+        background-color: #333;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Banner indicators */
+    .banner-indicators {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        z-index: 3;
+    }
+    
+    .indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.7);
+        margin: 0 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .indicator:hover {
+        background-color: rgba(227, 24, 55, 0.7);
+    }
+    
+    .indicator.active {
+        background-color: #e31837;
+        transform: scale(1.2);
+    }
+
+    /* Red curved accent */
+    .red-accent {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 25%;
+        z-index: 0;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 991.98px) {
+        .banner-container {
+            height: 400px;
+        }
+        
+        .banner-slide {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .banner-content {
+            width: 90%;
+            padding: 20px;
+            padding-left: 5%;
+            margin-bottom: 20px;
+        }
+        
+        .banner-image {
+            width: 100%;
+            text-align: center;
+            padding-right: 0;
+        }
+        
+        .banner-title {
+            font-size: 1.75rem;
+        }
+        
+        .brand-logo {
+            justify-content: center;
+        }
+    }
+    
+    @media (max-width: 767.98px) {
+        .banner-container {
+            height: 450px;
+        }
+        
+        .banner-image img {
+            max-height: 180px;
+        }
+        
+        .banner-title {
+            font-size: 1.5rem;
+        }
+        
+        .banner-description {
+            font-size: 0.9rem;
+        }
+    }
+    
+    @media (max-width: 575.98px) {
+        .banner-container {
+            height: 500px;
+        }
+        
+        .banner-image img {
+            max-height: 150px;
+        }
+    }
+</style>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        let currentBanner = 1;
+        const totalBanners = 4;
+        const slideTime = 30000; 
+        
+        function rotateBanners() {
+            
+            document.querySelectorAll('.banner-slide').forEach(slide => {
+                slide.classList.remove('banner-active');
+            });
+            
+           
+            document.querySelectorAll('.indicator').forEach(indicator => {
+                indicator.classList.remove('active');
+            });
+            
+           
+            document.getElementById('banner' + currentBanner).classList.add('banner-active');
+            
+            
+            document.querySelector(`.indicator[data-target="banner${currentBanner}"]`).classList.add('active');
+            
+            
+            currentBanner = currentBanner < totalBanners ? currentBanner + 1 : 1;
+            
+            
+            setTimeout(rotateBanners, slideTime);
+        }
+        
+       
+        setTimeout(rotateBanners, slideTime);
+        
+        
+        document.querySelectorAll('.indicator').forEach(indicator => {
+            indicator.addEventListener('click', function() {
+                const targetBanner = this.getAttribute('data-target').replace('banner', '');
+                currentBanner = parseInt(targetBanner);
+                rotateBanners();
+            });
+        });
+    });
+</script>

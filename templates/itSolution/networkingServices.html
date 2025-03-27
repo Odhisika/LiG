@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero bg-primary text-white py-5 text-center">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto">
+                <h3 class="fw-bold">Comprehensive Networking Solutions</h3>
+                <p class="lead">For all bussiness we ensure seamless connectivity and security.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sidebar Navigation -->
+<div class="container py-5">
+    <div class="row">
+        <aside class="col-md-3">
+            <div class="list-group">
+                <a href="#home-office" class="list-group-item list-group-item-action">Home & Office Networking</a>
+                <a href="#server" class="list-group-item list-group-item-action">Server Installation & Management</a>
+                <a href="#security" class="list-group-item list-group-item-action">Network Security</a>
+                <a href="#cabling" class="list-group-item list-group-item-action">Structured Cabling</a>
+                <a href="#routing" class="list-group-item list-group-item-action">Router & Switch Configuration</a>
+                <a href="#remote" class="list-group-item list-group-item-action">Remote Network Solutions</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <section id="home-office" class="mb-5">
+                <h2>Home & Office Networking</h2>
+                <p>We offer complete network installations for homes and offices, ensuring reliable and high-speed internet connectivity.</p>
+                <img src="{% static 'images/items/networking_home_office.jpg' %}" class="img-fluid rounded" alt="Home Networking">
+            </section>
+            
+            <section id="server" class="mb-5">
+                <h2>Server Installation & Management</h2>
+                <p>Reliable and scalable server solutions tailored to business needs.</p>
+                <img src="{% static 'images/items/server_management.jpg' %}" class="img-fluid rounded" alt="Server Installation">
+            </section>
+            
+            <section id="security" class="mb-5">
+                <h2>Network Security</h2>
+                <p>Protect your business with advanced security measures including firewalls, VPNs, and intrusion prevention.</p>
+                <img src="{% static 'images/items/network_security.jpg' %}" class="img-fluid rounded" alt="Network Security">
+            </section>
+            
+            <section id="cabling" class="mb-5">
+                <h2>Structured Cabling</h2>
+                <p>Organized cabling solutions for efficient and high-speed network performance.</p>
+                <img src="{% static 'images/items/structured_cabling.jpg' %}" class="img-fluid rounded" alt="Structured Cabling">
+            </section>
+            
+            <section id="routing" class="mb-5">
+                <h2>Router & Switch Configuration</h2>
+                <p>Optimize your network traffic with expert router and switch setups.</p>
+                <img src="{% static 'images/items/router_configuration.jpg' %}" class="img-fluid rounded" alt="Router Configuration">
+            </section>
+            
+            <section id="remote" class="mb-5">
+                <h2>Remote Network Solutions</h2>
+                <p>Work from anywhere with secure and efficient remote networking solutions.</p>
+                <img src="{% static 'images/items/remote_network.png' %}" class="img-fluid rounded" alt="Remote Network Solutions">
+            </section>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

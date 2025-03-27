@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero bg-primary text-white py-5">
+    <div class="container text-center">
+        <h1 class="fw-bold">IT Hardware Repair Services - Details</h1>
+        <p class="lead">Comprehensive solutions for all your IT hardware issues.</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <aside class="col-md-3">
+            <div class="list-group">
+                <a href="#laptop-repair" class="list-group-item list-group-item-action">Laptop & Desktop Repair</a>
+                <a href="#server-maintenance" class="list-group-item list-group-item-action">Server Maintenance</a>
+                <a href="#network-repair" class="list-group-item list-group-item-action">Networking Equipment Repair</a>
+                <a href="#printer-repair" class="list-group-item list-group-item-action">Printer & Peripheral Repair</a>
+                <a href="#data-recovery" class="list-group-item list-group-item-action">Data Recovery</a>
+                <a href="#hardware-upgrades" class="list-group-item list-group-item-action">Hardware Upgrades</a>
+            </div>
+        </aside>
+
+        <!-- Service Details -->
+        <section class="col-md-9">
+            <section id="laptop-repair" class="mb-5">
+                <h3 class="text-primary">Laptop & Desktop Repair</h3>
+                <img src="{% static 'images/items/laptop_repair.jpg' %}" class="img-fluid rounded mb-3" alt="Laptop Repair">
+                <p class="fw-bold">Professional repairs to ensure your devices perform flawlessly.</p>
+                <ul class="list-group">
+                    <li class="list-group-item">Screen replacements for cracked or damaged displays.</li>
+                    <li class="list-group-item">Battery replacements for extended usage and reliability.</li>
+                    <li class="list-group-item">Motherboard repairs to restore device functionality.</li>
+                    <li class="list-group-item">Software troubleshooting for efficient operation.</li>
+                </ul>
+            </section>
+            
+            <section id="server-maintenance" class="mb-5">
+                <h3 class="text-primary">Server Maintenance</h3>
+                <img src="{% static 'images/items/server_maintenance.jpg' %}" class="img-fluid rounded mb-3" alt="Server Maintenance">
+                <p class="fw-bold">Expert server care to keep your business running smoothly.</p>
+                <ul class="list-group">
+                    <li class="list-group-item">Regular repairs to address hardware issues.</li>
+                    <li class="list-group-item">Performance tuning to optimize server speed and efficiency.</li>
+                    <li class="list-group-item">Proactive maintenance to prevent unexpected downtime.</li>
+                </ul>
+            </section>
+            
+            <section id="network-repair" class="mb-5">
+                <h3 class="text-primary">Networking Equipment Repair</h3>
+                <img src="{% static 'images/items/network_repair.jpg' %}" class="img-fluid rounded mb-3" alt="Network Equipment Repair">
+                <p class="fw-bold">Reliable networking solutions to keep you connected.</p>
+                <ul class="list-group">
+                    <li class="list-group-item">Diagnosis and repair of routers, switches, and firewalls.</li>
+                    <li class="list-group-item">Resolution of connectivity and network issues.</li>
+                    <li class="list-group-item">Upgrades to ensure your network supports modern demands.</li>
+                </ul>
+            </section>
+            
+            <section id="printer-repair" class="mb-5">
+                <h3 class="text-primary">Printer & Peripheral Repair</h3>
+                <img src="{% static 'images/items/printer_repair.jpg' %}" class="img-fluid rounded mb-3" alt="Printer Repair">
+                <p class="fw-bold">Keep your office equipment running seamlessly.</p>
+                <ul class="list-group">
+                    <li class="list-group-item">Printer repairs to restore functionality and print quality.</li>
+                    <li class="list-group-item">Scanner repairs to ensure smooth document processing.</li>
+                    <li class="list-group-item">Fixes for external drives and other peripherals.</li>
+                </ul>
+            </section>
+            
+            <section id="data-recovery" class="mb-5">
+                <h3 class="text-primary">Data Recovery</h3>
+                <img src="{% static 'images/items/data_recovery.jpg' %}" class="img-fluid rounded mb-3" alt="Data Recovery">
+                <p class="fw-bold">Recover valuable data from damaged storage devices.</p>
+                <ul class="list-group">
+                    <li class="list-group-item">Recovery of lost data from hard drives and SSDs.</li>
+                    <li class="list-group-item">Solutions for damaged or corrupted storage devices.</li>
+                    <li class="list-group-item">Secure methods to ensure data integrity and privacy.</li>
+                </ul>
+            </section>
+            
+            
+            <section id="hardware-upgrades" class="mb-5">
+                <h3 class="text-primary">Hardware Upgrades</h3>
+                <img src="{% static 'images/items/hardware_upgrade.jpg' %}" class="img-fluid rounded mb-3" alt="Hardware Upgrades">
+                <p class="fw-bold">Supercharge your system's performance with cutting-edge hardware enhancements tailored to your needs.</p>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>Solid-State Drive (SSD) Upgrades:</strong> Transition from traditional hard drives to high-speed SSDs for faster boot times, lightning-quick file access, and an overall smoother experience.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Memory (RAM) Expansions:</strong> Enhance your system's multitasking capabilities with increased RAM. Open more applications, browse with numerous tabs, and run demanding software seamlessly.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Graphics Processing Unit (GPU) Replacements:</strong> Revolutionize your visuals with the latest GPUs, delivering unmatched rendering speeds for gaming, 3D rendering, or video editing.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Motherboard and CPU Enhancements:</strong> Upgrade your processor and motherboard for optimized compatibility, increased speed, and access to modern technologies.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Peripheral Improvements:</strong> Modernize your setup with high-performance peripherals, such as ergonomic keyboards, precision mice, and ultrawide monitors for an optimized workspace.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Custom Builds:</strong> Tailor every element of your system for specific needs—be it a gaming powerhouse, a professional workstation, or a home office PC.
+                    </li>
+                </ul>
+                <p class="mt-3">
+                    <strong>Why Choose Hardware Upgrades?</strong> Investing in upgrades is a cost-effective alternative to purchasing a completely new device. 
+                    It breathes new life into aging systems, boosts energy efficiency, and ensures your setup keeps up with technological advancements. 
+                    Perfect for resource-heavy applications, immersive gaming, and future-proofing your system!
+                </p>
+            </section>
+            
+        </section>
+    </div>
+</div>
+
+{% endblock %}
