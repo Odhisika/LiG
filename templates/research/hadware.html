@@ -220,6 +220,15 @@
         </div>
     </div>
     
+    <div>
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb bg-transparent p-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'research' %}">Research</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ single_product.product_name }}</li>
+            </ol>
+        </nav>
+    </div>
     
     <div class="section-heading">RESEARCH ABOUT HARDWARE</div>
     <h2 class="section-title">Read the Latest in the Research Hub</h2>

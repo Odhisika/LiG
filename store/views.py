@@ -3,12 +3,14 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib import messages
 
-from .models import Product, ReviewRating, ProductGallery
+from .models import Product, ReviewRating, ProductGallery, ComputerProduct, SoftwareProduct, PeripheralProduct
 from category.models import Category
 from cart.models import CartItem
 from cart.views import _cart_id
 from .forms import ReviewForm
 from orders.models import OrderProduct
+
+
 
 
 
@@ -47,29 +49,38 @@ def store(request, category_slug=None):
 
 
 
+
+
+# views.py
+from django.shortcuts import get_object_or_404, render
+from .models import Product, ReviewRating, ProductGallery
+
 def product_detail(request, category_slug, product_slug):
-    try:
-        single_product = Product.objects.get(category__slug=category_slug, slug=product_slug)
-        in_cart = CartItem.objects.filter(cart__cart_id=_cart_id(request), product=single_product).exists()
-    except Product.DoesNotExist as e:
-        raise e
-
-    orderproduct = None
-    if request.user.is_authenticated:
-        orderproduct = OrderProduct.objects.filter(user=request.user, product_id=single_product.id).exists()
-
-    reviews = ReviewRating.objects.filter(product_id=single_product.id, status=True)
-    product_gallery = ProductGallery.objects.filter(product_id=single_product.id)
-
+    # Get the product with all related sub-products in one query
+    product = get_object_or_404(
+        Product.objects.select_related(
+            'computerproduct',
+            'softwareproduct',
+            'peripheralproduct'
+        ).prefetch_related('productgallery_set'),
+        category__slug=category_slug,
+        slug=product_slug,
+        is_available=True
+    )
+    
+    # Get product gallery images
+    product_gallery = ProductGallery.objects.filter(product=product)
+    
+    # Get reviews
+    reviews = ReviewRating.objects.filter(product=product, status=True)
+    
     context = {
-        'single_product': single_product,
-        'in_cart': in_cart,
-        'orderproduct': orderproduct,
-        'reviews': reviews,
+        'single_product': product,
         'product_gallery': product_gallery,
+        'reviews': reviews,
     }
+    
     return render(request, 'store/product_detail.html', context)
-
 
 def search(request):
     print("Search function triggered")  

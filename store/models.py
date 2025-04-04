@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.db.models import Avg, Count
-from category.models import Category, ComputerTypes
+from category.models import Category, ComputerTypes, SoftwareTypes
 from accounts.models import Account
 
 # Base Product Model
@@ -47,19 +47,21 @@ class ComputerProduct(Product):
         return f"{self.brand} {self.product_name}"
 
 
-# Model for Software
-class SoftwareProduct(Product):
-    software_type = models.CharField(max_length=100)  # Example: Antivirus, OS, Office Suite
-    version = models.CharField(max_length=50)  # Example: Windows 11 Pro, Adobe Photoshop 2023
-    license_type = models.CharField(max_length=50, choices=[("One-time", "One-time"), ("Subscription", "Subscription")])
-    platform = models.CharField(max_length=100)  # Example: Windows, macOS, Linux
+
+class SoftwareProduct(Product):  
+    software_type = models.ForeignKey(SoftwareTypes, on_delete=models.CASCADE)
+    version = models.CharField(max_length=50)
+    license_type = models.CharField(
+        max_length=50, choices=[("One-time", "One-time"), ("Subscription", "Subscription")]
+    )
+    platform = models.CharField(max_length=100)
     download_link = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.software_type} - {self.product_name} ({self.version})"
 
 
-# Model for Peripherals (Keyboards, Mice, Monitors, etc.)
+
 class PeripheralProduct(Product):
     brand = models.CharField(max_length=100)
     connectivity = models.CharField(max_length=100, blank=True, null=True)  # Example: Wired, Wireless, Bluetooth

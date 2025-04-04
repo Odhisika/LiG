@@ -1,10 +1,10 @@
-from django.shortcuts import render
-from store.models import Product,Category,ReviewRating
+from django.shortcuts import render, get_object_or_404
+from store.models import Product,Category,ReviewRating, ComputerProduct, SoftwareProduct, PeripheralProduct
 from research.models import BlogModel
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from research.form import ProjectBookingForm
-from category.models import ResearchTypes
+from category.models import ResearchTypes, ComputerTypes, SoftwareTypes
   # Import the form
 
 def home(request):
@@ -41,37 +41,41 @@ def allproducts(request):
 
 
 ### Hardware ###
-
 def desktops(request):
     try:
-        desktops_category = Category.objects.get(category_name="Desktop")
-        products = Product.objects.filter(category=desktops_category, is_available=True)
-    except Category.DoesNotExist:
-        products = []
+        
+        desktops_category = ComputerTypes.objects.get(slug="desktop")
+        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+
+    except ComputerTypes.DoesNotExist:
+        products = []  
 
     context = {
         'products': products
     }
-    return render(request, 'hardware/desktop.html',context)  
-
+    return render(request, 'hardware/desktop.html', context)
 
 def laptops(request):
     try:
-        laptops_category = Category.objects.get(category_name="Laptops")
-        products = Product.objects.filter(category=laptops_category, is_available=True)
-    except Category.DoesNotExist:
-        products = []
-    
+        
+        desktops_category = ComputerTypes.objects.get(slug="laptop")
+        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+
+    except ComputerTypes.DoesNotExist:
+        products = []  
+
     context = {
         'products': products
     }
-    return render(request, 'hardware/laptop.html',context)  
+    return render(request, 'hardware/laptop.html',context) 
+
+
+
 
 def peripherals(request):
     try:
-        laptops_category = Category.objects.get(category_name="Peripherals")
-        products = Product.objects.filter(category=laptops_category, is_available=True)
-    except Category.DoesNotExist:
+        products = PeripheralProduct.objects.all().filter(is_available=True).order_by('created_date')
+    except PeripheralProduct.DoesNotExist:
         products = []
     
     context = {
@@ -82,9 +86,9 @@ def peripherals(request):
 ### Software ###
 def operatingSystems(request):
     try:
-        operatingSystems_category = Category.objects.get(category_name="Operating Systems")
-        products = Product.objects.filter(category=operatingSystems_category, is_available=True)
-    except Category.DoesNotExist:
+        operatingSystems_category = SoftwareTypes.objects.get(slug="operating-systems")
+        products = SoftwareProduct.objects.filter(software_type=operatingSystems_category, is_available=True)
+    except SoftwareProduct.DoesNotExist:
         products = []
     
     context = {
@@ -94,17 +98,17 @@ def operatingSystems(request):
 
 def applications(request):
     try:
-        applications_category = Category.objects.get(category_name="Applications")
-        products = Product.objects.filter(category=applications_category, is_available=True)
-    except Category.DoesNotExist:
+        applications_category = SoftwareTypes.objects.get(slug="application")
+        products = SoftwareProduct.objects.filter(software_type=applications_category, is_available=True)
+    except SoftwareProduct.DoesNotExist:
         products = []
     return render(request, 'software/applications.html', {'products': products})
 
 def developmentTools(request):
     try:
-        developmentTools_category = Category.objects.get(category_name="Development Tools")
-        products = Product.objects.filter(category=developmentTools_category, is_available=True)
-    except Category.DoesNotExist:
+        developmentTools_category = SoftwareTypes.objects.get(slug="development-tools")
+        products = SoftwareProduct.objects.filter(software_type=developmentTools_category, is_available=True)
+    except SoftwareProduct.DoesNotExist:
         products = []
     
     context = {

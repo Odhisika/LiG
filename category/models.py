@@ -36,7 +36,22 @@ class ComputerTypes(models.Model):
 
     def __str__(self):
         return self.computer_type
-    
+
+class SoftwareTypes(models.Model):
+    software_type = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+    description = models.TextField(max_length=255, blank=True)
+    cat_image = models.ImageField(upload_to='photos/software_types', blank=True)
+
+    class Meta:
+        verbose_name = 'Software type'
+        verbose_name_plural = 'Software types'
+
+    def get_url(self):
+        return reverse('products_by_Software_type', args=[self.slug]) 
+
+    def __str__(self):
+        return self.software_type
 
 
 

@@ -1,6 +1,6 @@
 
 from django.contrib import admin
-from .models import Category, ComputerTypes, ResearchTypes
+from .models import Category, ComputerTypes, ResearchTypes, SoftwareTypes
 
 # Register your models here.
 
@@ -12,6 +12,10 @@ class ComputerTypesAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('computer_type',)}
     list_display = ('computer_type', 'slug')
 
+class SoftwareTypesAdmin(admin.ModelAdmin):   
+    prepopulated_fields = {'slug': ('software_type',)}
+    list_display = ('software_type', 'slug')
+
 
 class ResearchTypesAdmin(admin.ModelAdmin):   
     prepopulated_fields = {'slug': ('research_type',)}
@@ -20,3 +24,4 @@ class ResearchTypesAdmin(admin.ModelAdmin):
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(ComputerTypes, ComputerTypesAdmin)
 admin.site.register(ResearchTypes, ResearchTypesAdmin)
+admin.site.register(SoftwareTypes, SoftwareTypesAdmin)

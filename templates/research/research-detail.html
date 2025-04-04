@@ -6,6 +6,15 @@
 
 <section>
     <div class="container">
+        <div>
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-transparent p-0">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'research' %}">Research</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ single_product.product_name }}</li>
+                </ol>
+            </nav>
+        </div>
         <h1>{{ blog.title }}</h1>
         
         <img src="/media/{{ blog.image }}" alt="{{ blog.title }}" class="img-fluid">

@@ -189,6 +189,15 @@
   </div>
 </section>
 
+<div>
+  <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb bg-transparent p-0">
+          <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'research' %}">Research</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ single_product.product_name }}</li>
+      </ol>
+  </nav>
+</div>
 <!-- Services Offered -->
 <section class="py-5 bg-light">
   <div class="container text-center">

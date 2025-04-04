@@ -98,7 +98,7 @@ def login(request):
                 pass
             
             next_url = request.GET.get('next')
-            return redirect(next_url if next_url else 'dashboard')
+            return redirect(next_url if next_url else 'home')
         else:
             messages.error(request, 'Invalid login credentials')
     
