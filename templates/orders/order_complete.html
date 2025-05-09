@@ -3,93 +3,246 @@
 
 {% block content %}
 
-<div class="container mt-5 text-center">
-    <i class="fas fa-check-circle text-success" style="font-size: 72px; margin-bottom: 20px;"></i>
-    <h2>Order Successful</h2>
-    <p class="text-muted">Thank you for your purchase. Your order has been successfully processed.</p>
-    <a href="{% url 'store' %}" class="btn btn-success mt-3">Continue Shopping</a>
+
+<div class="container" style="margin-top: 50px;">
+    <center><i class="fas fa-check-circle" style="font-size: 72px;margin-bottom: 20px;color: #28A745;"></i></center>
+    <h2 class="text-center">Order Successful</h2>
+    <br>
+    <div class="text-center">
+        <a href="{% url 'store' %}" class="btn btn-success">Shop more</a>
+    </div>
+
+    <hr>
+    <!-- Pay Now Button -->
+    <div class="text-center mt-3">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#paymentModal">Pay Now</button>
+    </div>
+
 </div>
 
-<div class="container mt-5 mb-5 p-4 shadow-lg bg-light rounded" style="max-width: 800px;">
-    <div class="row">
-        <div class="col-12 text-center">
-            <img src="{% static 'images/logo.jpg' %}" alt="Invoice Logo" style="max-height: 40px;">
-            <h4 class="mt-3">Order Invoice</h4>
-        </div>
+<div class="container"
+    style="margin: 0 auto;width: 50%;padding: 50px;background: #f1f1f1;margin-top: 50px;margin-bottom: 50px;">
+    <div class="row invoice row-printable">
+        <div class="col-md-12">
+            <!-- col-lg-12 start here -->
+            <div class="panel panel-default plain" id="dash_0">
+                <!-- Start .panel -->
+                <div class="panel-body p30">
+                    <div class="row">
+                        <!-- Start .row -->
+                        <div class="col-lg-6">
+                            <!-- col-lg-6 start here -->
+                            <div class="invoice-logo"><img src="{% static '/images/logo.jpg' %}" alt="Invoice logo"
+                                    style="max-height: 40px;"></div>
+                        </div>
+                        <!-- col-lg-6 end here -->
+                        <div class="col-lg-6">
+                            <!-- col-lg-6 start here -->
+                            <div class="invoice-from">
+                                <ul class="list-unstyled text-right">
+                                    <li><strong>Invoiced To</strong></li>
+                                    <li>{{order.full_name}}</li>
+                                    <li>{{order.full_address}}</li>
+                                    <li>{{order.city}}, {{order.state}}</li>
+                                    <li>{{order.country}}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- col-lg-6 end here -->
+                        <div class="col-lg-12">
+                            <!-- col-lg-12 start here -->
+                            <div class="invoice-details mt25">
+                                <div class="well">
+                                    <ul class="list-unstyled mb0">
+                                        <li><strong>Order</strong> #{{order_number}}</li>
+                                        <li><strong>Transaction ID</strong> {{transID}}</li>
+                                        <li><strong>Order Date:</strong> {{order.created_at}}</li>
+                                        <li><strong>Status:</strong> {{payment.status}}</li>
+                                    </ul>
+                                </div>
+                            </div>
 
-        <div class="col-12 mt-4">
-            <h5 class="text-muted">Billing Details</h5>
-            <ul class="list-unstyled">
-                <li><strong>Name:</strong> {{ order.full_name }}</li>
-                <li><strong>Address:</strong> {{ order.full_address }}</li>
-                <li><strong>City:</strong> {{ order.city }}, {{ order.state }}</li>
-                <li><strong>Country:</strong> {{ order.country }}</li>
-            </ul>
-        </div>
+                            <div class="invoice-items">
+                                <div class="table-responsive" style="overflow: hidden; outline: none;" tabindex="0">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th class="per70 text-center">Products</th>
+                                                <th class="per5 text-center">Qty</th>
+                                                <th class="per25 text-center">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in ordered_products %}
+                                            <tr>
+                                                <td>{{ item.product.product_name }}
+                                                    <p class="text-muted small">
+                                                        {% if item.color %}
+                                                        Color: {{ item.color|capfirst }}<br>
+                                                        {% endif %}
+                                                        {% if item.size %}
+                                                        Size: {{ item.size|capfirst }}<br>
+                                                        {% endif %}
+                                                        {% if item.footsizes %}
+                                                        Foot Size: {{ item.footsizes|capfirst }}<br>
+                                                        {% endif %}
+                                                    </p>
+                                                </td>
+                                                <td class="text-center">{{ item.quantity }}</td>
+                                                <td class="text-center">₵{{ item.product_price }} GHC</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Sub Total:</th>
+                                                <th class="text-center">₵{{ subtotal }} GHC</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Tax:</th>
+                                                <th class="text-center">₵{{ order.tax }} GHC</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Grand Total:</th>
+                                                <th class="text-center">₵{{ order.order_total }} GHC</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
 
-        <div class="col-12 mt-3">
-            <h5 class="text-muted">Order Summary</h5>
-            <div class="well p-3 bg-white rounded shadow-sm">
-                <ul class="list-unstyled">
-                    <li><strong>Order Number:</strong> {{ order_number }}</li>
-                    <li><strong>Transaction ID:</strong> {{ transID }}</li>
-                    <li><strong>Order Date:</strong> {{ order.created_at }}</li>
-                    <li><strong>Status:</strong> {{ payment.status }}</li>
-                </ul>
+                                </div>
+                            </div>
+                            <div class="invoice-footer mt25">
+                                <p class="text-center">Thank you for shopping with us!</p>
+                            </div>
+                        </div>
+                        <!-- col-lg-12 end here -->
+                    </div>
+                    <!-- End .row -->
+                </div>
             </div>
+            <!-- End .panel -->
         </div>
-
-        <div class="col-12 mt-3">
-            <h5 class="text-muted">Ordered Products</h5>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Product</th>
-                            <th class="text-center">Qty</th>
-                            <th class="text-center">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in ordered_products %}
-                        <tr>
-                            <td>
-                                <strong>{{ item.product.product_name }}</strong>
-                                {% if item.variations.all %}
-                                <p class="text-muted small">
-                                    {% for i in item.variations.all %}
-                                    {{ i.variation_category | capfirst }}: {{ i.variation_value | capfirst }} <br>
-                                    {% endfor %}
-                                </p>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">{{ item.quantity }}</td>
-                            <td class="text-center">₵{{ item.product_price|floatformat:2 }} GHS</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="2" class="text-right">Sub Total:</th>
-                            <th class="text-center">₵{{ subtotal|floatformat:2 }} GHS</th>
-                        </tr>
-                        <tr>
-                            <th colspan="2" class="text-right">Tax (2%):</th>
-                            <th class="text-center">₵{{ order.tax|floatformat:2 }} GHS</th>
-                        </tr>
-                        <tr>
-                            <th colspan="2" class="text-right"><strong>Grand Total:</strong></th>
-                            <th class="text-center"><strong>₵{{ order.order_total|floatformat:2 }} GHS</strong></th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-
-        <div class="col-12 text-center mt-4">
-            <p class="text-muted">Thank you for shopping with us!</p>
-        </div>
+        <!-- col-lg-12 end here -->
     </div>
 </div>
+
+
+
+<!-- Payment Modal -->
+
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'submit_proof' order_number=order.order_number %}">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="paymentModalLabel">
+                        <i class="fa fa-money mr-2"></i> Payment Instructions
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <strong>Payment Details</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p>Please send your total payment of <strong>₵{{ order.order_total }} GHS</strong> to:</p>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>MoMo Number:</span>
+                                            <strong>0593 021 696</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Name:</span>
+                                            <strong>Francis </strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Reference:</span>
+                                            <code>{{ order.order_number }}</code>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="alert alert-warning">
+                                <i class="fa fa-exclamation-triangle mr-2"></i>
+                                <strong>Important:</strong> Use the order number as reference for easy identification.
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="proof"><strong>Upload Payment Screenshot:</strong></label>
+                                <input type="file" name="proof" class="form-control-file border p-2" required>
+                                <small class="form-text text-muted">Please ensure your screenshot clearly shows the payment details.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="note"><strong>Additional Note (optional):</strong></label>
+                                <textarea class="form-control" name="note" rows="2" placeholder="Any additional information..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa fa-check mr-2"></i> Submit Proof
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form method="POST" enctype="multipart/form-data"
+            action="{% url 'submit_proof' order_number=order.order_number %}">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Payment Instructions</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <p>Please send your total payment (₵{{ order.order_total }}) to the following account:</p>
+                    <ul>
+                        <li><strong>MoMo Number:</strong> 0593 021 696</li>
+                        <li><strong>Name:</strong> Francis</li>
+                        <li><strong>Reference:</strong> <code>{{ order_number }}</code></li>
+                        <li><strong>Please make sure you use the order number as reference.</strong></li>
+                    </ul>
+
+                    <hr>
+                    <div class="form-group">
+                        <label for="proof">Upload Payment Screenshot:</label>
+                        <input type="file" name="proof" class="form-control-file" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Additional Note (optional):</label>
+                        <textarea class="form-control" name="note" rows="2"></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Submit Proof</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div> -->
+
 
 {% endblock %}

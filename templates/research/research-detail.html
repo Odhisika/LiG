@@ -4,30 +4,95 @@
 {% block content %}
 
 
-<section>
-    <div class="container">
-        <div>
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb bg-transparent p-0">
-                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'research' %}">Research</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ single_product.product_name }}</li>
-                </ol>
-            </nav>
-        </div>
-        <h1>{{ blog.title }}</h1>
+<div class="article-container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="article-breadcrumb">
+        <ol>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'research' %}">Research</a></li>
+            <li class="active">{{ blog.title }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Article Header -->
+    <div class="article-header">
+        <h1 class="article-title">{{ blog.title }}</h1>
         
-        <img src="/media/{{ blog.image }}" alt="{{ blog.title }}" class="img-fluid">
-        <p>
-            <div class="content">
-                {{ blog.content|safe }}
+        <!-- Article Categories -->
+        <div class="article-categories">
+            <span class="article-category">IT Research</span>
+            <!-- Add more categories if available -->
+        </div>
+        
+        <!-- Article Meta -->
+        <div class="article-meta">
+            <div class="article-meta-item">
+                <i class="far fa-user"></i>
+                <span class="article-meta-label">Author:</span>
+                <span>{{ blog.user.username }}</span>
             </div>
-        </p>
-        <p><strong>By:</strong> {{ blog.user.username }}</p>
-        <p><strong>Published on:</strong> {{ blog.created_at }}</p>
+            <div class="article-meta-item">
+                <i class="far fa-calendar"></i>
+                <span class="article-meta-label">Published:</span>
+                <span>{{ blog.created_at }}</span>
+            </div>
+            <div class="article-meta-item">
+                <i class="far fa-clock"></i>
+                <span class="article-meta-label">Reading time:</span>
+                <span>8 min read</span>
+            </div>
+        </div>
     </div>
-</section>
-
-
-
+    
+    <!-- Featured Image -->
+    <div class="article-featured-image">
+        <img src="/media/{{ blog.image }}" alt="{{ blog.title }}">
+    </div>
+    
+    <!-- Article Content -->
+    <div class="article-content">
+        {{ blog.content|safe }}
+    </div>
+    
+    <!-- Article Footer -->
+    <div class="article-footer">
+        <!-- Author Information -->
+        <div class="article-author">
+            <div class="article-author-avatar">
+                {{ blog.user.username|slice:":1" }}
+            </div>
+            <div class="article-author-details">
+                <div class="article-author-name">{{ blog.user.username }}</div>
+                <div class="article-author-bio">Researcher and contributor at Research Everything IT. Passionate about technology innovations and their impact.</div>
+            </div>
+        </div>
+        
+        <!-- Share Buttons -->
+        <div class="article-share">
+            <div class="article-share-label">Share this article:</div>
+            <div class="article-share-buttons">
+                <a href="#" class="article-share-button">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="article-share-button">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="article-share-button">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a href="#" class="article-share-button">
+                    <i class="far fa-envelope"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Articles - Optional -->
+    <div class="article-related">
+        <h2 class="article-related-title">Related Research</h2>
+        <div class="article-related-grid">
+            <!-- This section would be populated by your backend with related articles -->
+        </div>
+    </div>
+</div>
 {% endblock %}

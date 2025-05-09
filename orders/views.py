@@ -10,8 +10,9 @@ from decimal import Decimal
 
 from cart.models import CartItem
 from .forms import OrderForm
-from .models import Order, OrderProduct
-from store.models import Product
+from .models import Order, OrderProduct, PaymentProof
+from django.contrib import messages
+
 
 @login_required
 def place_order(request):
@@ -22,7 +23,7 @@ def place_order(request):
         return redirect('store')
 
     total = sum(item.product.price * item.quantity for item in cart_items)
-    tax = Decimal(total * 0.02).quantize(Decimal('0.01'))  # 2% tax
+    tax = (total * Decimal('0.0')).quantize(Decimal('0.0'))
     grand_total = total + tax
 
     if request.method == 'POST':
@@ -37,8 +38,9 @@ def place_order(request):
             data.save()
 
             # Generate order number
-            order_number = now().strftime("%Y%m%d") + str(data.id)
-            data.order_number = order_number
+            data.save()
+            data.refresh_from_db()  # Ensures ID is present
+            data.order_number = now().strftime("%Y%m%d") + str(data.id)
             data.save()
 
             # Move cart items to OrderProduct
@@ -51,7 +53,6 @@ def place_order(request):
                     product_price=item.product.price,
                     ordered=True
                 )
-                order_product.variations.set(item.variations.all())
                 order_product.save()
 
             # Clear cart
@@ -69,7 +70,7 @@ def place_order(request):
             except Exception as e:
                 print(f"Email sending failed: {e}")
 
-            return redirect(reverse('order_complete', kwargs={'order_number': order_number}))
+            return redirect(reverse('order_complete', kwargs={'order_number': data.order_number}))
 
     return redirect('checkout')
 
@@ -90,6 +91,40 @@ def order_complete(request, order_number):
         'order_number': order.order_number,
         'subtotal': subtotal,
     })
+
+
+def submit_proof(request, order_number):
+    if request.method == 'POST':
+        order = get_object_or_404(Order, order_number=order_number)
+        user = request.user
+        proof_file = request.FILES.get('proof')
+        note = request.POST.get('note')
+
+        if proof_file:
+            payment_proof = PaymentProof.objects.create(
+                order=order,
+                user=user,
+                proof_image=proof_file,
+                note=note
+            )
+            order.status = 'New'
+            order.save()
+
+            # Redirect to confirmation step
+            return redirect('confirm_payment', proof_id=payment_proof.id)
+
+    return redirect('home')
+
+
+
+def confirm_payment(request, proof_id):
+    proof = get_object_or_404(PaymentProof, id=proof_id, user=request.user)
+
+    if request.method == 'POST':
+        messages.success(request, "Thank you! We'll review your order and process it as soon as possible.")
+        return redirect('order_detail', order_id=proof.order.order_number)
+
+    return render(request, 'orders/confirm_payment.html', {'proof': proof})
 
 
 

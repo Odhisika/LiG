@@ -1,263 +1,111 @@
+
+
+
+
 {% extends "base.html" %}
 
 {% block content %}
 
 
-    
-    <title>Research Everything CyberSecurity</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        
-        .header-banner {
-            background-image: url('/api/placeholder/1400/300');
-            background-size: cover;
-            background-position: center;
-            height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        
-        .header-banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-        }
-        
-        .header-title {
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            position: relative;
-            z-index: 2;
-            margin-bottom: 20px;
-        }
-        
-        .search-bar {
-            position: relative;
-            z-index: 2;
-            width: 60%;
-            max-width: 600px;
-        }
-        
-        .search-bar input {
-            width: 100%;
-            padding: 10px 15px;
-            border-radius: 20px;
-            border: none;
-            font-size: 14px;
-        }
-        
-        .category-nav {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .category-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #333;
-            font-size: 12px;
-        }
-        
-        .category-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #f0f0f0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 5px;
-        }
-        
-        .section-heading {
-            margin: 40px 0 20px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-        }
-        
-        .section-title {
-            font-size: 22px;
-            margin: 10px 0;
-            color: #333;
-            text-align: left;
-            padding: 0 20px;
-        }
-        
-        .article-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 0 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .article-card {
-            width: 280px;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .article-image {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
-        
-        .article-content {
-            padding: 15px;
-        }
-        
-        .article-category {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        
-        .article-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            line-height: 1.3;
-        }
-        
-        .article-meta {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .article-author {
-            margin-right: 15px;
-        }
-        
-        .article-time {
-            margin-right: 15px;
-        }
-        
-        .article-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #666;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-        }
-        
-        .view-link {
-            display: inline-block;
-            margin-top: 5px;
-            font-size: 12px;
-            color: #06c;
-            text-decoration: none;
-        }
-        
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin: 30px 0;
-        }
-        
-        .pagination-dot {
-            width: 8px;
-            height: 8px;
-            background: #ccc;
-            border-radius: 50%;
-            margin: 0 5px;
-        }
-        
-        .pagination-dot.active {
-            background: #333;
-        }
-        
-        .view-all {
-            text-align: right;
-            padding-right: 20px;
-            margin: 10px 0 30px;
-        }
-        
-        .view-all a {
-            font-size: 14px;
-            color: #06c;
-            text-decoration: none;
-        }
-    </style>
-
-<body>
-    <div class="header-banner">
-        <h1 class="header-title">Research Everything SECURITY</h1>
-        <div class="search-bar">
-            <form action="{% url 'search1' %}" class="search" method="GET">
-                <div class="input-group">
-                  <input type="text" class="form-control rounded-pill" placeholder="Let's help you with your research work" name="keyword">
-                  
-                </div>
-              </form>
+<div class="hardware-page">
+    <!-- Header Banner -->
+    <div class="hardware-header">
+        <div class="hardware-header-overlay"></div>
+        <div class="hardware-header-grid"></div>
+        <div class="hardware-header-circuit"></div>
+        <div class="hardware-header-content">
+            <h1 class="hardware-title">Research <span>Cyber Security</span></h1>
+            <p class="hardware-subtitle">Explore cutting-edge hardware research, architecture innovations, and component analysis from industry experts</p>
+            <div class="hardware-search">
+                <form action="{% url 'search1' %}" method="GET">
+                    <input type="text" placeholder="Search hardware research topics, components, architecture..." name="keyword">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
         </div>
     </div>
     
-    <div>
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb bg-transparent p-0">
-                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'research' %}">Research</a></li>
+    <!-- Breadcrumb Navigation -->
+    <div class="container">
+        <div class="hardware-breadcrumb">
+            <ol>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'research' %}">Research</a></li>
+                <li class="active">CyberSecurity</li>
             </ol>
-        </nav>
-    </div>
-    
-    <div class="section-heading">RESEARCH ABOUT CYBER SECURITY</div>
-    <h2 class="section-title">Read the Latest in the Research Hub</h2>
-    
-    <section class="py-6">
-        <div class="container">
-          <div class="row mb-5">
-            <!-- blog item-->
+        </div>
+        
+        <!-- Section Heading -->
+        <div class="hardware-section-heading">
+            <div class="hardware-section-tag">Cyber Security Research Hub</div>
+            <h2 class="hardware-section-title">Latest Cyber Security Top Articles</h2>
+            <div class="hardware-section-divider"></div>
+            <p class="hardware-section-subtitle">Discovering the technological foundations that power modern computing systems</p>
+        </div>
+        
+        <!-- Article Grid -->
+        <div class="hardware-grid">
             {% for blog in blogs %}
-            <div class="col-lg-4 col-sm-6 mb-4 hover-animate">
-              <div class="card shadow border-0 h-100">
-                <a href="{% url 'research-detail' blog.slug %}">
-                  <img class="img-fluid card-img-top" src="/media/{{blog.image}}" alt="..."/></a>
-                <div class="card-body"><a class="text-uppercase text-muted text-sm letter-spacing-2" href="#">
-                  {{blog.user.username}} </a>
-                  <h5 class="my-2"><a class="text-dark" href="{% url 'research-detail' blog.slug %}">
-                   {{blog.title}}          </a></h5>
-                  <p class="text-gray-500 text-sm my-3"><i class="far fa-clock mr-2"></i>
-                    {{blog.created_at}}</p>
-                  <!-- <p class="my-2 text-muted text-sm">
-                    {{blog.content|safe}}
-                  </p>
-                -->
-                  <a class="btn btn-link pl-0"href="{% url 'research-detail' blog.slug %}">Read more<i class="fa fa-long-arrow-alt-right ml-2"></i></a> 
+            <div class="hardware-card">
+                <div class="hardware-card-image">
+                    <img src="/media/{{blog.image}}" alt="{{blog.title}}">
+                    <div class="hardware-card-overlay"></div>
+                    <div class="hardware-card-badge">Artificial Intelligence</div>
                 </div>
-              </div>
+                <div class="hardware-card-content">
+                    <div class="hardware-card-meta">
+                        <div class="hardware-card-author">
+                            <div class="hardware-card-author-avatar">
+                                {{blog.user.username|slice:":1"}}
+                            </div>
+                            <span>{{blog.user.username}}</span>
+                        </div>
+                        <div class="hardware-card-date">
+                            <i class="far fa-calendar"></i>
+                            <span>{{blog.created_at|date:"M d, Y"}}</span>
+                        </div>
+                    </div>
+                    <h3 class="hardware-card-title">
+                        <a href="{% url 'research-detail' blog.slug %}">{{blog.title}}</a>
+                    </h3>
+                    <div class="hardware-card-footer">
+                        <div class="hardware-card-specs">
+                            <div class="hardware-card-spec">
+                                <i class="far fa-clock"></i>
+                                <span>8 min read</span>
+                            </div>
+                            <div class="hardware-card-spec">
+                                <i class="far fa-eye"></i>
+                                <span>127 views</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'research-detail' blog.slug %}" class="hardware-card-link">
+                            Read Article <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
             {% endfor %}
-          
-          
-          
-
+        </div>
+        
+        <!-- Pagination -->
+        <div class="hardware-pagination">
+            <div class="hardware-pagination-item"><i class="fas fa-chevron-left"></i></div>
+            <div class="hardware-pagination-item active">1</div>
+            <div class="hardware-pagination-item">2</div>
+            <div class="hardware-pagination-item">3</div>
+            <div class="hardware-pagination-item"><i class="fas fa-chevron-right"></i></div>
+        </div>
+        
+        <!-- Footer Banner -->
+        <div class="hardware-footer-banner">
+            <div class="hardware-footer-pattern"></div>
+            <div class="hardware-footer-content">
+                <h3 class="hardware-footer-title">Submit Your Cyber Security Research</h3>
+                <p class="hardware-footer-subtitle">Have groundbreaking findings or industry insights? Share your hardware research with our professional community.</p>
+                <a href="#" class="hardware-footer-btn">Contribute Research</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

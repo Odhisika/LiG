@@ -67,3 +67,22 @@ class OrderProduct(models.Model):
 
     def __str__(self):
         return f"{self.product.product_name} (x{self.quantity})"
+    
+
+class PaymentProof(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('rejected', 'Rejected'),
+    ]
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    proof_image = models.ImageField(upload_to='payment_proofs/')
+    note = models.TextField(blank=True, null=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    reviewed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Proof for Order #{self.order.order_number}'
