@@ -11,7 +11,22 @@ from .forms import ReviewForm
 from orders.models import OrderProduct
 
 
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+from .models import Product, ReviewRating
+from django.db.models import Count, Avg
 
+@staff_member_required
+def product_reports_view(request):
+    context = {
+        'total_products': Product.objects.count(),
+        'available_products': Product.objects.filter(is_available=True).count(),
+        'total_reviews': ReviewRating.objects.count(),
+        'average_rating': ReviewRating.objects.aggregate(avg=Avg('rating'))['avg'] or 0,
+        'products_by_category': Product.objects.values('category__category_name').annotate(count=Count('id')),
+        'top_rated_products': Product.objects.annotate(avg_rating=Avg('reviewrating__rating')).order_by('-avg_rating')[:5],
+    }
+    return render(request, 'admin/reports/product_reports.html', context)
 
 
 def store(request, category_slug=None):

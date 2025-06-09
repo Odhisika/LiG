@@ -1,0 +1,22 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h1>Product Reports</h1>
+  <p><strong>Total Products:</strong> {{ total_products }}</p>
+  <p><strong>Available Products:</strong> {{ available_products }}</p>
+  <p><strong>Total Reviews:</strong> {{ total_reviews }}</p>
+  <p><strong>Average Rating:</strong> {{ average_rating|floatformat:1 }}</p>
+
+  <h3>Products by Category</h3>
+  <ul>
+    {% for item in products_by_category %}
+      <li>{{ item.category__category_name }}: {{ item.count }}</li>
+    {% endfor %}
+  </ul>
+
+  <h3>Top Rated Products</h3>
+  <ul>
+    {% for product in top_rated_products %}
+      <li>{{ product.product_name }} — {{ product.avg_rating|floatformat:1 }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

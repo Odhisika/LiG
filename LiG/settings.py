@@ -261,3 +261,15 @@ JAZZMIN_SETTINGS["icons"] = {
     "auth.Group": "fas fa-users",
     "admin.LogEntry": "fas fa-file",
 }
+
+JAZZMIN_SETTINGS = {
+    "custom_links": {
+        "LiG": [
+            {
+                "name": "Product Reports",
+                "url": "admin:product-reports",  # use the name from `urls.py`
+                "icon": "fas fa-chart-line",
+            },
+        ]
+    },
+}

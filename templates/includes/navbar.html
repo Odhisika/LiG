@@ -1,293 +1,208 @@
 {% load static %}
 
-<header class="section-header">
-  <!-- Custom CSS -->
-  <style>
-    .gold-accent {
-      color: #FFD700;
-    }
-    .red-accent {
-      color: #DC3545;
-    }
-    
-    .navbar-light .navbar-nav .nav-link {
-      color: #50452c;
-      font-weight: 500;
-    }
-    .navbar-light .navbar-nav .nav-link:hover {
-      color: #FFD700;
-    }
-    .navbar, .navbar-nav {
-      padding-left: 0;
-      margin-left: 0;
-    }
-   
-    .dropdown-menu {
-      border: 1px solid #FFD700;
-    }
-    .badge.bg-danger {
-      background-color: #DC3545 !important;
-    }
-    .search-btn {
-      background-color: #FFD700;
-      color: #2C3E50;
-    }
-    .search-btn:hover {
-      background-color: #FFC107;
-    }
-  
-    .mobile-header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 0;
-    }
+<header class="main-header">
+  <link href="{% static 'css/nav.css' %}" rel="stylesheet" type="text/css"/>
 
-    
-      .mobile-menu-toggle {
-        flex: 0;
-        height: 100%;
-        text-align: left;
-        margin-right: 12px; 
-      }
-
-     
-      .logo-container {
-        flex: 0;
-        text-align: left;
-      }
-
-      .logo-container .brand-wrap {
-        display: inline-block;
-      }
-
-      
-      .mobile-icons {
-        flex: 1;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 8px; 
-        min-width: 120px; 
-      }
-
-    .search-container {
-      width: 100%;
-      margin: 10px 0;
-    }
-    .icon-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      font-size: 0.6rem;
-    }
-    /* NEW: Smaller logo for mobile */
-    .mobile-logo {
-      max-height: 45px;
-      width: auto;
-    }
-    /* NEW: Better positioning for icons */
-    .mobile-icons .nav-icon {
-      position: relative;
-      font-size: 1.2rem;
-      padding: 0 4px;
-    }
-    @media (min-width: 992px) {
-      .mobile-menu-toggle {
-        display: none;
-      }
-      .desktop-search {
-        display: block;
-      }
-      .mobile-search {
-        display: none;
-      }
-    }
-    @media (max-width: 991px) {
-      .desktop-search {
-        display: none;
-      }
-      .mobile-search {
-        display: block;
-      }
-    }
-  </style>
-
-  <section class="header-main border-bottom">
+  <!-- Top Header Bar
+  <div class="top-header">
     <div class="container">
-      <!-- Mobile Header - IMPROVED -->
-      <div class="d-lg-none mobile-header-row">
-        <!-- Hamburger Menu -->
-        <div class="mobile-menu-toggle">
-          <button class="navbar-toggler border-0 p-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-        </div>
-        
-        <!-- Logo - SMALLER SIZE -->
-        <div class="logo-container">
-          <a href="{% url 'home' %}" class="brand-wrap">
-            <img class="mobile-logo" src="{% static 'images/logo.jpg' %}" alt="Logo">
-          </a>
-        </div>
-        
-        <!-- Mobile Icons - BETTER SPACING -->
-        <div class="mobile-icons">
-          <a href="#" class="nav-icon position-relative text-dark gold-accent">
-            <i class="fa fa-bell"></i>
-          </a>
-          {% if user.id is None %}
-            <a href="{% url 'login' %}" class="nav-icon text-dark">
-              <i class="fa fa-user"></i>
-            </a>
-          {% else %}
-            <a href="{% url 'dashboard' %}" class="nav-icon text-dark">
-              {% if user.userprofile.profile_picture %}
-                <img src="{{ user.userprofile.profile_picture.url }}" alt="User Profile" class="rounded-circle" width="24" height="24">
-              {% else %}
-                <i class="fa fa-user"></i>
-              {% endif %}
-            </a>
-          {% endif %}
-          <a href="{% url 'cart' %}" class="nav-icon position-relative text-dark">
-            <i class="fa fa-shopping-cart red-accent"></i>
-            <span class="badge bg-danger icon-badge">{{ cart_count }}</span>
-          </a>
-        </div>
+      <div class="top-links">
+        <a href="#">For Business</a>
+        <a href="#">For Education</a>
+        <a href="#">For Government</a>
+        <a href="#">For Healthcare</a>
       </div>
-      
-      <!-- Mobile Search -->
-      <div class="d-lg-none mobile-search mb-2">
-        <form action="{% url 'search' %}" class="search" method="GET">
-          <div class="input-group">
-            <input type="text" class="form-control rounded-pill" placeholder="What can we help you find today?" name="keyword">
-            <button class="btn search-btn rounded-pill ms-2" type="submit">
-              <i class="fa fa-search"></i>
-            </button>
-          </div>
-        </form>
-      </div>
-      
-      <!-- Desktop Header - UNCHANGED -->
-      <div class="row align-items-center d-none d-lg-flex">
-        <!-- Logo -->
-        <div class="col-lg-2 col-md-3 col-6">
-          <a href="{% url 'home' %}" class="brand-wrap">
-            <img class="logo img-fluid" src="{% static 'images/logo.jpg' %}" alt="Logo">
-          </a>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="col-lg-6 col-md-8 col-sm-12 desktop-search">
-          <form action="{% url 'search' %}" class="search" method="GET">
-            <div class="input-group">
-              <input type="text" class="form-control rounded-pill" placeholder="What can we help you find today?" name="keyword">
-              <button class="btn search-btn rounded-pill ms-2" type="submit">
-                <i class="fa fa-search"></i>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- User Options -->
-        <div class="col-lg-4 d-flex justify-content-end">
-          <div class="d-flex align-items-center">
-            <!-- Notification Bell -->
-<div class="dropdown">
-  <a href="#" class="px-3 text-dark gold-accent position-relative" data-bs-toggle="dropdown" aria-expanded="false">
-      <i class="fa fa-bell fa-lg"></i>
-      <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" id="notification-badge">0</span>
-  </a>
-
-  <!-- Notification Dropdown -->
-  <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="width: 300px;">
-      <li class="px-3 py-2 border-bottom fw-bold text-primary">Notifications</li>
-      
-      <!-- Notification Items -->
-     
-      <li>
-          <a href="#" class="dropdown-item d-flex align-items-center py-2">
-              <i class="fa fa-check-circle text-warning me-3"></i>
-              <div>
-                  <small class="fw-bold">No Notifications yet</small>
-              </div>
-          </a>
-      </li>
-  </ul>
-</div>
-
-            {% if user.id is None %}
-              <a href="{% url 'login' %}" class="px-2 text-dark">
-                <i class="fa fa-user"></i><span class="d-inline"> Sign In</span>
-              </a>
-            {% else %}
-              <a href="{% url 'dashboard' %}" class="px-2 text-dark d-flex align-items-center">
-                {% if user.userprofile.profile_picture %}
-                  <img src="{{ user.userprofile.profile_picture.url }}" alt="User Profile" class="rounded-circle" width="24" height="24">
-                {% else %}
-                  <i class="fa fa-user"></i>
-                {% endif %}
-                <span class="ms-1 d-inline">{{ user.first_name }}</span>
-              </a>
-            {% endif %}
-            <a href="{% url 'cart' %}" class="widget-header pl-3 ml-3">
-              <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
-              <span class="badge badge-pill badge-danger notify">{{cart_count}}</span>
-            </a>
-          </div>
-        </div>
+      <div class="top-links">
+        <a href="#">Help</a>
+        <a href="#">Account</a>
+        <a href="#">Track Order</a>
       </div>
     </div>
-  </section>
+  </div> -->
 
-  <!-- Navigation Menu - UNCHANGED -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-    <div class="container-fluid">
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav mr-auto ">
-          <li class="nav-item dropdown ">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Hardware
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'allproducts' %}">All Products</a></li>
-              <li><a class="dropdown-item" href="{% url 'laptops' %}">Laptops</a></li>
-              <li><a class="dropdown-item" href="{% url 'desktops' %}">Desktops</a></li>
-              <li><a class="dropdown-item" href="{% url 'peripherals' %}">Accessories</a></li>
-            </ul>
-          </li>
+  <!-- Main Navigation -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <!-- Logo -->
+      <div class="logo-section">
+        <a href="{% url 'home' %}">
+          <img src="{% static 'images/logo.jpg' %}" alt="Logo">
+        </a>
+      </div>
 
-          <li class="nav-item dropdown px-3">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Software
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'operatingSystems' %}">Operating Systems</a></li>
-              <li><a class="dropdown-item" href="{% url 'applications' %}">Applications</a></li>
-              <li><a class="dropdown-item" href="{% url 'developmentTools' %}">Development Tools</a></li>
-            </ul>
-          </li>
+      <!-- Search Bar -->
+      <div class="search-section">
+        <form action="{% url 'search' %}" method="GET" class="search-form">
+          <input type="text" class="search-input" placeholder="Search products, solutions, and services..." name="keyword">
+          <button type="submit" class="search-btn">
+            <i class="fa fa-search"></i>
+          </button>
+        </form>
+      </div>
 
-          <li class="nav-item dropdown px-3">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              IT Solutions
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'hardwareRepairs' %}">Hardware Repair Services </a></li>
-              <li><a class="dropdown-item" href="{% url 'networkingSolutions' %}">Networking Solutions</a></li>
-              <li><a class="dropdown-item" href="{% url 'CCTVInstallation' %}">CCTV Camera Installation</a></li>
-            </ul>
-          </li>
+      <!-- User Actions -->
+      <div class="user-actions">
+        <!-- Notifications -->
+        <div class="nav-item">
+          <a href="#" class="action-item" onclick="toggleNotifications(event)">
+            <i class="fa fa-bell"></i>
+            <span>Alerts</span>
+            <span class="cart-badge" id="notification-count">0</span>
+          </a>
+          <div class="dropdown-menu notification-dropdown" id="notifications-dropdown">
+            <div class="notification-header">Notifications</div>
+            <div class="notification-item">
+              <div class="notification-icon">
+                <i class="fa fa-info"></i>
+              </div>
+              <div class="notification-content">
+                <div class="notification-title">Welcome!</div>
+                <div class="notification-text">No new notifications</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          <li class="nav-item  px-3">
-            <a class="nav-link" href="{% url 'research' %}" role="button" >
-              Research Hub
-            </a>
-          </li>
-        </ul>
+        <!-- User Account -->
+        {% if user.id is None %}
+          <a href="{% url 'login' %}" class="action-item">
+            <i class="fa fa-user"></i>
+            <span>Sign In</span>
+          </a>
+        {% else %}
+          <a href="{% url 'dashboard' %}" class="action-item">
+            {% if user.userprofile.profile_picture %}
+              <img src="{{ user.userprofile.profile_picture.url }}" alt="Profile" class="profile-img">
+            {% else %}
+              <i class="fa fa-user"></i>
+            {% endif %}
+            <span>{{ user.first_name|default:"Account" }}</span>
+          </a>
+        {% endif %}
+
+        <!-- Cart -->
+        <a href="{% url 'cart' %}" class="action-item">
+          <i class="fa fa-shopping-cart"></i>
+          <span>Cart</span>
+          <span class="cart-badge">{{ cart_count|default:0 }}</span>
+        </a>
       </div>
     </div>
   </nav>
+
+  <!-- Mobile Sub Navigation (Menu + Search) -->
+  <div class="mobile-sub-nav">
+    <div class="mobile-sub-container">
+      <!-- Mobile Menu Button -->
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa fa-bars"></i>
+        <span>Menu</span>
+      </button>
+
+      <!-- Mobile Search -->
+      <div class="mobile-search-section">
+        <form action="{% url 'search' %}" method="GET" class="search-form">
+          <input type="text" class="search-input" placeholder="Search products, solutions, and services..." name="keyword">
+          <button type="submit" class="search-btn">
+            <i class="fa fa-search"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Menu -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+          Hardware
+          <i class="fa fa-chevron-down" style="margin-left: 5px; font-size: 10px;"></i>
+        </a>
+        <div class="dropdown-menu">
+          <a href="{% url 'allproducts' %}" class="dropdown-item">All Products</a>
+          <a href="{% url 'laptops' %}" class="dropdown-item">Laptops</a>
+          <a href="{% url 'desktops' %}" class="dropdown-item">Desktops</a>
+          <a href="{% url 'peripherals' %}" class="dropdown-item">Accessories</a>
+        </div>
+      </li>
+
+      <li class="nav-item">
+        <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+          Software
+          <i class="fa fa-chevron-down" style="margin-left: 5px; font-size: 10px;"></i>
+        </a>
+        <div class="dropdown-menu">
+          <a href="{% url 'operatingSystems' %}" class="dropdown-item">Operating Systems</a>
+          <a href="{% url 'applications' %}" class="dropdown-item">Applications</a>
+          <a href="{% url 'developmentTools' %}" class="dropdown-item">Development Tools</a>
+        </div>
+      </li>
+
+      <li class="nav-item">
+        <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+          IT Solutions
+          <i class="fa fa-chevron-down" style="margin-left: 5px; font-size: 10px;"></i>
+        </a>
+        <div class="dropdown-menu">
+          <a href="{% url 'hardwareRepairs' %}" class="dropdown-item">Hardware Repair Services</a>
+          <a href="{% url 'networkingSolutions' %}" class="dropdown-item">Networking Solutions</a>
+          <a href="{% url 'CCTVInstallation' %}" class="dropdown-item">CCTV Camera Installation</a>
+        </div>
+      </li>
+
+      <li class="nav-item">
+        <a href="{% url 'research' %}" class="nav-link">Research Hub</a>
+      </li>
+
+      <!-- <li class="nav-item">
+        <a href="#" class="nav-link">Services</a>
+      </li>
+
+      <li class="nav-item">
+        <a href="#" class="nav-link">Support</a>
+      </li> -->
+    </ul>
+  </nav>
 </header>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleMobileMenu() {
+    const bottomNav = document.getElementById('bottom-nav');
+    bottomNav.classList.toggle('mobile-open');
+  }
+
+  function toggleDropdown(event, element) {
+    if (window.innerWidth <= 768) {
+      event.preventDefault();
+      const navItem = element.parentElement;
+      navItem.classList.toggle('mobile-open');
+    }
+  }
+
+  function toggleNotifications(event) {
+    event.preventDefault();
+    const dropdown = document.getElementById('notifications-dropdown');
+    dropdown.style.opacity = dropdown.style.opacity === '1' ? '0' : '1';
+    dropdown.style.visibility = dropdown.style.visibility === 'visible' ? 'hidden' : 'visible';
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(event) {
+    const notifications = document.getElementById('notifications-dropdown');
+    if (!event.target.closest('.nav-item')) {
+      notifications.style.opacity = '0';
+      notifications.style.visibility = 'hidden';
+    }
+  });
+
+  // Handle window resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      document.getElementById('bottom-nav').classList.remove('mobile-open');
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('mobile-open');
+      });
+    }
+  });
+</script>
