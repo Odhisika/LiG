@@ -36,6 +36,10 @@ urlpatterns = [
     # Navigation hardware links
     path('hardware/desktops/', views.desktops, name='desktops'),
     path('hardware/laptops/', views.laptops, name='laptops'),
+    path('hardware/fresh_laptops/', views.fresh_laptops, name='fresh_laptops'),
+    path('hardware/fresh_desktops/', views.fresh_desktops, name='fresh_desktops'),
+    path('hardware/used_laptops/', views.used_laptops, name='used_laptops'),
+    path('hardware/used_desktops/', views.used_desktops, name='used_desktops'),
     path('hardware/peripherals/', views.peripherals, name='peripherals'),
 
     # Navigation software links

@@ -3,22 +3,7 @@
 <header class="main-header">
   <link href="{% static 'css/nav.css' %}" rel="stylesheet" type="text/css"/>
 
-  <!-- Top Header Bar
-  <div class="top-header">
-    <div class="container">
-      <div class="top-links">
-        <a href="#">For Business</a>
-        <a href="#">For Education</a>
-        <a href="#">For Government</a>
-        <a href="#">For Healthcare</a>
-      </div>
-      <div class="top-links">
-        <a href="#">Help</a>
-        <a href="#">Account</a>
-        <a href="#">Track Order</a>
-      </div>
-    </div>
-  </div> -->
+ 
 
   <!-- Main Navigation -->
   <nav class="main-nav">
@@ -111,59 +96,69 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation Menu -->
-  <nav class="bottom-nav" id="bottom-nav">
-    <ul class="nav-menu">
-      <li class="nav-item">
-        <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
-          Hardware
-          <i class="fa fa-chevron-down" style="margin-left: 5px; font-size: 10px;"></i>
-        </a>
-        <div class="dropdown-menu">
-          <a href="{% url 'allproducts' %}" class="dropdown-item">All Products</a>
-          <a href="{% url 'laptops' %}" class="dropdown-item">Laptops</a>
-          <a href="{% url 'desktops' %}" class="dropdown-item">Desktops</a>
-          <a href="{% url 'peripherals' %}" class="dropdown-item">Accessories</a>
+<!-- Bottom Navigation Menu -->
+<nav class="bottom-nav" id="bottom-nav">
+  <ul class="nav-menu">
+    <!-- Hardware -->
+    <li class="nav-item">
+      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+        Hardware <i class="fa fa-chevron-down"></i>
+      </a>
+      <div class="dropdown-menu">
+        <a href="{% url 'allproducts' %}" class="dropdown-item">All Products</a>
+
+        <div class="dropdown-item has-submenu">
+          <a href="{% url 'laptops' %}" class="submenu-link">Laptops <i class="fa fa-chevron-right"></i></a>
+          <div class="sub-dropdown-menu">
+            <a href="{% url 'fresh_laptops' %}" class="dropdown-item">Fresh in Box</a>
+            <a href="{% url 'used_laptops' %}" class="dropdown-item">Slightly Used</a>
+          </div>
         </div>
-      </li>
 
-      <li class="nav-item">
-        <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
-          Software
-          <i class="fa fa-chevron-down" style="margin-left: 5px; font-size: 10px;"></i>
-        </a>
-        <div class="dropdown-menu">
-          <a href="{% url 'operatingSystems' %}" class="dropdown-item">Operating Systems</a>
-          <a href="{% url 'applications' %}" class="dropdown-item">Applications</a>
-          <a href="{% url 'developmentTools' %}" class="dropdown-item">Development Tools</a>
+        <div class="dropdown-item has-submenu">
+          <a href="{% url 'desktops' %}" class="submenu-link">Desktops <i class="fa fa-chevron-right"></i></a>
+          <div class="sub-dropdown-menu">
+            <a href="{% url 'fresh_desktops' %}" class="dropdown-item">Fresh in Box</a>
+            <a href="{% url 'used_desktops' %}" class="dropdown-item">Slightly Used</a>
+          </div>
         </div>
-      </li>
 
-      <li class="nav-item">
-        <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
-          IT Solutions
-          <i class="fa fa-chevron-down" style="margin-left: 5px; font-size: 10px;"></i>
-        </a>
-        <div class="dropdown-menu">
-          <a href="{% url 'hardwareRepairs' %}" class="dropdown-item">Hardware Repair Services</a>
-          <a href="{% url 'networkingSolutions' %}" class="dropdown-item">Networking Solutions</a>
-          <a href="{% url 'CCTVInstallation' %}" class="dropdown-item">CCTV Camera Installation</a>
-        </div>
-      </li>
+        <a href="{% url 'peripherals' %}" class="dropdown-item">Accessories</a>
+      </div>
+    </li>
 
-      <li class="nav-item">
-        <a href="{% url 'research' %}" class="nav-link">Research Hub</a>
-      </li>
+    <!-- Software -->
+    <li class="nav-item">
+      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+        Software <i class="fa fa-chevron-down"></i>
+      </a>
+      <div class="dropdown-menu">
+        <a href="{% url 'operatingSystems' %}" class="dropdown-item">Operating Systems</a>
+        <a href="{% url 'applications' %}" class="dropdown-item">Applications</a>
+        <a href="{% url 'developmentTools' %}" class="dropdown-item">Development Tools</a>
+      </div>
+    </li>
 
-      <!-- <li class="nav-item">
-        <a href="#" class="nav-link">Services</a>
-      </li>
+    <!-- IT Solutions -->
+    <li class="nav-item">
+      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
+        IT Solutions <i class="fa fa-chevron-down"></i>
+      </a>
+      <div class="dropdown-menu">
+        <a href="{% url 'hardwareRepairs' %}" class="dropdown-item">Hardware Repair Services</a>
+        <a href="{% url 'networkingSolutions' %}" class="dropdown-item">Networking Solutions</a>
+        <a href="{% url 'CCTVInstallation' %}" class="dropdown-item">CCTV Camera Installation</a>
+      </div>
+    </li>
 
-      <li class="nav-item">
-        <a href="#" class="nav-link">Support</a>
-      </li> -->
-    </ul>
-  </nav>
+    <!-- Research -->
+    <li class="nav-item">
+      <a href="{% url 'research' %}" class="nav-link">Research Hub</a>
+    </li>
+  </ul>
+</nav>
+
+
 </header>
 
 <script>

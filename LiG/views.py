@@ -54,6 +54,55 @@ def desktops(request):
         'products': products
     }
     return render(request, 'hardware/desktop.html', context)
+def fresh_desktops(request):
+    try:
+        desktops_category = ComputerTypes.objects.get(slug="fresh-desktop")
+        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+
+    except ComputerTypes.DoesNotExist:
+        products = []  
+
+    context = {
+        'products': products
+    }
+    return render(request, 'hardware/fresh_desktops.html', context)
+def used_desktops(request):
+    try:
+        desktops_category = ComputerTypes.objects.get(slug="used-desktop")
+        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+
+    except ComputerTypes.DoesNotExist:
+        products = []  
+
+    context = {
+        'products': products
+    }
+    return render(request, 'hardware/used_desktops.html', context)
+def fresh_laptops(request):
+    try:
+        desktops_category = ComputerTypes.objects.get(slug="fresh-laptop")
+        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+
+    except ComputerTypes.DoesNotExist:
+        products = []  
+
+    context = {
+        'products': products
+    }
+    return render(request, 'hardware/fresh_laptops.html', context)
+
+def used_laptops(request):
+    try:
+        desktops_category = ComputerTypes.objects.get(slug="used-laptop")
+        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+
+    except ComputerTypes.DoesNotExist:
+        products = []  
+
+    context = {
+        'products': products
+    }
+    return render(request, 'hardware/used_laptops.html', context)
 
 def laptops(request):
     try:

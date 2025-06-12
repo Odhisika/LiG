@@ -534,3 +534,34 @@
     font-size: 16px; /* Prevents zoom on iOS */
   }
 }
+
+.has-submenu {
+  position: relative;
+}
+
+.sub-dropdown-menu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+
+.has-submenu:hover .sub-dropdown-menu {
+  display: block;
+}
+.sub-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background: #fff;
+  min-width: 180px;
+  border-radius: 4px;
+}
+.has-submenu:hover .sub-dropdown-menu {
+  display: block;
+}
