@@ -1,73 +1,866 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Networking Solutions</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block content %}
+        :root {
+            --primary-gold: #FFD700;
+            --secondary-gold: #FFA500;
+            --accent-yellow: #FFEB3B;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f8f9fa;
+            --text-dark: #2c2c2c;
+            --text-light: #6c757d;
+            --white: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            --dark-gradient: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+        }
 
-<!-- Hero Section -->
-<section class="hero bg-primary text-white py-5 text-center">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8 mx-auto">
-                <h3 class="fw-bold">Comprehensive Networking Solutions</h3>
-                <p class="lead">For all bussiness we ensure seamless connectivity and security.</p>
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--dark-gradient);
+            position: relative;
+            overflow: hidden;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="circuit" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23FFD700" opacity="0.3"/><path d="M5,10 L15,10 M10,5 L10,15" stroke="%23FFD700" stroke-width="0.5" opacity="0.2"/></pattern></defs><rect width="100" height="100" fill="url(%23circuit)"/></svg>');
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: slideInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+            animation: slideInUp 1s ease-out 0.2s both;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            padding: 5rem 0;
+            background: var(--light-bg);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: sticky;
+            top: 2rem;
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .sidebar h4 {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .sidebar h4::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--gold-gradient);
+            border-radius: 2px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gold-gradient);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-link:hover {
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .nav-link:hover::before {
+            left: 0;
+        }
+
+        .nav-link.active {
+            background: var(--gold-gradient);
+            color: var(--dark-bg);
+            font-weight: 600;
+        }
+
+        /* Service Sections */
+        .service-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--gold-gradient);
+        }
+
+        .service-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gold-gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 2rem;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+        }
+
+        .service-icon i {
+            font-size: 2rem;
+            color: var(--dark-bg);
+        }
+
+        .service-title {
+            flex: 1;
+        }
+
+        .service-title h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .service-title .subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .service-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .service-description {
+            flex: 1;
+        }
+
+        .service-description p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .service-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .service-features li {
+            padding: 0.75rem 0;
+            color: var(--text-dark);
+            position: relative;
+            padding-left: 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .service-features li:last-child {
+            border-bottom: none;
+        }
+
+        .service-features li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--primary-gold);
+            font-size: 1rem;
+        }
+
+        .service-image {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            height: 250px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .service-section:hover .service-image img {
+            transform: scale(1.1);
+        }
+
+        .service-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--dark-bg);
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 70% 30%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .cta-content h2 {
+            color: var(--white);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-content p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-gold {
+            background: var(--gold-gradient);
+            border: none;
+            color: var(--dark-bg);
+            font-weight: 600;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+            color: var(--dark-bg);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: var(--white);
+            padding: 4rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .stat-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gold-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+        }
+
+        .stat-icon i {
+            font-size: 2rem;
+            color: var(--dark-bg);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .service-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .service-image {
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 50vh;
+                padding: 3rem 0;
+            }
+
+            .main-content {
+                padding: 3rem 0;
+            }
+
+            .service-section {
+                padding: 2rem;
+            }
+
+            .service-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .service-icon {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .cta-content h2 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Scroll Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: var(--gold-gradient);
+            z-index: 1000;
+            transition: width 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content text-center">
+                <h1>Comprehensive Networking Solutions</h1>
+                <p>For all businesses we ensure seamless connectivity and security with cutting-edge network infrastructure and expert support.</p>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Sidebar Navigation -->
-<div class="container py-5">
-    <div class="row">
-        <aside class="col-md-3">
-            <div class="list-group">
-                <a href="#home-office" class="list-group-item list-group-item-action">Home & Office Networking</a>
-                <a href="#server" class="list-group-item list-group-item-action">Server Installation & Management</a>
-                <a href="#security" class="list-group-item list-group-item-action">Network Security</a>
-                <a href="#cabling" class="list-group-item list-group-item-action">Structured Cabling</a>
-                <a href="#routing" class="list-group-item list-group-item-action">Router & Switch Configuration</a>
-                <a href="#remote" class="list-group-item list-group-item-action">Remote Network Solutions</a>
+    <!-- Main Content -->
+    <section class="main-content">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar Navigation -->
+                <div class="col-lg-3">
+                    <div class="sidebar">
+                        <h4>Our Services</h4>
+                        <ul class="nav-list">
+                            <li class="nav-item">
+                                <a href="#home-office" class="nav-link active" data-target="home-office">
+                                    <i class="fas fa-home me-2"></i>Home & Office Networking
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#server" class="nav-link" data-target="server">
+                                    <i class="fas fa-server me-2"></i>Server Installation
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#security" class="nav-link" data-target="security">
+                                    <i class="fas fa-shield-alt me-2"></i>Network Security
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#cabling" class="nav-link" data-target="cabling">
+                                    <i class="fas fa-plug me-2"></i>Structured Cabling
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#routing" class="nav-link" data-target="routing">
+                                    <i class="fas fa-route me-2"></i>Router & Switch Config
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#remote" class="nav-link" data-target="remote">
+                                    <i class="fas fa-cloud me-2"></i>Remote Solutions
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Service Sections -->
+                <div class="col-lg-9">
+                    <!-- Home & Office Networking -->
+                    <div id="home-office" class="service-section">
+                        <div class="service-header">
+                            <div class="service-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="service-title">
+                                <h2>Home & Office Networking</h2>
+                                <div class="subtitle">Complete network infrastructure for seamless connectivity</div>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <div class="service-description">
+                                <p>We provide comprehensive network installations for homes and offices, ensuring reliable and high-speed internet connectivity across all your devices. Our solutions are designed to support modern digital workflows and entertainment needs.</p>
+                                <ul class="service-features">
+                                    <li>High-speed WiFi 6 installation</li>
+                                    <li>Ethernet network setup</li>
+                                    <li>Network optimization</li>
+                                    <li>Device connectivity management</li>
+                                    <li>Bandwidth allocation</li>
+                                </ul>
+                            </div>
+                            <div class="service-image">
+                                <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=300&h=250&fit=crop" alt="Home Office Networking">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Server Installation -->
+                    <div id="server" class="service-section">
+                        <div class="service-header">
+                            <div class="service-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="service-title">
+                                <h2>Server Installation & Management</h2>
+                                <div class="subtitle">Reliable and scalable server solutions</div>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <div class="service-description">
+                                <p>Our expert team provides professional server installation and management services tailored to your business needs. From small business servers to enterprise-level solutions, we ensure optimal performance and reliability.</p>
+                                <ul class="service-features">
+                                    <li>Physical & virtual server setup</li>
+                                    <li>Database management systems</li>
+                                    <li>Backup & disaster recovery</li>
+                                    <li>Performance monitoring</li>
+                                    <li>24/7 server maintenance</li>
+                                </ul>
+                            </div>
+                            <div class="service-image">
+                                <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=300&h=250&fit=crop" alt="Server Installation">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Network Security -->
+                    <div id="security" class="service-section">
+                        <div class="service-header">
+                            <div class="service-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="service-title">
+                                <h2>Network Security</h2>
+                                <div class="subtitle">Advanced protection for your digital assets</div>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <div class="service-description">
+                                <p>Protect your business with our comprehensive security measures including firewalls, VPNs, and intrusion prevention systems. We implement multi-layered security strategies to safeguard your network from cyber threats.</p>
+                                <ul class="service-features">
+                                    <li>Firewall configuration</li>
+                                    <li>VPN setup & management</li>
+                                    <li>Intrusion detection systems</li>
+                                    <li>Security auditing</li>
+                                    <li>Threat monitoring</li>
+                                </ul>
+                            </div>
+                            <div class="service-image">
+                                <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=300&h=250&fit=crop" alt="Network Security">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Structured Cabling -->
+                    <div id="cabling" class="service-section">
+                        <div class="service-header">
+                            <div class="service-icon">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <div class="service-title">
+                                <h2>Structured Cabling</h2>
+                                <div class="subtitle">Organized infrastructure for optimal performance</div>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <div class="service-description">
+                                <p>Our structured cabling solutions provide organized and efficient network infrastructure that supports high-speed data transmission and future scalability. We ensure clean, professional installations that meet industry standards.</p>
+                                <ul class="service-features">
+                                    <li>Cat6/Cat6a cable installation</li>
+                                    <li>Fiber optic cabling</li>
+                                    <li>Cable management systems</li>
+                                    <li>Patch panel organization</li>
+                                    <li>Testing & certification</li>
+                                </ul>
+                            </div>
+                            <div class="service-image">
+                                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=250&fit=crop" alt="Structured Cabling">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Router & Switch Configuration -->
+                    <div id="routing" class="service-section">
+                        <div class="service-header">
+                            <div class="service-icon">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <div class="service-title">
+                                <h2>Router & Switch Configuration</h2>
+                                <div class="subtitle">Optimize traffic flow and network performance</div>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <div class="service-description">
+                                <p>Maximize your network efficiency with our expert router and switch configuration services. We optimize traffic flow, implement VLANs, and ensure seamless communication between all network segments.</p>
+                                <ul class="service-features">
+                                    <li>Enterprise router setup</li>
+                                    <li>Managed switch configuration</li>
+                                    <li>VLAN implementation</li>
+                                    <li>QoS optimization</li>
+                                    <li>Load balancing</li>
+                                </ul>
+                            </div>
+                            <div class="service-image">
+                                <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=300&h=250&fit=crop" alt="Router Configuration">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remote Network Solutions -->
+                    <div id="remote" class="service-section">
+                        <div class="service-header">
+                            <div class="service-icon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div class="service-title">
+                                <h2>Remote Network Solutions</h2>
+                                <div class="subtitle">Work from anywhere with secure connectivity</div>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <div class="service-description">
+                                <p>Enable seamless remote work with our secure and efficient networking solutions. We provide VPN access, cloud connectivity, and remote management tools that keep your team productive from any location.</p>
+                                <ul class="service-features">
+                                    <li>VPN server setup</li>
+                                    <li>Cloud network integration</li>
+                                    <li>Remote desktop solutions</li>
+                                    <li>Secure file sharing</li>
+                                    <li>Mobile device management</li>
+                                </ul>
+                            </div>
+                            <div class="service-image">
+                                <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=300&h=250&fit=crop" alt="Remote Network Solutions">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </aside>
-
-        <!-- Main Content -->
-        <div class="col-md-9">
-            <section id="home-office" class="mb-5">
-                <h2>Home & Office Networking</h2>
-                <p>We offer complete network installations for homes and offices, ensuring reliable and high-speed internet connectivity.</p>
-                <img src="{% static 'images/items/networking_home_office.jpg' %}" class="img-fluid rounded" alt="Home Networking">
-            </section>
-            
-            <section id="server" class="mb-5">
-                <h2>Server Installation & Management</h2>
-                <p>Reliable and scalable server solutions tailored to business needs.</p>
-                <img src="{% static 'images/items/server_management.jpg' %}" class="img-fluid rounded" alt="Server Installation">
-            </section>
-            
-            <section id="security" class="mb-5">
-                <h2>Network Security</h2>
-                <p>Protect your business with advanced security measures including firewalls, VPNs, and intrusion prevention.</p>
-                <img src="{% static 'images/items/network_security.jpg' %}" class="img-fluid rounded" alt="Network Security">
-            </section>
-            
-            <section id="cabling" class="mb-5">
-                <h2>Structured Cabling</h2>
-                <p>Organized cabling solutions for efficient and high-speed network performance.</p>
-                <img src="{% static 'images/items/structured_cabling.jpg' %}" class="img-fluid rounded" alt="Structured Cabling">
-            </section>
-            
-            <section id="routing" class="mb-5">
-                <h2>Router & Switch Configuration</h2>
-                <p>Optimize your network traffic with expert router and switch setups.</p>
-                <img src="{% static 'images/items/router_configuration.jpg' %}" class="img-fluid rounded" alt="Router Configuration">
-            </section>
-            
-            <section id="remote" class="mb-5">
-                <h2>Remote Network Solutions</h2>
-                <p>Work from anywhere with secure and efficient remote networking solutions.</p>
-                <img src="{% static 'images/items/remote_network.png' %}" class="img-fluid rounded" alt="Remote Network Solutions">
-            </section>
         </div>
-    </div>
-</div>
+    </section>
 
-{% endblock %}
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <span class="stat-number">300+</span>
+                        <div class="stat-label">Networks Deployed</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <span class="stat-number">150+</span>
+                        <div class="stat-label">Servers Managed</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span class="stat-number">99.9%</span>
+                        <div class="stat-label">Uptime Guarantee</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span class="stat-number">24/7</span>
+                        <div class="stat-label">Support Available</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Upgrade Your Network?</h2>
+                <p>Get a free consultation and customized networking solution designed specifically for your business needs. Our experts will assess your requirements and provide the perfect infrastructure.</p>
+                <a href="#" class="btn-gold">Get Free Assessment</a>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scroll and active navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Smooth scroll to target
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    // Update active navigation
+                    const id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('data-target') === id) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+
+        // Observe service sections
+        document.querySelectorAll('.service-section').forEach((section, index) => {
+            section.style.transitionDelay = `${index * 0.1}s`;
+            observer.observe(section);
+        });
+
+        // Progress bar
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.querySelector('.progress-bar').style.width = scrollPercent + '%';
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (target.toString().includes('%')) {
+                    element.textContent = Math.floor(current) + '%';
+                } else if (target.toString().includes('+')) {
+                    element.textContent = Math.floor(current) + '+';
+                } else if (target.toString().includes('.')) {
+                    element.textContent = current.toFixed(1);
+                } else {    
+                    element.textContent = Math.floor(current);
+                }
+            }, 20);
+        }
+        document.querySelectorAll('.stat-number').forEach(stat => {
+            const target = parseFloat(stat.textContent.replace(/[^0-9.]/g, ''));
+            animateCounter(stat, target);
+        });
+    </script>
+</body>
+</html>

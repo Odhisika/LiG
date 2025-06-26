@@ -1,122 +1,675 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Hardware Repair Services - Professional Solutions</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block content %}
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #64748b;
+            --accent-color: #0ea5e9;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        }
 
-<!-- Hero Section -->
-<section class="hero bg-primary text-white py-5">
-    <div class="container text-center">
-        <h1 class="fw-bold">IT Hardware Repair Services - Details</h1>
-        <p class="lead">Comprehensive solutions for all your IT hardware issues.</p>
-    </div>
-</section>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--white);
+        }
 
-<div class="container py-5">
-    <div class="row">
-        <!-- Sidebar Navigation -->
-        <aside class="col-md-3">
-            <div class="list-group">
-                <a href="#laptop-repair" class="list-group-item list-group-item-action">Laptop & Desktop Repair</a>
-                <a href="#server-maintenance" class="list-group-item list-group-item-action">Server Maintenance</a>
-                <a href="#network-repair" class="list-group-item list-group-item-action">Networking Equipment Repair</a>
-                <a href="#printer-repair" class="list-group-item list-group-item-action">Printer & Peripheral Repair</a>
-                <a href="#data-recovery" class="list-group-item list-group-item-action">Data Recovery</a>
-                <a href="#hardware-upgrades" class="list-group-item list-group-item-action">Hardware Upgrades</a>
+        /* Hero Section */
+        .hero {
+            background: var(--gradient);
+            color: var(--white);
+            padding: 6rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 0.8s ease-out 0.2s forwards;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 0.8s ease-out 0.4s forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Navigation Pills */
+        .nav-pills {
+            background: var(--white);
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-pill {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            color: var(--text-light);
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .nav-pill:hover, .nav-pill.active {
+            background: var(--primary-color);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 4rem 0;
+            background: var(--bg-light);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Service Cards */
+        .service-card {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .service-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+        }
+
+        .service-card h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .service-description {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-item {
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: var(--white);
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-title i {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+
+        .feature-description {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Special styling for hardware upgrades */
+        .upgrade-highlight {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-top: 2rem;
+        }
+
+        .upgrade-highlight h4 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .service-card {
+                padding: 2rem;
+            }
+
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Loading animation for images */
+        .service-image {
+            width: 100%;
+            height: 200px;
+            background: var(--bg-light);
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 3rem;
+            transition: all 0.3s ease;
+        }
+
+        .service-image:hover {
+            background: var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Professional IT Hardware Repair</h1>
+                <p>Expert solutions for all your technology needs. Fast, reliable, and comprehensive repair services.</p>
             </div>
-        </aside>
+        </div>
+    </section>
 
-        <!-- Service Details -->
-        <section class="col-md-9">
-            <section id="laptop-repair" class="mb-5">
-                <h3 class="text-primary">Laptop & Desktop Repair</h3>
-                <img src="{% static 'images/items/laptop_repair.jpg' %}" class="img-fluid rounded mb-3" alt="Laptop Repair">
-                <p class="fw-bold">Professional repairs to ensure your devices perform flawlessly.</p>
-                <ul class="list-group">
-                    <li class="list-group-item">Screen replacements for cracked or damaged displays.</li>
-                    <li class="list-group-item">Battery replacements for extended usage and reliability.</li>
-                    <li class="list-group-item">Motherboard repairs to restore device functionality.</li>
-                    <li class="list-group-item">Software troubleshooting for efficient operation.</li>
-                </ul>
-            </section>
-            
-            <section id="server-maintenance" class="mb-5">
-                <h3 class="text-primary">Server Maintenance</h3>
-                <img src="{% static 'images/items/server_maintenance.jpg' %}" class="img-fluid rounded mb-3" alt="Server Maintenance">
-                <p class="fw-bold">Expert server care to keep your business running smoothly.</p>
-                <ul class="list-group">
-                    <li class="list-group-item">Regular repairs to address hardware issues.</li>
-                    <li class="list-group-item">Performance tuning to optimize server speed and efficiency.</li>
-                    <li class="list-group-item">Proactive maintenance to prevent unexpected downtime.</li>
-                </ul>
-            </section>
-            
-            <section id="network-repair" class="mb-5">
-                <h3 class="text-primary">Networking Equipment Repair</h3>
-                <img src="{% static 'images/items/network_repair.jpg' %}" class="img-fluid rounded mb-3" alt="Network Equipment Repair">
-                <p class="fw-bold">Reliable networking solutions to keep you connected.</p>
-                <ul class="list-group">
-                    <li class="list-group-item">Diagnosis and repair of routers, switches, and firewalls.</li>
-                    <li class="list-group-item">Resolution of connectivity and network issues.</li>
-                    <li class="list-group-item">Upgrades to ensure your network supports modern demands.</li>
-                </ul>
-            </section>
-            
-            <section id="printer-repair" class="mb-5">
-                <h3 class="text-primary">Printer & Peripheral Repair</h3>
-                <img src="{% static 'images/items/printer_repair.jpg' %}" class="img-fluid rounded mb-3" alt="Printer Repair">
-                <p class="fw-bold">Keep your office equipment running seamlessly.</p>
-                <ul class="list-group">
-                    <li class="list-group-item">Printer repairs to restore functionality and print quality.</li>
-                    <li class="list-group-item">Scanner repairs to ensure smooth document processing.</li>
-                    <li class="list-group-item">Fixes for external drives and other peripherals.</li>
-                </ul>
-            </section>
-            
-            <section id="data-recovery" class="mb-5">
-                <h3 class="text-primary">Data Recovery</h3>
-                <img src="{% static 'images/items/data_recovery.jpg' %}" class="img-fluid rounded mb-3" alt="Data Recovery">
-                <p class="fw-bold">Recover valuable data from damaged storage devices.</p>
-                <ul class="list-group">
-                    <li class="list-group-item">Recovery of lost data from hard drives and SSDs.</li>
-                    <li class="list-group-item">Solutions for damaged or corrupted storage devices.</li>
-                    <li class="list-group-item">Secure methods to ensure data integrity and privacy.</li>
-                </ul>
-            </section>
-            
-            
-            <section id="hardware-upgrades" class="mb-5">
-                <h3 class="text-primary">Hardware Upgrades</h3>
-                <img src="{% static 'images/items/hardware_upgrade.jpg' %}" class="img-fluid rounded mb-3" alt="Hardware Upgrades">
-                <p class="fw-bold">Supercharge your system's performance with cutting-edge hardware enhancements tailored to your needs.</p>
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <strong>Solid-State Drive (SSD) Upgrades:</strong> Transition from traditional hard drives to high-speed SSDs for faster boot times, lightning-quick file access, and an overall smoother experience.
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Memory (RAM) Expansions:</strong> Enhance your system's multitasking capabilities with increased RAM. Open more applications, browse with numerous tabs, and run demanding software seamlessly.
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Graphics Processing Unit (GPU) Replacements:</strong> Revolutionize your visuals with the latest GPUs, delivering unmatched rendering speeds for gaming, 3D rendering, or video editing.
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Motherboard and CPU Enhancements:</strong> Upgrade your processor and motherboard for optimized compatibility, increased speed, and access to modern technologies.
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Peripheral Improvements:</strong> Modernize your setup with high-performance peripherals, such as ergonomic keyboards, precision mice, and ultrawide monitors for an optimized workspace.
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Custom Builds:</strong> Tailor every element of your system for specific needs—be it a gaming powerhouse, a professional workstation, or a home office PC.
-                    </li>
-                </ul>
-                <p class="mt-3">
-                    <strong>Why Choose Hardware Upgrades?</strong> Investing in upgrades is a cost-effective alternative to purchasing a completely new device. 
-                    It breathes new life into aging systems, boosts energy efficiency, and ensures your setup keeps up with technological advancements. 
-                    Perfect for resource-heavy applications, immersive gaming, and future-proofing your system!
-                </p>
-            </section>
-            
-        </section>
-    </div>
-</div>
+    <!-- Navigation Pills -->
+    <section class="nav-pills">
+        <div class="container">
+            <div class="nav-container">
+                <a href="#laptop-repair" class="nav-pill active">Laptop & Desktop</a>
+                <a href="#server-maintenance" class="nav-pill">Server Maintenance</a>
+                <a href="#network-repair" class="nav-pill">Network Equipment</a>
+                <a href="#printer-repair" class="nav-pill">Printers & Peripherals</a>
+                <a href="#data-recovery" class="nav-pill">Data Recovery</a>
+                <a href="#hardware-upgrades" class="nav-pill">Hardware Upgrades</a>
+            </div>
+        </div>
+    </section>
 
-{% endblock %}
+    <!-- Main Content -->
+    <section class="main-content">
+        <div class="container">
+            <div class="content-grid">
+                
+                <!-- Laptop & Desktop Repair -->
+                <div id="laptop-repair" class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-laptop"></i>
+                        </div>
+                        <h3>Laptop & Desktop Repair</h3>
+                    </div>
+                    <div class="service-image">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <p class="service-description">Professional repairs to ensure your devices perform flawlessly with industry-leading diagnostic tools and genuine parts.</p>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-desktop"></i>
+                                Screen Replacements
+                            </div>
+                            <div class="feature-description">High-quality LCD/LED screen replacements for cracked or damaged displays with warranty coverage.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-battery-full"></i>
+                                Battery Replacements
+                            </div>
+                            <div class="feature-description">Genuine battery replacements for extended usage and reliability with power optimization.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-microchip"></i>
+                                Motherboard Repairs
+                            </div>
+                            <div class="feature-description">Advanced motherboard diagnostics and repairs to restore full device functionality.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-cog"></i>
+                                Software Troubleshooting
+                            </div>
+                            <div class="feature-description">Comprehensive software diagnosis and optimization for peak performance.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Server Maintenance -->
+                <div id="server-maintenance" class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <h3>Server Maintenance</h3>
+                    </div>
+                    <div class="service-image">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <p class="service-description">Expert server care to keep your business running smoothly with 24/7 monitoring and proactive maintenance.</p>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-wrench"></i>
+                                Hardware Repairs
+                            </div>
+                            <div class="feature-description">Rapid hardware issue resolution with enterprise-grade replacement parts and minimal downtime.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-tachometer-alt"></i>
+                                Performance Tuning
+                            </div>
+                            <div class="feature-description">Advanced optimization techniques to maximize server speed, efficiency, and resource utilization.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Proactive Maintenance
+                            </div>
+                            <div class="feature-description">Scheduled maintenance protocols to prevent unexpected downtime and extend hardware lifespan.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Equipment Repair -->
+                <div id="network-repair" class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <h3>Network Equipment Repair</h3>
+                    </div>
+                    <div class="service-image">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <p class="service-description">Reliable networking solutions to keep you connected with advanced diagnostic tools and certified technicians.</p>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-search"></i>
+                                Equipment Diagnosis
+                            </div>
+                            <div class="feature-description">Comprehensive testing and repair of routers, switches, firewalls, and access points.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-link"></i>
+                                Connectivity Solutions
+                            </div>
+                            <div class="feature-description">Expert resolution of network connectivity issues and performance bottlenecks.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-arrow-up"></i>
+                                Network Upgrades
+                            </div>
+                            <div class="feature-description">Infrastructure upgrades to support modern bandwidth demands and security requirements.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Printer & Peripheral Repair -->
+                <div id="printer-repair" class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-print"></i>
+                        </div>
+                        <h3>Printer & Peripheral Repair</h3>
+                    </div>
+                    <div class="service-image">
+                        <i class="fas fa-scanner"></i>
+                    </div>
+                    <p class="service-description">Keep your office equipment running seamlessly with specialized repair services for all major brands.</p>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-print"></i>
+                                Printer Repairs
+                            </div>
+                            <div class="feature-description">Complete printer restoration including print quality optimization and mechanical repairs.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-file-alt"></i>
+                                Scanner Services
+                            </div>
+                            <div class="feature-description">Professional scanner repairs to ensure smooth document processing and image quality.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-hdd"></i>
+                                Peripheral Fixes
+                            </div>
+                            <div class="feature-description">Expert repairs for external drives, keyboards, mice, and other essential peripherals.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Recovery -->
+                <div id="data-recovery" class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-undo"></i>
+                        </div>
+                        <h3>Data Recovery</h3>
+                    </div>
+                    <div class="service-image">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <p class="service-description">Recover valuable data from damaged storage devices using advanced forensic techniques and clean room facilities.</p>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-hdd"></i>
+                                Drive Recovery
+                            </div>
+                            <div class="feature-description">Professional recovery of lost data from hard drives, SSDs, and flash storage devices.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Damage Assessment
+                            </div>
+                            <div class="feature-description">Comprehensive analysis and recovery solutions for damaged or corrupted storage devices.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-lock"></i>
+                                Secure Methods
+                            </div>
+                            <div class="feature-description">Military-grade security protocols to ensure complete data integrity and privacy protection.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hardware Upgrades -->
+                <div id="hardware-upgrades" class="service-card">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3>Hardware Upgrades</h3>
+                    </div>
+                    <div class="service-image">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <p class="service-description">Supercharge your system's performance with cutting-edge hardware enhancements tailored to your specific needs and budget.</p>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-bolt"></i>
+                                SSD Upgrades
+                            </div>
+                            <div class="feature-description">Transition to high-speed SSDs for faster boot times, lightning-quick file access, and smoother overall experience.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-memory"></i>
+                                RAM Expansions
+                            </div>
+                            <div class="feature-description">Boost multitasking capabilities with increased RAM for seamless operation of demanding applications.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-display"></i>
+                                GPU Replacements
+                            </div>
+                            <div class="feature-description">Latest graphics cards for unmatched rendering speeds in gaming, 3D work, and video editing.</dev>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-microchip"></i>
+                                CPU & Motherboard
+                            </div>
+                            <div class="feature-description">Processor and motherboard upgrades for optimized compatibility and access to modern technologies.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-mouse"></i>
+                                Peripheral Upgrades
+                            </div>
+                            <div class="feature-description">High-performance peripherals including ergonomic keyboards, precision mice, and ultrawide monitors.</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-title">
+                                <i class="fas fa-cogs"></i>
+                                Custom Builds
+                            </div>
+                            <div class="feature-description">Tailored systems for specific needs—gaming powerhouses, professional workstations, or home office PCs.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="upgrade-highlight">
+                        <h4><i class="fas fa-star"></i> Why Choose Hardware Upgrades?</h4>
+                        <p>Investing in upgrades is a cost-effective alternative to purchasing completely new devices. It breathes new life into aging systems, improves energy efficiency, and ensures your setup keeps pace with technological advancements. Perfect for resource-heavy applications, immersive gaming experiences, and future-proofing your technology investment.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Smooth scrolling for navigation
+        document.querySelectorAll('.nav-pill').forEach(pill => {
+            pill.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Update active state
+                document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Smooth scroll to target
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all service cards
+        document.querySelectorAll('.service-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Update active navigation based on scroll position
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.service-card');
+            const navPills = document.querySelectorAll('.nav-pill');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navPills.forEach(pill => {
+                pill.classList.remove('active');
+                if (pill.getAttribute('href') === '#' + current) {
+                    pill.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

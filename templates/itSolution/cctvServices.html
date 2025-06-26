@@ -1,79 +1,625 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional CCTV Installation Services</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block content %}
+        :root {
+            --primary-gold: #FFD700;
+            --secondary-gold: #FFA500;
+            --accent-yellow: #FFEB3B;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f8f9fa;
+            --text-dark: #2c2c2c;
+            --text-light: #6c757d;
+            --white: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
 
-<!-- Service Details Hero Section -->
-<section class="hero bg-dark text-white py-5">
-    <div class="container text-center">
-        <h1 class="fw-bold">Our CCTV Installation Services</h1>
-        <p class="lead">Learn more about our professional security solutions tailored for your needs.</p>
-    </div>
-</section>
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
 
-<!-- Service Details Section -->
-<section class="container py-5">
-    
-    
-    <div class="row g-4">
-        <div class="col-md-6">
-            <img src="{% static 'images/items/home-security.jpg' %}" alt="Home Security Cameras" class="img-fluid rounded">
-        </div>
-        <div class="col-md-6">
-            <h3>Home Security Cameras</h3>
-            <p>Our high-definition indoor and outdoor cameras provide 24/7 surveillance for your home, ensuring safety and peace of mind.</p>
-        </div>
-    </div>
-    
-    <div class="row g-4 mt-5">
-        <div class="col-md-6 order-md-2">
-            <img src="{% static 'images/items/business-surveillance.jpg' %}" alt="Business Surveillance" class="img-fluid rounded">
-        </div>
-        <div class="col-md-6 order-md-1">
-            <h3>Business Surveillance</h3>
-            <p>Protect your office and commercial spaces with state-of-the-art surveillance systems designed for optimal security.</p>
-        </div>
-    </div>
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+            position: relative;
+            overflow: hidden;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+        }
 
-    <div class="row g-4 mt-5">
-        <div class="col-md-6">
-            <img src="{% static 'images/items/wireless-cctv.jpg' %}" alt="Wireless CCTV" class="img-fluid rounded">
-        </div>
-        <div class="col-md-6">
-            <h3>Wireless CCTV Installation</h3>
-            <p>Experience hassle-free security with wireless CCTV solutions, providing flexibility and remote access from anywhere.</p>
-        </div>
-    </div>
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23FFD700" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
 
-    <div class="row g-4 mt-5">
-        <div class="col-md-6 order-md-2">
-            <img src="{% static 'images/items/night-vision.jpg' %}" alt="Night Vision Cameras" class="img-fluid rounded">
-        </div>
-        <div class="col-md-6 order-md-1">
-            <h3>Night Vision Cameras</h3>
-            <p>Get clear and detailed images even in complete darkness, ensuring round-the-clock security.</p>
-        </div>
-    </div>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
 
-    <div class="row g-4 mt-5">
-        <div class="col-md-6">
-            <img src="{% static 'images/items/motion-detection.jpg' %}" alt="Motion Detection & Alerts" class="img-fluid rounded">
-        </div>
-        <div class="col-md-6">
-            <h3>Motion Detection & Smart Alerts</h3>
-            <p>Our AI-powered cameras send instant notifications whenever suspicious activity is detected.</p>
-        </div>
-    </div>
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
 
-    <div class="row g-4 mt-5">
-        <div class="col-md-6 order-md-2">
-            <img src="{% static 'images/items/maintenance.jpg' %}" alt="Maintenance & Upgrades" class="img-fluid rounded">
-        </div>
-        <div class="col-md-6 order-md-1">
-            <h3>Maintenance & Upgrades</h3>
-            <p>Keep your security system updated with our regular maintenance and upgrade services.</p>
-        </div>
-    </div>
-</section>
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: slideInUp 1s ease-out;
+        }
 
-{% endblock %}
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+            animation: slideInUp 1s ease-out 0.2s both;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Service Cards */
+        .services-section {
+            padding: 6rem 0;
+            background: var(--light-bg);
+        }
+
+        .service-card {
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px var(--shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 3rem;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .service-card.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-image {
+            position: relative;
+            overflow: hidden;
+            height: 300px;
+        }
+
+        .service-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .service-card:hover .service-image img {
+            transform: scale(1.1);
+        }
+
+        .service-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.9));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .service-card:hover .service-overlay {
+            opacity: 1;
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            color: var(--white);
+            animation: bounceIn 0.6s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .service-content {
+            padding: 2.5rem;
+        }
+
+        .service-content h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .service-content h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--gold-gradient);
+            border-radius: 2px;
+        }
+
+        .service-content p {
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .service-features li {
+            padding: 0.5rem 0;
+            color: var(--text-light);
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .service-features li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--primary-gold);
+            font-size: 0.9rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--dark-bg);
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 70%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .cta-content h2 {
+            color: var(--white);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-content p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-gold {
+            background: var(--gold-gradient);
+            border: none;
+            color: var(--dark-bg);
+            font-weight: 600;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+            color: var(--dark-bg);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: var(--white);
+            padding: 4rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 50vh;
+                padding: 3rem 0;
+            }
+
+            .services-section {
+                padding: 4rem 0;
+            }
+
+            .service-content {
+                padding: 2rem;
+            }
+
+            .cta-content h2 {
+                font-size: 2rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content text-center">
+                <h1>Professional CCTV Installation Services</h1>
+                <p>Advanced security solutions tailored for your home and business needs with cutting-edge technology and expert installation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold mb-3">Our Security Solutions</h2>
+                    <p class="lead text-muted">Comprehensive CCTV services designed to protect what matters most</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Home Security -->
+                <div class="col-lg-6">
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=300&fit=crop" alt="Home Security Cameras">
+                            <div class="service-overlay">
+                                <i class="fas fa-home service-icon"></i>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <h3>Home Security Systems</h3>
+                            <p>Protect your family and property with our advanced residential security camera systems featuring HD recording, night vision, and mobile monitoring.</p>
+                            <ul class="service-features">
+                                <li>4K Ultra HD Recording</li>
+                                <li>24/7 Mobile Monitoring</li>
+                                <li>Weather-Resistant Design</li>
+                                <li>Cloud Storage Options</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Surveillance -->
+                <div class="col-lg-6">
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=300&fit=crop" alt="Business Surveillance">
+                            <div class="service-overlay">
+                                <i class="fas fa-building service-icon"></i>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <h3>Commercial Surveillance</h3>
+                            <p>Comprehensive security solutions for offices, retail spaces, and industrial facilities with scalable monitoring systems.</p>
+                            <ul class="service-features">
+                                <li>Multi-Camera Networks</li>
+                                <li>Access Control Integration</li>
+                                <li>Remote Management</li>
+                                <li>Professional Installation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wireless CCTV -->
+                <div class="col-lg-6">
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&h=300&fit=crop" alt="Wireless CCTV">
+                            <div class="service-overlay">
+                                <i class="fas fa-wifi service-icon"></i>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <h3>Wireless Camera Systems</h3>
+                            <p>Flexible wireless solutions that eliminate cable clutter while providing reliable security coverage for any property layout.</p>
+                            <ul class="service-features">
+                                <li>Easy Installation</li>
+                                <li>Battery & Solar Options</li>
+                                <li>Flexible Positioning</li>
+                                <li>Encrypted Transmission</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Night Vision -->
+                <div class="col-lg-6">
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=300&fit=crop" alt="Night Vision Cameras">
+                            <div class="service-overlay">
+                                <i class="fas fa-moon service-icon"></i>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <h3>Night Vision Technology</h3>
+                            <p>Advanced infrared and low-light cameras that deliver crystal-clear footage even in complete darkness.</p>
+                            <ul class="service-features">
+                                <li>Infrared Technology</li>
+                                <li>Color Night Vision</li>
+                                <li>150ft+ Range</li>
+                                <li>Zero Light Performance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Smart Detection -->
+                <div class="col-lg-6">
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=300&fit=crop" alt="Smart Detection">
+                            <div class="service-overlay">
+                                <i class="fas fa-brain service-icon"></i>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <h3>AI-Powered Detection</h3>
+                            <p>Smart cameras with artificial intelligence that can distinguish between people, vehicles, and animals for accurate alerts.</p>
+                            <ul class="service-features">
+                                <li>Person Detection</li>
+                                <li>Vehicle Recognition</li>
+                                <li>Custom Alert Zones</li>
+                                <li>Instant Notifications</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance -->
+                <div class="col-lg-6">
+                    <div class="service-card">
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&h=300&fit=crop" alt="Maintenance Services">
+                            <div class="service-overlay">
+                                <i class="fas fa-tools service-icon"></i>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <h3>Maintenance & Support</h3>
+                            <p>Comprehensive maintenance packages and technical support to ensure your security system operates at peak performance.</p>
+                            <ul class="service-features">
+                                <li>Regular Health Checks</li>
+                                <li>Software Updates</li>
+                                <li>24/7 Technical Support</li>
+                                <li>System Upgrades</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item fade-in">
+                        <span class="stat-number">500+</span>
+                        <div class="stat-label">Installations</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item fade-in">
+                        <span class="stat-number">98%</span>
+                        <div class="stat-label">Client Satisfaction</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item fade-in">
+                        <span class="stat-number">5+</span>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item fade-in">
+                        <span class="stat-number">24/7</span>
+                        <div class="stat-label">Support</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Secure Your Property?</h2>
+                <p>Get a free consultation and quote for your custom CCTV installation. Our experts will design the perfect security solution for your specific needs.</p>
+                <button class="btn btn-gold btn-lg">Get Free Quote</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        }, observerOptions);
+
+        // Observe service cards
+        document.querySelectorAll('.service-card').forEach((card, index) => {
+            card.style.transitionDelay = `${index * 0.1}s`;
+            observer.observe(card);
+        });
+
+        // Fade in animations for stats
+        const fadeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach((el, index) => {
+            el.style.transitionDelay = `${index * 0.2}s`;
+            fadeObserver.observe(el);
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (target.toString().includes('%')) {
+                    element.textContent = Math.floor(current) + '%';
+                } else if (target.toString().includes('+')) {
+                    element.textContent = Math.floor(current) + '+';
+                } else {
+                    element.textContent = target.toString().includes('/') ? target : Math.floor(current);
+                }
+            }, 20);
+        }
+
+        // Trigger counter animations when stats section is visible
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumbers = entry.target.querySelectorAll('.stat-number');
+                    statNumbers.forEach(stat => {
+                        const text = stat.textContent;
+                        if (text.includes('500+')) animateCounter(stat, 500);
+                        else if (text.includes('98%')) animateCounter(stat, 98);
+                        else if (text.includes('5+')) animateCounter(stat, 5);
+                    });
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        statsObserver.observe(document.querySelector('.stats-section'));
+    </script>
+</body>
+</html>

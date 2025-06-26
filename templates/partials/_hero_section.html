@@ -1,107 +1,120 @@
-<!-- Why Work with LIG Section -->
-<section class="py-5 animated-bg">
-    <div class="container">
-        <!-- Heading -->
-        <div class="row mb-4">
-            <div class="col-12 text-center">
-                <h2 class="fw-bold mb-3">Why Work with LIG?</h2>
-                <p class="text-muted mx-auto" style="max-width: 600px;">
-                    We bring together the services and technologies that solve your business problems.
-                </p>
-            </div>
-        </div>
+     
+
+    <style>
+        /* Real World Version Styles */
+        .real-world {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         
-        <!-- Cards Row -->
-        <div class="row g-4">
-            <!-- Card 1 -->
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm rounded-3">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4 icon-bg-red">
-                            <i class="bi bi-gear-fill text-white fs-4"></i>
-                        </div>
-                        
-                        <h5 class="card-title mb-3">Expertise & Experience</h5>
-                        <p class="card-text">
-                            Our team ensures reliable and high-quality computer sales, repairs, and installations, delivering top-tier service.
-                        </p>
-                    </div>
+        .real-world .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .real-world .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .real-world .icon-container {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .real-world .icon-expertise {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .real-world .icon-quality {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .real-world .icon-innovation {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .real-world h2 {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        
+        .real-world .card-title {
+            color: #34495e;
+            font-weight: 600;
+        }
+        
+        .real-world .card-text {
+            color: #5a6c7d;
+            line-height: 1.6;
+        }
+
+
+    </style>
+
+    <!-- Real World Version -->
+    <section class="py-5 real-world">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h2 class="mb-3">Why Work with LIG?</h2>
+                    <p class="text-muted mx-auto" style="max-width: 650px; font-size: 1.1rem;">
+                        We deliver comprehensive technology solutions that drive your business forward with proven expertise and reliable service.
+                    </p>
                 </div>
             </div>
             
-            <!-- Card 2 -->
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm rounded-3">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4 icon-bg-blue">
-                            <i class="bi bi-shield-check text-white fs-4"></i>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-container icon-expertise">
+                                <i class="bi bi-gear-fill text-white"></i>
+                            </div>
+                            <h5 class="card-title">Expertise & Experience</h5>
+                            <p class="card-text">
+                                Our certified technicians bring years of experience in computer sales, repairs, and installations, ensuring reliable solutions for your technology needs.
+                            </p>
                         </div>
-                        
-                        <h5 class="card-title mb-3">Quality & Reliability</h5>
-                        <p class="card-text">
-                            We ensure long-term reliability in every product and service, from CCTV installations to software development.
-                        </p>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Card 3 -->
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm rounded-3">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4 icon-bg-green">
-                            <i class="bi bi-lightbulb-fill text-white fs-4"></i>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-container icon-quality">
+                                <i class="bi bi-shield-check text-white"></i>
+                            </div>
+                            <h5 class="card-title">Quality & Reliability</h5>
+                            <p class="card-text">
+                                We guarantee long-term reliability across all our services, from CCTV security systems to custom software development, with comprehensive warranties.
+                            </p>
                         </div>
-                        
-                        <h5 class="card-title mb-3">Innovation & Solutions</h5>
-                        <p class="card-text">
-                            We implement cutting-edge technology to provide innovative solutions for businesses and individuals.
-                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mx-auto">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-container icon-innovation">
+                                <i class="bi bi-lightbulb-fill text-white"></i>
+                            </div>
+                            <h5 class="card-title">Innovation & Solutions</h5>
+                            <p class="card-text">
+                                We implement cutting-edge technologies and provide innovative solutions tailored to meet the unique challenges of modern businesses.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Custom CSS for animated background and icon colors -->
-<style>
-    /* .animated-bg {
-        background: linear-gradient(90deg, #f8a409, #02d8b4, #2a332a);
-        background-size: 600% 600%;
-        animation: gradientBG 10s ease infinite;
-    } */
 
-    @keyframes gradientBG {
-        0% {
-            background-position: 0% 50%;
-        }
-        50% {
-            background-position: 100% 50%;
-        }
-        100% {
-            background-position: 0% 50%;
-        }
-    }
 
-    .icon-bg-red {
-        background-color: #f8a409;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-    }
-
-    .icon-bg-blue {
-        background-color: #02d8b4;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-    }
-
-    .icon-bg-green {
-        background-color: #2a332a;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-    }
-</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>

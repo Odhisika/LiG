@@ -132,6 +132,7 @@ def peripherals(request):
     }
     return render(request, 'hardware/peripherals.html', context) 
 
+
 ### Software ###
 def operatingSystems(request):
     try:

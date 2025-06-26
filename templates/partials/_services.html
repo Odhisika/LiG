@@ -1,121 +1,911 @@
 {% load static %}
 
-<section class="py-5" style="background-color: #f8f9fa;">
-  <div class="container-fluid">
-    <div class="row">
-      <!-- Left sidebar navigation - refined styling -->
-      <div class="col-md-2 p-4" style="background-color: #283747;">
-        <h5 class="mb-4 fw-bold text-white">Our Services</h5>
+<style>
+    .services-page-wrapper {
+        --sp-primary-color: #2563eb;
+        --sp-primary-dark: #1d4ed8;
+        --sp-primary-light: #3b82f6;
+        --sp-secondary-color: #64748b;
+        --sp-accent-color: #f59e0b;
+        --sp-success-color: #10b981;
+        --sp-text-dark: #1e293b;
+        --sp-text-medium: #475569;
+        --sp-text-light: #64748b;
+        --sp-text-muted: #94a3b8;
+        --sp-bg-primary: #ffffff;
+        --sp-bg-secondary: #f8fafc;
+        --sp-bg-tertiary: #f1f5f9;
+        --sp-border-light: #e2e8f0;
+        --sp-border-medium: #cbd5e1;
+        --sp-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --sp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --sp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --sp-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --sp-border-radius: 12px;
+        --sp-border-radius-lg: 16px;
+        --sp-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .services-page-wrapper {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: var(--sp-text-dark);
+        line-height: 1.6;
+        background-color: var(--sp-bg-secondary);
+        margin: 0;
+        padding: 0;
+    }
+
+    .services-page-wrapper .sp-services-container {
+        min-height: 100vh;
+        display: flex;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    /* Sidebar Styles */
+    .services-page-wrapper .sp-sidebar {
+        width: 280px;
+        background: var(--sp-bg-primary);
+        border-right: 1px solid var(--sp-border-light);
+        box-shadow: var(--sp-shadow-md);
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        z-index: 10;
+    }
+
+    .services-page-wrapper .sp-sidebar-header {
+        padding: 2rem 1.5rem;
+        border-bottom: 1px solid var(--sp-border-light);
+        background: linear-gradient(135deg, var(--sp-primary-color) 0%, var(--sp-primary-dark) 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .services-page-wrapper .sp-sidebar-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(30%, -30%);
+    }
+
+    .services-page-wrapper .sp-sidebar-title {
+        font-size: 1.375rem;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .services-page-wrapper .sp-sidebar-subtitle {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        margin: 0.5rem 0 0;
+        font-weight: 400;
+    }
+
+    .services-page-wrapper .sp-sub-menu {
+        padding: 1.5rem 0;
+        flex: 1;
+    }
+
+    .services-page-wrapper .sp-sub-item {
+        margin: 0.25rem 1rem;
+    }
+
+    .services-page-wrapper .sp-sub-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        color: var(--sp-text-medium);
+        text-decoration: none;
+        border-radius: var(--sp-border-radius);
+        transition: var(--sp-transition);
+        font-weight: 500;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .services-page-wrapper .sp-sub-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--sp-primary-color), var(--sp-primary-light));
+        transition: width 0.3s ease;
+        z-index: -1;
+    }
+
+    .services-page-wrapper .sp-sub-link:hover {
+        color: white;
+        transform: translateX(8px);
+        box-shadow: var(--sp-shadow-md);
+    }
+
+    .services-page-wrapper .sp-sub-link:hover::before {
+        width: 100%;
+    }
+
+    .services-page-wrapper .sp-sub-link.active {
+        background: linear-gradient(135deg, var(--sp-primary-color) 0%, var(--sp-primary-light) 100%);
+        color: white;
+        box-shadow: var(--sp-shadow-md);
+    }
+
+    .services-page-wrapper .sp-sub-link i {
+        margin-right: 0.875rem;
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    /* Main Content */
+    .services-page-wrapper .sp-main-content {
+        flex: 1;
+        padding: 2.5rem 3rem;
+        background: var(--sp-bg-secondary);
+        overflow-y: auto;
+    }
+
+    .services-page-wrapper .sp-p-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+    }
+
+    .services-page-wrapper .sp-p-title {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--sp-text-dark);
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--sp-primary-color), var(--sp-primary-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .services-page-wrapper .sp-p-subtitle {
+        font-size: 1.25rem;
+        color: var(--sp-text-medium);
+        max-width: 700px;
+        margin: 0 auto;
+        font-weight: 400;
+        line-height: 1.7;
+    }
+
+    .services-page-wrapper .sp-st-bar {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin-top: 2rem;
+    }
+
+    .services-page-wrapper .sp-st-item-header {
+        text-align: center;
+    }
+
+    .services-page-wrapper .sp-st-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--sp-primary-color);
+        display: block;
+    }
+
+    .services-page-wrapper .sp-st-label {
+        font-size: 0.875rem;
+        color: var(--sp-text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Services Grid */
+    .services-page-wrapper .sp-services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .services-page-wrapper .sp-service-card {
+        background: var(--sp-bg-primary);
+        border-radius: var(--sp-border-radius-lg);
+        box-shadow: var(--sp-shadow-md);
+        transition: var(--sp-transition);
+        overflow: hidden;
+        border: 1px solid var(--sp-border-light);
+        position: relative;
+        cursor: pointer;
+    }
+
+    .services-page-wrapper .sp-service-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--sp-primary-color), var(--sp-primary-light));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .services-page-wrapper .sp-service-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--sp-shadow-xl);
+    }
+
+    .services-page-wrapper .sp-service-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .services-page-wrapper .sp-card-image {
+        height: 220px;
+        background: linear-gradient(135deg, var(--sp-primary-color), var(--sp-primary-light));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .services-page-wrapper .sp-card-image::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .services-page-wrapper .sp-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .services-page-wrapper .sp-service-card:hover .sp-card-image img {
+        transform: scale(1.1);
+    }
+
+    .services-page-wrapper .sp-card-image i {
+        font-size: 3.5rem;
+        color: white;
+        z-index: 2;
+        opacity: 0.9;
+    }
+
+    .services-page-wrapper .sp-card-body {
+        padding: 2rem;
+    }
+
+    .services-page-wrapper .sp-card-title {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: var(--sp-text-dark);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .services-page-wrapper .sp-card-subtitle {
+        font-size: 0.8125rem;
+        color: var(--sp-primary-color);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        margin-bottom: 1.25rem;
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: rgba(37, 99, 235, 0.1);
+        border-radius: 20px;
+    }
+
+    .services-page-wrapper .sp-card-description {
+        color: var(--sp-text-medium);
+        margin-bottom: 2rem;
+        line-height: 1.7;
+        font-size: 0.95rem;
+    }
+
+    .services-page-wrapper .sp-card-action {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .services-page-wrapper .sp-btn-primary {
+        background: linear-gradient(135deg, var(--sp-primary-color), var(--sp-primary-light));
+        border: none;
+        color: white;
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+        border-radius: var(--sp-border-radius);
+        font-size: 0.9rem;
+        transition: var(--sp-transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .services-page-wrapper .sp-btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .services-page-wrapper .sp-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--sp-shadow-lg);
+    }
+
+    .services-page-wrapper .sp-btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .services-page-wrapper .sp-btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .services-page-wrapper .sp-card-stats {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.8125rem;
+        color: var(--sp-text-light);
+    }
+
+    .services-page-wrapper .sp-stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+
+    .services-page-wrapper .sp-stat-item i {
+        color: var(--sp-success-color);
+        font-size: 0.875rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .services-page-wrapper .sp-main-content {
+            padding: 2rem;
+        }
         
-        <div class="nav flex-column">
-          <a href="{% url 'store' %}" class="nav-link text-white py-2 border-top border-secondary">Computer Sales</a>
-          <a href="{% url 'hardwareRepairs' %}" class="nav-link text-white py-2 border-top border-secondary">Repairs & Maintenance</a>
-          <a href="{% url 'CCTVInstallation' %}" class="nav-link text-white py-2 border-top border-secondary">CCTV Installation</a>
-          <a href="{% url 'projects' %}" class="nav-link text-white py-2 border-top border-secondary">Software Development</a>
-          <a href="{% url 'hardwareRepairs' %}" class="nav-link text-white py-2 border-top border-secondary active" style="background-color: #34495e;">IT Solutions</a>
-        </div>
-      </div>
-      
-      <!-- Right content area with cards - improved layout -->
-      <div class="col-md-10 bg-white p-4">
-        <h3 class="mb-4 text-center fw-bold">Professional IT Services</h3>
-        <div class="row g-4">
-          <!-- Card 1: Computer Sales -->
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="img-container" style="height: 200px; overflow: hidden;">
-                <img src="{% static 'images/items/computer-sales.jpg' %}" class="card-img-top" alt="Computer Sales" style="object-fit: cover; width: 100%; height: 100%;">
-              </div>
-              <div class="card-body p-3">
-                <h5 class="card-title fw-bold">High-Quality Computer Sales</h5>
-                <h6 class="text-muted mb-3">Reliable and Affordable Devices</h6>
-                <p class="card-text text-muted">
-                  We offer a wide range of high-performance computers, laptops, and accessories at competitive prices.
-                </p>
-              </div>
-              <div class="card-footer bg-white border-0 pb-3 pt-0">
-                <a href="{% url 'store' %}" class="btn btn-outline-primary btn-sm px-4">Explore Products</a>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Card 2: Repairs & Maintenance -->
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="img-container" style="height: 200px; overflow: hidden;">
-                <img src="{% static 'images/items/computer-repair.png' %}" class="card-img-top" alt="Computer Repairs" style="object-fit: cover; width: 100%; height: 100%;">
-              </div>
-              <div class="card-body p-3">
-                <h5 class="card-title fw-bold">Expert Computer Repairs</h5>
-                <h6 class="text-muted mb-3">Fast & Reliable Fixes</h6>
-                <p class="card-text text-muted">
-                  From hardware issues to software troubleshooting, our expert technicians ensure seamless performance.
-                </p>
-              </div>
-              <div class="card-footer bg-white border-0 pb-3 pt-0">
-                <a href="{% url 'hardwareRepairs' %}" class="btn btn-outline-primary btn-sm px-4">Get a Repair</a>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Card 3: CCTV Installation -->
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="img-container" style="height: 200px; overflow: hidden;">
-                <img src="{% static 'images/items/cctv-installation.jpg' %}" class="card-img-top" alt="CCTV Installation" style="object-fit: cover; width: 100%; height: 100%;">
-              </div>
-              <div class="card-body p-3">
-                <h5 class="card-title fw-bold">CCTV Camera Installation</h5>
-                <h6 class="text-muted mb-3">Secure Your Home & Business</h6>
-                <p class="card-text text-muted">
-                  Protect your property with our high-quality CCTV solutions, offering expert installation and support.
-                </p>
-              </div>
-              <div class="card-footer bg-white border-0 pb-3 pt-0">
-                <a href="{% url 'CCTVInstallation' %}" class="btn btn-outline-primary btn-sm px-4">Learn More</a>
-              </div>
-            </div>
-          </div>
+        .services-page-wrapper .sp-services-grid {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .services-page-wrapper .sp-p-title {
+            font-size: 2.5rem;
+        }
+        
+        .services-page-wrapper .sp-st-bar {
+            gap: 2rem;
+        }
+    }
 
-          <!-- Card 4: Software Development -->
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="img-container" style="height: 200px; overflow: hidden;">
-                <img src="{% static 'images/items/software-development.jpg' %}" class="card-img-top" alt="Software Development" style="object-fit: cover; width: 100%; height: 100%;">
-              </div>
-              <div class="card-body p-3">
-                <h5 class="card-title fw-bold">Custom Software Development</h5>
-                <h6 class="text-muted mb-3">Innovative Digital Solutions</h6>
-                <p class="card-text text-muted">
-                  We build cutting-edge software solutions tailored to your business needs for efficiency and growth.
-                </p>
-              </div>
-              <div class="card-footer bg-white border-0 pb-3 pt-0">
-                <a href="{% url 'projects' %}" class="btn btn-outline-primary btn-sm px-4">View Services</a>
-              </div>
-            </div>
-          </div>
+    @media (max-width: 768px) {
+        .services-page-wrapper .sp-services-container {
+            flex-direction: column;
+        }
+        
+        .services-page-wrapper .sp-sidebar {
+            width: 100%;
+            position: static;
+            height: auto;
+            box-shadow: none;
+            border-right: none;
+            border-bottom: 1px solid var(--sp-border-light);
+        }
+        
+        .services-page-wrapper .sp-sub-menu {
+            padding: 1rem 0;
+            display: flex;
+            overflow-x: auto;
+            gap: 0.5rem;
+        }
+        
+        .services-page-wrapper .sp-sub-item {
+            margin: 0;
+            flex-shrink: 0;
+        }
+        
+        .services-page-wrapper .sp-sub-link {
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        
+        .services-page-wrapper .sp-main-content {
+            padding: 1.5rem;
+        }
+        
+        .services-page-wrapper .sp-services-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .services-page-wrapper .sp-p-title {
+            font-size: 2rem;
+        }
+        
+        .services-page-wrapper .sp-p-subtitle {
+            font-size: 1.125rem;
+        }
+        
+        .services-page-wrapper .sp-st-bar {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .services-page-wrapper .sp-card-action {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .services-page-wrapper .sp-card-stats {
+            justify-content: center;
+        }
+    }
 
-          <!-- Card 5: IT Solutions -->
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="img-container" style="height: 200px; overflow: hidden;">
-                <img src="{% static 'images/items/it-solutions.jpg' %}" class="card-img-top" alt="IT Solutions" style="object-fit: cover; width: 100%; height: 100%;">
-              </div>
-              <div class="card-body p-3">
-                <h5 class="card-title fw-bold">Comprehensive IT Solutions</h5>
-                <h6 class="text-muted mb-3">Optimize Your Business</h6>
-                <p class="card-text text-muted">
-                  From network setup to system upgrades, we provide full-scale IT support for seamless operations.
-                </p>
-              </div>
-              <div class="card-footer bg-white border-0 pb-3 pt-0">
-                <a href="{% url 'hardwareRepairs' %}" class="btn btn-outline-primary btn-sm px-4">Discover More</a>
-              </div>
+    /* Loading animation */
+    @keyframes sp-fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .services-page-wrapper .sp-service-card {
+        animation: sp-fadeInUp 0.6s ease forwards;
+    }
+
+    .services-page-wrapper .sp-service-card:nth-child(1) { animation-delay: 0.1s; }
+    .services-page-wrapper .sp-service-card:nth-child(2) { animation-delay: 0.2s; }
+    .services-page-wrapper .sp-service-card:nth-child(3) { animation-delay: 0.3s; }
+    .services-page-wrapper .sp-service-card:nth-child(4) { animation-delay: 0.4s; }
+    .services-page-wrapper .sp-service-card:nth-child(5) { animation-delay: 0.5s; }
+
+    /* Ripple animation for buttons */
+    @keyframes sp-ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+</style>
+
+<div class="services-page-wrapper">
+    <div class="sp-services-container">
+        <!-- Sidebar -->
+        <div class="sp-sidebar">
+            <div class="sp-sidebar-header">
+                <h3 class="sp-sidebar-title">Our Services</h3>
+                <p class="sp-sidebar-subtitle">Professional IT Solutions</p>
             </div>
-          </div>
+            
+            <nav class="sp-sub-menu">
+                <div class="sp-sub-item">
+                    <a href="{% url 'laptops' %}" class="sp-sub-link">
+                        <i class="fas fa-laptop"></i>
+                        Computer Sales
+                    </a>
+                </div>
+                <div class="sp-sub-item">
+                    <a href="{% url 'hardwareRepairs' %}" class="sp-sub-link">
+                        <i class="fas fa-tools"></i>
+                        Repairs & Maintenance
+                    </a>
+                </div>
+                <div class="sp-sub-item">
+                    <a href="{% url 'CCTVInstallation' %}" class="sp-sub-link">
+                        <i class="fas fa-video"></i>
+                        CCTV Installation
+                    </a>
+                </div>
+                <div class="sp-sub-item">
+                    <a href="{% url 'applications' %}" class="sp-sub-link">
+                        <i class="fas fa-code"></i>
+                        Software Development
+                    </a>
+                </div>
+                <div class="sp-sub-item">
+                    <a href=" {% url 'networkingSolutions' %}" class="sp-sub-link active">
+                        <i class="fas fa-server"></i>
+                        IT Solutions
+                    </a>
+                </div>
+            </nav>
         </div>
-      </div>
+        
+        <!-- Main Content -->
+        <div class="sp-main-content">
+            <div class="sp-services-grid">
+                <!-- Computer Sales Card -->
+                <div class="sp-service-card">
+                    <div class="sp-card-image">
+                        <img src="{% static 'images/items/computer-sales.jpg' %}" alt="Computer Sales">
+                    </div>
+                    <div class="sp-card-body">
+                        <h3 class="sp-card-title">Premium Computer Sales</h3>
+                        <div class="sp-card-subtitle">Hardware Solutions</div>
+                        <p class="sp-card-description">
+                            Cutting-edge computers, laptops, and accessories at competitive prices. From high-performance workstations to gaming rigs, we provide the perfect device tailored to your specific requirements.
+                        </p>
+                        <div class="sp-card-action">
+                            <button class="sp-btn-primary">
+                                <span>Explore Products</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <div class="sp-card-stats">
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.9/5 Rating</span>
+                                </div>
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>2yr Warranty</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Repairs Card -->
+                <div class="sp-service-card">
+                    <div class="sp-card-image">
+                        <img src="{% static 'images/items/computer-repair.png' %}" alt="Computer Repairs">
+                    </div>
+                    <div class="sp-card-body">
+                        <h3 class="sp-card-title">Expert Computer Repairs</h3>
+                        <div class="sp-card-subtitle">Technical Support</div>
+                        <p class="sp-card-description">
+                            Fast, reliable repairs from certified technicians. Comprehensive hardware fixes, software troubleshooting, virus removal, and performance optimization services to keep your systems running smoothly.
+                        </p>
+                        <div class="sp-card-action">
+                            <button class="sp-btn-primary">
+                                <span>Schedule Repair</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <div class="sp-card-stats">
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>24hr Turnaround</span>
+                                </div>
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Expert Certified</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CCTV Card -->
+                <div class="sp-service-card">
+                    <div class="sp-card-image">
+                        <img src="{% static 'images/items/cctv-installation.jpg' %}" alt="CCTV Installation">
+                    </div>
+                    <div class="sp-card-body">
+                        <h3 class="sp-card-title">CCTV Security Systems</h3>
+                        <div class="sp-card-subtitle">Security Solutions</div>
+                        <p class="sp-card-description">
+                            Professional security camera installation with advanced remote monitoring capabilities. Protect your property with cutting-edge surveillance technology, AI-powered analytics, and cloud storage.
+                        </p>
+                        <div class="sp-card-action">
+                            <button class="sp-btn-primary">
+                                <span>Get Quote</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <div class="sp-card-stats">
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>24/7 Monitoring</span>
+                                </div>
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-cloud"></i>
+                                    <span>Cloud Storage</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Software Development Card -->
+                <div class="sp-service-card">
+                    <div class="sp-card-image">
+                        <img src="{% static 'images/items/software-development.jpg' %}" alt="Software Development">
+                    </div>
+                    <div class="sp-card-body">
+                        <h3 class="sp-card-title">Custom Software Development</h3>
+                        <div class="sp-card-subtitle">Digital Innovation</div>
+                        <p class="sp-card-description">
+                            Tailored software solutions built for your unique business requirements. Modern web applications, mobile solutions, enterprise systems, and API integrations using latest technologies.
+                        </p>
+                        <div class="sp-card-action">
+                            <button class="sp-btn-primary">
+                                <span>Start Project</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <div class="sp-card-stats">
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-rocket"></i>
+                                    <span>Agile Delivery</span>
+                                </div>
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-code"></i>
+                                    <span>Modern Stack</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- IT Solutions Card -->
+                <div class="sp-service-card">
+                    <div class="sp-card-image">
+                        <img src="{% static 'images/items/it-solutions.jpg' %}" alt="IT Solutions">
+                    </div>
+                    <div class="sp-card-body">
+                        <h3 class="sp-card-title">Enterprise IT Solutions</h3>
+                        <div class="sp-card-subtitle">Infrastructure Management</div>
+                        <p class="sp-card-description">
+                            Complete IT infrastructure management including network architecture, system upgrades, cloud migration, cybersecurity, and ongoing technical support for seamless business operations.
+                        </p>
+                        <div class="sp-card-action">
+                            <button class="sp-btn-primary">
+                                <span>Learn More</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <div class="sp-card-stats">
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-headset"></i>
+                                    <span>24/7 Support</span>
+                                </div>
+                                <div class="sp-stat-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Secure & Reliable</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Enhanced interactions and animations for services page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only target elements within the services page wrapper
+        const servicesWrapper = document.querySelector('.services-page-wrapper');
+        if (!servicesWrapper) return;
+
+        // Service card hover effects
+        servicesWrapper.querySelectorAll('.sp-service-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-12px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Navigation link interactions
+        servicesWrapper.querySelectorAll('.sp-sub-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links within this component
+                servicesWrapper.querySelectorAll('.sp-sub-link').forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Add ripple effect
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: scale(0);
+                    animation: sp-ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Button interactions with enhanced effects
+        servicesWrapper.querySelectorAll('.sp-btn-primary').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Scale animation
+                this.style.transform = 'scale(0.95)';
+                
+                // Create success feedback
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i> <span>Requested!</span>';
+                this.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 100);
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.style.background = '';
+                }, 2000);
+            });
+            
+            // Add hover effects
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Smooth scrolling for better UX (scoped to this component)
+        servicesWrapper.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading state simulation with intersection observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Observe only service cards within this component
+        servicesWrapper.querySelectorAll('.sp-service-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Add smooth reveal animation for cards on scroll
+        const revealCards = () => {
+            const cards = servicesWrapper.querySelectorAll('.sp-service-card');
+            const windowHeight = window.innerHeight;
+            
+            cards.forEach((card, index) => {
+                const cardTop = card.getBoundingClientRect().top;
+                const revealPoint = windowHeight * 0.8;
+                
+                if (cardTop < revealPoint) {
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 100);
+                }
+            });
+        };
+
+        // Initial reveal check
+        revealCards();
+        
+        // Reveal on scroll (with throttling to improve performance)
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    revealCards();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Add click handlers for service cards to make them more interactive
+        servicesWrapper.querySelectorAll('.sp-service-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Don't trigger if clicking on buttons or links
+                if (e.target.closest('.sp-btn-primary') || e.target.closest('a')) {
+                    return;
+                }
+                
+                // Add a subtle pulse effect
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Parallax effect for card images on scroll (subtle)
+        const handleParallax = () => {
+            const cards = servicesWrapper.querySelectorAll('.sp-service-card');
+            
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const speed = 0.1;
+                const yPos = -(rect.top * speed);
+                const image = card.querySelector('.sp-card-image img');
+                
+                if (image && rect.top < window.innerHeight && rect.bottom > 0) {
+                    image.style.transform = `translateY(${yPos}px) scale(1)`;
+                }
+            });
+        };
+
+        // Throttled parallax scroll handler
+        let parallaxTicking = false;
+        window.addEventListener('scroll', () => {
+            if (!parallaxTicking) {
+                requestAnimationFrame(() => {
+                    handleParallax();
+                    parallaxTicking = false;
+                });
+                parallaxTicking = true;
+            }
+        });
+
+        // Initial parallax setup
+        handleParallax();
+    });
+</script>

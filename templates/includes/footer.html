@@ -1,71 +1,327 @@
-<!-- ========================= FOOTER ========================= -->
-<footer class="section-footer" style="background-color: #1a0a06; color: white; padding: 40px 0;">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4 text-center text-md-left">
-                <h4>LuckyTech Innovations</h4>
-                <p>With full-stack expertise, we help you design, orchestrate, and manage technologies that drive business success.</p>
-                <div>
-                    <a href="#" class="text-white mx-2"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="text-white mx-2"><i class="fab fa-linkedin"></i></a>
-                    <a href="#" class="text-white mx-2"><i class="fab fa-twitter"></i></a>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #e2e8f0;
+            padding: 3rem 0 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+            gap: 3rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .footer-section h3 {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -0.5rem;
+            width: 2rem;
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            border-radius: 1px;
+        }
+
+        .company-info {
+            max-width: 280px;
+        }
+
+        .company-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .company-logo i {
+            color: #3b82f6;
+        }
+
+        .company-description {
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.7rem;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+            transform: translateX(3px);
+        }
+
+        .footer-links a i {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .contact-info {
+            list-style: none;
+        }
+
+        .contact-info li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .contact-info i {
+            color: #3b82f6;
+            margin-top: 0.2rem;
+            min-width: 1rem;
+        }
+
+        .contact-info span {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3b82f6;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background: #3b82f6;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .copyright {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .footer-bottom-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom-links a:hover {
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer-container {
+                padding: 0 1rem;
+            }
+
+            .footer {
+                padding: 2rem 0 1rem;
+            }
+
+            .footer-bottom-links {
+                gap: 1rem;
+                flex-direction: column;
+            }
+        }
+    </style>
+
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <!-- Company Info -->
+                <div class="footer-section company-info">
+                    <div class="company-logo">
+                        <i class="fas fa-bolt"></i>
+                        LuckyTech Innovation Ground
+                    </div>
+                    <p class="company-description">
+                        With full-stack expertise, we help you design, orchestrate, and manage technologies that drive business success and digital transformation.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <!-- Services -->
+                <div class="footer-section">
+                    <h3>Services</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Web Development</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Mobile Apps</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Cloud Solutions</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>IT Consulting</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Digital Strategy</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company -->
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>About Us</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Our Team</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Careers</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Blog</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Case Studies</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Help Center</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Documentation</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Contact Support</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>System Status</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i>Resources</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <ul class="contact-info">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Adweso-Koforidua Road<br>Eastern Region, Ghana</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <span>+233 59 188 4422</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+233 20 952 2722</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>info@lig.com.gh</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="col-md-2">
-                <h6 class="text-white">Quick Links</h6>
-                <ul class="list-unstyled">
-                    <li><a href="#" class="text-white">Site Map</a></li>
-                    <li><a href="#" class="text-white">Privacy Notice</a></li>
-                    <li><a href="#" class="text-white">Cookie Notice</a></li>
-                    <li><a href="#" class="text-white">Terms & Conditions</a></li>
+            <div class="footer-bottom">
+                <div class="copyright">
+                    © 2025 LuckyTech Innovations. All rights reserved.
+                </div>
+                <ul class="footer-bottom-links">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                    <li><a href="#">Sitemap</a></li>
                 </ul>
-            </div>
-
-            <div class="col-md-2">
-                <h6 class="text-white">About Us</h6>
-                <ul class="list-unstyled">
-                    <li><a href="#" class="text-white">Why LuckyTech</a></li>
-                    <li><a href="#" class="text-white">Our Team</a></li>
-                    <li><a href="#" class="text-white">Careers</a></li>
-                    <li><a href="#" class="text-white">Sustainability</a></li>
-                </ul>
-            </div>
-
-            <div class="col-md-2">
-                <h6 class="text-white">How We Can Help</h6>
-                <ul class="list-unstyled">
-                    <li><a href="#" class="text-white">Customer Support</a></li>
-                    <li><a href="#" class="text-white">Leasing Services</a></li>
-                    <li><a href="#" class="text-white">Product Recalls</a></li>
-                    <li><a href="#" class="text-white">Corporate Gifts</a></li>
-                </ul>
-            </div>
-
-            <div class="col-md-2 text-md-right">
-                <h6 class="text-white">Contact Us</h6>
-                <p class="mb-0">📞059 188 4422</p>
-                <p class="fab fa-whatsapp">+23320 952 2722</p>
-                <p class="mb-0">📧 info@lig.com.gh</p>
-                <p class="mb-0">📍 Adweso-Koforidua Road</p>
             </div>
         </div>
-
-        <div class="row mt-4 border-top pt-3">
-            <div class="col-md-6 text-center text-md-left">
-                <p class="mb-0">&copy; 2020 - 2025 LuckyTech Innovations. All rights reserved.</p>
-            </div>
-            <div class="col-md-6 text-md-right">
-                <i class="fab fa-cc-visa fa-lg mx-2"></i>
-                <i class="fab fa-cc-paypal fa-lg mx-2"></i>
-                <i class="fab fa-cc-mastercard fa-lg mx-2"></i>
-            </div>
-        </div>
-    </div>
-
-    
-</footer>
-<!-- ========================= FOOTER END // ========================= -->
-
-<!-- FontAwesome for Icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    </footer>
