@@ -19,18 +19,33 @@ from django.urls import path, include
 from . import views
 from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib.sitemaps.views import sitemap
+from store.sitemaps import ProductSitemap
+from django.views.generic import TemplateView
+
+sitemaps = {
+    'products': ProductSitemap,
+}
+
+
 
 urlpatterns = [
     path('securelogin/', admin.site.urls),
     path('', views.home, name='home'),
     path('store/', include('store.urls')),
-    path('cart/', include('cart.urls')),
+    path("cart/", include("cart.urls")),
+    path('payments/', include('payment.urls')),
+    path('orders/', include('orders.urls')),
     path('accounts/', include('accounts.urls')),
     path('froala_editor/',include('froala_editor.urls')),
-    path('research/', include('research.urls')),    
-
-    # ORDERS
-    path('orders/', include('orders.urls')),
+    path('research/', include('research.urls')),   
+    path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')), 
+    path("googlec8d038f8f2eae61f.html", TemplateView.as_view(
+        template_name="googlec8d038f8f2eae61f.html", content_type="text/html"
+    )),
+    
+    
 
     # Navigation hardware links
     path('hardware/desktops/', views.desktops, name='desktops'),

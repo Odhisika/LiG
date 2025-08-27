@@ -1,203 +1,1431 @@
 {% load static %}
 
-<header class="main-header">
-  <link href="{% static 'css/nav.css' %}" rel="stylesheet" type="text/css"/>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
- 
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #004499;
+            --accent-color: #ff6600;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --border-color: #e0e0e0;
+            --hover-bg: #f8f9fa;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-  <!-- Main Navigation -->
-  <nav class="main-nav">
-    <div class="nav-container">
-      <!-- Logo -->
-      <div class="logo-section">
-        <a href="{% url 'home' %}">
-          <img src="{% static 'images/logo.jpg' %}" alt="Logo">
-        </a>
-      </div>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
 
-      <!-- Search Bar -->
-      <div class="search-section">
-        <form action="{% url 'search' %}" method="GET" class="search-form">
-          <input type="text" class="search-input" placeholder="Search products, solutions, and services..." name="keyword">
-          <button type="submit" class="search-btn">
-            <i class="fa fa-search"></i>
-          </button>
-        </form>
-      </div>
+        /* Header Styles */
+        .main-header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-      <!-- User Actions -->
-      <div class="user-actions">
-        <!-- Notifications -->
-        <div class="nav-item">
-          <a href="#" class="action-item" onclick="toggleNotifications(event)">
-            <i class="fa fa-bell"></i>
-            <span>Alerts</span>
-            <span class="cart-badge" id="notification-count">0</span>
-          </a>
-          <div class="dropdown-menu notification-dropdown" id="notifications-dropdown">
-            <div class="notification-header">Notifications</div>
-            <div class="notification-item">
-              <div class="notification-icon">
-                <i class="fa fa-info"></i>
-              </div>
-              <div class="notification-content">
-                <div class="notification-title">Welcome!</div>
-                <div class="notification-text">No new notifications</div>
-              </div>
+        /* Main Navigation */
+        .main-nav {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section img {
+            height: 45px;
+            width: auto;
+        }
+
+        .search-section {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 30px;
+        }
+
+        .search-form {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 50px 12px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 14px;
+            position: relative;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .action-item:hover {
+            background: var(--hover-bg);
+            color: var(--primary-color);
+        }
+
+        .action-item i {
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 11px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* Mobile Sub Navigation */
+        .mobile-sub-nav {
+            display: none;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 0;
+        }
+
+        .mobile-sub-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mobile-menu-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .mobile-menu-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary-color);
+        }
+
+        .mobile-menu-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .mobile-search-section {
+            flex: 1;
+        }
+
+        .bottom-nav {
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+        .nav-menu {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background: white;
+        }
+
+        .dropdown-icon {
+            margin-left: 8px;
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        .nav-item .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 250px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        padding: 8px 0;
+        display: none;
+        }
+
+        .nav-item:hover .dropdown-menu {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .dropdown-item:hover {
+            background: var(--hover-bg);
+            color: var(--primary-color);
+            padding-left: 25px;
+        }
+
+        /* Submenu Styles */
+        .has-submenu {
+            position: relative;
+        }
+
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .submenu-link i {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .has-submenu:hover .submenu-link i {
+            transform: rotate(90deg);
+        }
+
+        .sub-dropdown-menu {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            min-width: 200px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            padding: 8px 0;
+        }
+
+        .has-submenu:hover .sub-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .sub-dropdown-menu .dropdown-item {
+            padding: 10px 18px;
+            font-size: 13px;
+        }
+
+        .sub-dropdown-menu .dropdown-item:hover {
+            background: var(--hover-bg);
+            color: var(--primary-color);
+            padding-left: 23px;
+        }
+
+        /* Prevent dropdown from closing when hovering over submenu */
+        .nav-item:hover .dropdown-menu,
+        .dropdown-menu:hover,
+        .sub-dropdown-menu:hover {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Add arrow indicator for items with submenus */
+        .has-submenu::after {
+            content: '';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid var(--text-light);
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .has-submenu:hover::after {
+            border-left-color: var(--primary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: none;
+            }
+        }
+
+        /* Animation for dropdown items */
+        .dropdown-menu .dropdown-item {
+            animation: fadeInUp 0.3s ease forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .nav-item:hover .dropdown-menu .dropdown-item {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-item:hover .dropdown-menu .dropdown-item:nth-child(1) { animation-delay: 0.1s; }
+        .nav-item:hover .dropdown-menu .dropdown-item:nth-child(2) { animation-delay: 0.15s; }
+        .nav-item:hover .dropdown-menu .dropdown-item:nth-child(3) { animation-delay: 0.2s; }
+        .nav-item:hover .dropdown-menu .dropdown-item:nth-child(4) { animation-delay: 0.25s; }
+        .nav-item:hover .dropdown-menu .dropdown-item:nth-child(5) { animation-delay: 0.3s; }
+        .nav-item:hover .dropdown-menu .dropdown-item:nth-child(6) { animation-delay: 0.35s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Navigation Overlay */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-nav-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Mobile Navigation Sidebar */
+        .mobile-nav-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-nav-sidebar.active {
+            left: 0;
+        }
+
+        /* Mobile Nav Header */
+        .mobile-nav-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-nav-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mobile-nav-user i {
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .mobile-nav-user-info h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .mobile-nav-user-info p {
+            margin: 0;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .mobile-nav-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .mobile-nav-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Mobile Navigation Menu */
+        .mobile-nav-menu {
+            padding: 0;
+        }
+
+        .mobile-nav-item {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .mobile-nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mobile-nav-link:hover {
+            background: var(--hover-bg);
+            color: var(--primary-color);
+        }
+
+        .mobile-nav-link i.nav-icon {
+            font-size: 18px;
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .mobile-nav-link i.chevron {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-nav-item.active .mobile-nav-link i.chevron {
+            transform: rotate(90deg);
+        }
+    
+          .profile-img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            }
+
+
+        /* Mobile Submenu */
+        .mobile-submenu {
+            max-height: 0;
+            overflow: hidden;
+            background: #f8f9fa;
+            transition: max-height 0.3s ease;
+        }
+
+        .mobile-nav-item.active .mobile-submenu {
+            max-height: 500px;
+        }
+
+        .mobile-submenu-item {
+            padding: 12px 20px 12px 52px;
+            border-bottom: 1px solid #e9ecef;
+            display: block;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mobile-submenu-item:hover {
+            background: white;
+            color: var(--primary-color);
+            padding-left: 60px;
+        }
+
+        .mobile-submenu-item::before {
+            content: '';
+            position: absolute;
+            left: 36px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--text-light);
+            border-radius: 50%;
+        }
+
+        .mobile-submenu-item:hover::before {
+            background: var(--primary-color);
+        }
+
+        /* Sub-submenu */
+        .mobile-sub-submenu {
+            background: #ffffff;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .mobile-sub-submenu .mobile-submenu-item {
+            padding-left: 70px;
+            font-size: 13px;
+        }
+
+        .mobile-sub-submenu .mobile-submenu-item:hover {
+            padding-left: 78px;
+        }
+
+        /* Mobile Nav Footer */
+        .mobile-nav-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: #f8f9fa;
+        }
+
+        .mobile-nav-footer-links {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .mobile-nav-footer-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 12px;
+            padding: 8px;
+            text-align: center;
+            flex: 1;
+            transition: color 0.3s ease;
+        }
+
+        .mobile-nav-footer-link:hover {
+            color: var(--primary-color);
+        }
+
+        .mobile-nav-version {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                justify-content: space-between;
+                gap: 15px;
+            }
+
+            .logo-section img {
+                height: 35px;
+            }
+
+            .search-section {
+                display: none;
+            }
+
+            .user-actions {
+                gap: 15px;
+            }
+
+            .action-item span {
+                display: none;
+            }
+
+            .action-item i {
+                margin-right: 0;
+                font-size: 20px;
+            }
+
+            .action-item {
+                padding: 8px;
+            }
+
+            .mobile-sub-nav {
+                display: block;
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 15px;
+            }
+
+            .mobile-sub-container {
+                padding: 0 15px;
+            }
+
+            .user-actions {
+                gap: 10px;
+            }
+
+            .mobile-nav-sidebar {
+                width: 100%;
+                left: -100%;
+            }
+
+            .search-input {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        /* Animation for menu items */
+        .mobile-nav-item {
+            animation: slideInLeft 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        .mobile-nav-sidebar.active .mobile-nav-item {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .mobile-nav-sidebar.active .mobile-nav-item:nth-child(1) { animation-delay: 0.1s; }
+        .mobile-nav-sidebar.active .mobile-nav-item:nth-child(2) { animation-delay: 0.15s; }
+        .mobile-nav-sidebar.active .mobile-nav-item:nth-child(3) { animation-delay: 0.2s; }
+        .mobile-nav-sidebar.active .mobile-nav-item:nth-child(4) { animation-delay: 0.25s; }
+
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Notification styles */
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .notification-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .notification-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .notification-icon {
+            width: 35px;
+            height: 35px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .notification-text {
+            color: var(--text-light);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <!-- Main Navigation -->
+        <nav class="main-nav">
+            <div class="nav-container">
+                <!-- Logo -->
+                <div class="logo-section">
+                    <a href="{% url 'home' %}">
+                        <img src="{% static 'images/logo.jpg' %}" alt="Logo">
+                    </a>
+                </div>
+
+                
+                <!-- Search Bar (Desktop) -->
+                <div class="search-section">
+                    <form action="{% url 'search' %}" method="GET" class="search-form">
+                        <input type="text" class="search-input" placeholder="Search products, solutions, and services..." name="keyword">
+                        <button type="submit" class="search-btn">
+                          <i class="fa fa-search"></i>
+                        </button>
+                      </form>
+                  </div>
+
+              <!-- User Actions -->
+              <div class="user-actions">
+                <!-- Notifications -->
+                <div class="nav-item">
+                  <a href="#" class="action-item" onclick="toggleNotifications(event)">
+                    <i class="fa fa-bell"></i>
+                    <span>Alerts</span>
+                    <span class="cart-badge" id="notification-count">0</span>
+                  </a>
+                  <div class="dropdown-menu notification-dropdown" id="notifications-dropdown">
+                    <div class="notification-header">Notifications</div>
+                    <div class="notification-item">
+                      <div class="notification-icon">
+                        <i class="fa fa-info"></i>
+                      </div>
+                      <div class="notification-content">
+                        <div class="notification-title">Welcome!</div>
+                        <div class="notification-text">No new notifications</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                      <!-- User Account -->
+                {% if user.id is None %}
+                  <a href="{% url 'login' %}" class="action-item">
+                    <i class="fa fa-user"></i>
+                    <span>Sign In</span>
+                  </a>
+                 {% else %}
+                  <a href="{% url 'dashboard' %}" class="action-item">
+                    {% if user.userprofile.profile_picture %}
+                      <img src="{{ user.userprofile.profile_picture.url }}" alt="Profile" class="profile-img">
+                    {% else %}
+                      <i class="fa fa-user"></i>
+                    {% endif %}
+                    <span>{{ user.first_name|default:"Account" }}</span>
+                  </a>
+                {% endif %}
+
+                    <!-- Cart -->
+                    <!-- Cart -->
+                  <a href="{% url 'cart' %}" class="action-item">
+                    <i class="fa fa-shopping-cart"></i>
+                    <span>Cart</span>
+                    <span class="cart-badge">{{ cart_count|default:0 }}</span>
+                  </a>
+                </div>
             </div>
-          </div>
+        </nav>
+
+        <!-- Mobile Sub Navigation -->
+        <div class="mobile-sub-nav">
+            <div class="mobile-sub-container">
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fa fa-bars"></i>
+                    <span></span>
+                </button>
+
+                <!-- Mobile Search -->
+                <div class="mobile-search-section">
+                    <form action="{% url 'search' %}" method="GET" class="search-form">
+                        <input type="text" class="search-input" placeholder="Search products, solutions, and services..." name="keyword">
+                        <button type="submit" class="search-btn">
+                          <i class="fa fa-search"></i>
+                        </button>
+                      </form>
+                </div>
+            </div>
         </div>
 
-        <!-- User Account -->
+
+        <!-- Updated Desktop Navigation Menu -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <ul class="nav-menu">
+        <!-- Hardware -->
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                Hardware <i class="fa fa-chevron-down dropdown-icon"></i>
+            </a>
+            <div class="dropdown-menu">
+                <a href="{% url 'allproducts' %}" class="dropdown-item">All Products</a>
+                <div class="dropdown-item has-submenu">
+                    <a href="{% url 'laptops' %}" class="submenu-link">Laptops <i class="fa fa-chevron-right"></i></a>
+                    <div class="sub-dropdown-menu">
+                        <a href="{% url 'fresh_laptops' %}" class="dropdown-item">Fresh in Box</a>
+                        <a href="{% url 'used_laptops' %}" class="dropdown-item">Slightly Used</a>
+                    </div>
+                </div>
+                <div class="dropdown-item has-submenu">
+                    <a href="{% url 'desktops' %}" class="submenu-link">Desktops <i class="fa fa-chevron-right"></i></a>
+                    </a>
+                    <div class="sub-dropdown-menu">
+                        <a href="{% url 'fresh_desktops' %}" class="dropdown-item">Fresh in Box</a>
+                        <a href="{% url 'used_desktops' %}" class="dropdown-item">Slightly Used</a>
+                    </div>
+                </div>
+                <a href="{% url 'peripherals' %}" class="dropdown-item">Accessories</a>
+            </div>
+        </li>
+        
+        <!-- Software -->
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                Software <i class="fa fa-chevron-down dropdown-icon"></i>
+            </a>
+            <div class="dropdown-menu">
+                <a href="{% url 'operatingSystems' %}" class="dropdown-item">Operating Systems</a>
+                <a href="{% url 'applications' %}" class="dropdown-item">Applications</a>
+                <a href="{% url 'developmentTools' %}" class="dropdown-item">Development Tools</a>
+            </div>
+        </li>
+
+        <!-- IT Solutions -->
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                IT Solutions <i class="fa fa-chevron-down dropdown-icon"></i>
+            </a>
+            <div class="dropdown-menu">
+                <a href="{% url 'hardwareRepairs' %}" class="dropdown-item">Hardware Repair Services</a>
+                <a href="{% url 'networkingSolutions' %}" class="dropdown-item">Networking Solutions</a>
+                <a href="{% url 'CCTVInstallation' %}" class="dropdown-item">CCTV Camera Installation</a>
+            </div>
+        </li>
+
+        <!-- Research Hub -->
+        <li class="nav-item">
+            <a href="{% url 'research' %}" class="nav-link">Research Hub</a>
+          </li>
+    </nav>
+    </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Mobile Navigation Sidebar -->
+    <div class="mobile-nav-sidebar" id="mobile-nav-sidebar">
+        <!-- Mobile Nav Header -->
+        <!-- Mobile Nav Header -->
+<div class="mobile-nav-header">
+    <div class="mobile-nav-user">
         {% if user.id is None %}
-          <a href="{% url 'login' %}" class="action-item">
-            <i class="fa fa-user"></i>
-            <span>Sign In</span>
-          </a>
+            <i class="fa fa-user-circle"></i>
+            <div class="mobile-nav-user-info">
+                <h4>Welcome, Guest</h4>
+                <a href="{% url 'login' %}" class="btn btn-sm btn-primary mt-1">Sign In</a>
+            </div>
         {% else %}
-          <a href="{% url 'dashboard' %}" class="action-item">
             {% if user.userprofile.profile_picture %}
-              <img src="{{ user.userprofile.profile_picture.url }}" alt="Profile" class="profile-img">
+                <img src="{{ user.userprofile.profile_picture.url }}" alt="Profile" class="profile-img" style="width: 40px; height: 40px; border-radius: 50%;">
             {% else %}
-              <i class="fa fa-user"></i>
+                <i class="fa fa-user-circle"></i>
             {% endif %}
-            <span>{{ user.first_name|default:"Account" }}</span>
-          </a>
+            <div class="mobile-nav-user-info">
+                <h4>Hello, {{ user.first_name|default:"User" }}</h4>
+                <p>Welcome back!</p>
+                <a href="{% url 'dashboard' %}" class="btn btn-sm btn-secondary mt-1">Dashboard</a>
+            </div>
         {% endif %}
-
-        <!-- Cart -->
-        <a href="{% url 'cart' %}" class="action-item">
-          <i class="fa fa-shopping-cart"></i>
-          <span>Cart</span>
-          <span class="cart-badge">{{ cart_count|default:0 }}</span>
-        </a>
-      </div>
     </div>
-  </nav>
+    <button class="mobile-nav-close" onclick="closeMobileMenu()">
+        <i class="fa fa-times"></i>
+    </button>
+</div>
 
-  <!-- Mobile Sub Navigation (Menu + Search) -->
-  <div class="mobile-sub-nav">
-    <div class="mobile-sub-container">
-      <!-- Mobile Menu Button -->
-      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-        <i class="fa fa-bars"></i>
-        <span>Menu</span>
-      </button>
 
-      <!-- Mobile Search -->
-      <div class="mobile-search-section">
-        <form action="{% url 'search' %}" method="GET" class="search-form">
-          <input type="text" class="search-input" placeholder="Search products, solutions, and services..." name="keyword">
-          <button type="submit" class="search-btn">
-            <i class="fa fa-search"></i>
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
+    <!-- Mobile Navigation Menu -->
+    <div class="mobile-nav-menu">
+        <!-- Hardware -->
+        <div class="mobile-nav-item">
+            <a href="#" class="mobile-nav-link" onclick="toggleMobileSubmenu(event, this)">
+                <div>
+                    <i class="fa fa-laptop nav-icon"></i>
+                    Hardware
+                </div>
+                <i class="fa fa-chevron-right chevron"></i>
+            </a>
+            <div class="mobile-submenu">
+                <a href="{% url 'allproducts' %}" class="mobile-submenu-item">All Products</a>
+                
+                <div class="mobile-nav-item">
+                    <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
+                        Laptops
+                        <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
+                    </a>
+                    <div class="mobile-sub-submenu">
+                        <a href="{% url 'fresh_laptops' %}" class="mobile-submenu-item">Fresh in Box</a>
+                        <a href="{% url 'used_laptops' %}" class="mobile-submenu-item">Slightly Used</a>
+                        <!-- <a href="{% url 'fresh_desktops' %}" class="mobile-submenu-item">Gaming Laptops</a>
+                        <a href="{% url 'fresh_desktops' %}" class="mobile-submenu-item">Business Laptops</a> -->
+                    </div>
+                </div>
 
-<!-- Bottom Navigation Menu -->
-<nav class="bottom-nav" id="bottom-nav">
-  <ul class="nav-menu">
-    <!-- Hardware -->
-    <li class="nav-item">
-      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
-        Hardware <i class="fa fa-chevron-down"></i>
-      </a>
-      <div class="dropdown-menu">
-        <a href="{% url 'allproducts' %}" class="dropdown-item">All Products</a>
+                <div class="mobile-nav-item">
+                    <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
+                        Desktops
+                        <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
+                    </a>
+                    <div class="mobile-sub-submenu">
+                        <a href="{% url 'used_desktops' %}" class="mobile-submenu-item">Fresh in Box</a>
+                        <a href="{% url 'used_desktops' %}" class="mobile-submenu-item">Slightly Used</a>
+                        <!-- <a href="#gaming-desktops" class="mobile-submenu-item">Gaming PCs</a>
+                        <a href="#workstations" class="mobile-submenu-item">Workstations</a> -->
+                    </div>
+                </div>
 
-        <div class="dropdown-item has-submenu">
-          <a href="{% url 'laptops' %}" class="submenu-link">Laptops <i class="fa fa-chevron-right"></i></a>
-          <div class="sub-dropdown-menu">
-            <a href="{% url 'fresh_laptops' %}" class="dropdown-item">Fresh in Box</a>
-            <a href="{% url 'used_laptops' %}" class="dropdown-item">Slightly Used</a>
-          </div>
+                <a href="{% url 'peripherals' %}" class="mobile-submenu-item">Accessories & Peripherals</a>
+                <!-- <a href="#components" class="mobile-submenu-item">Computer Components</a> -->
+            </div>
         </div>
 
-        <div class="dropdown-item has-submenu">
-          <a href="{% url 'desktops' %}" class="submenu-link">Desktops <i class="fa fa-chevron-right"></i></a>
-          <div class="sub-dropdown-menu">
-            <a href="{% url 'fresh_desktops' %}" class="dropdown-item">Fresh in Box</a>
-            <a href="{% url 'used_desktops' %}" class="dropdown-item">Slightly Used</a>
-          </div>
+        <!-- Software -->
+        <div class="mobile-nav-item">
+            <a href="#" class="mobile-nav-link" onclick="toggleMobileSubmenu(event, this)">
+                <div>
+                    <i class="fa fa-code nav-icon"></i>
+                    Software
+                </div>
+                <i class="fa fa-chevron-right chevron"></i>
+            </a>
+            <div class="mobile-submenu">
+                <a href="{% url 'operatingSystems' %}" class="mobile-submenu-item">Operating Systems</a>
+                <a href="{% url 'developmentTools' %}" class="mobile-submenu-item">Development Tools</a>
+                <a href="{% url 'applications' %}" class="mobile-submenu-item">Business Applications</a>
+
+            </div>
         </div>
 
-        <a href="{% url 'peripherals' %}" class="dropdown-item">Accessories</a>
-      </div>
-    </li>
+        <!-- IT Solutions -->
+        <div class="mobile-nav-item">
+            <a href="#" class="mobile-nav-link" onclick="toggleMobileSubmenu(event, this)">
+                <div>
+                    <i class="fa fa-cogs nav-icon"></i>
+                    IT Solutions
+                </div>
+                <i class="fa fa-chevron-right chevron"></i>
+            </a>
+            <div class="mobile-submenu">
+                <a href="{% url 'hardwareRepairs' %}" class="mobile-submenu-item">Hardware Repair Services</a>
+                <a href="{% url 'networkingSolutions' %}" class="mobile-submenu-item">Networking Solutions</a>
+                <a href="{% url 'CCTVInstallation' %}" class="mobile-submenu-item">CCTV Installation</a>
+            </div>
+        </div>
 
-    <!-- Software -->
-    <li class="nav-item">
-      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
-        Software <i class="fa fa-chevron-down"></i>
-      </a>
-      <div class="dropdown-menu">
-        <a href="{% url 'operatingSystems' %}" class="dropdown-item">Operating Systems</a>
-        <a href="{% url 'applications' %}" class="dropdown-item">Applications</a>
-        <a href="{% url 'developmentTools' %}" class="dropdown-item">Development Tools</a>
-      </div>
-    </li>
+        <!-- Research Hub -->
+        <div class="mobile-nav-item">
+            <a href="{% url 'research' %}" class="mobile-nav-link">
+                <div>
+                    <i class="fa fa-flask nav-icon"></i>
+                    Research Hub
+                </div>
+            </a>
+        </div>
 
-    <!-- IT Solutions -->
-    <li class="nav-item">
-      <a href="#" class="nav-link" onclick="toggleDropdown(event, this)">
-        IT Solutions <i class="fa fa-chevron-down"></i>
-      </a>
-      <div class="dropdown-menu">
-        <a href="{% url 'hardwareRepairs' %}" class="dropdown-item">Hardware Repair Services</a>
-        <a href="{% url 'networkingSolutions' %}" class="dropdown-item">Networking Solutions</a>
-        <a href="{% url 'CCTVInstallation' %}" class="dropdown-item">CCTV Camera Installation</a>
-      </div>
-    </li>
+       
 
-    <!-- Research -->
-    <li class="nav-item">
-      <a href="{% url 'research' %}" class="nav-link">Research Hub</a>
-    </li>
-  </ul>
-</nav>
+        <div class="mobile-nav-item">
+            <a href="#support" class="mobile-nav-link">
+                <div>
+                    <i class="fa fa-life-ring nav-icon"></i>
+                    Customer Support
+                </div>
+            </a>
+        </div>
+    </div>
 
+    </div>
 
-</header>
-
-<script>
-  function toggleMobileMenu() {
-    const bottomNav = document.getElementById('bottom-nav');
-    bottomNav.classList.toggle('mobile-open');
-  }
-
-  function toggleDropdown(event, element) {
-    if (window.innerWidth <= 768) {
-      event.preventDefault();
-      const navItem = element.parentElement;
-      navItem.classList.toggle('mobile-open');
+</body>
+    <script>
+        function toggleMobileMenu() {
+        const sidebar = document.getElementById('mobile-nav-sidebar');
+        const overlay = document.getElementById('mobile-nav-overlay');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        menuBtn.classList.toggle('active');
+        
+        // Prevent body scroll when menu is open
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        
+        // Add timer reset directly here
+        resetMenuTimer();
     }
-  }
 
-  function toggleNotifications(event) {
-    event.preventDefault();
-    const dropdown = document.getElementById('notifications-dropdown');
-    dropdown.style.opacity = dropdown.style.opacity === '1' ? '0' : '1';
-    dropdown.style.visibility = dropdown.style.visibility === 'visible' ? 'hidden' : 'visible';
-  }
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('mobile-nav-sidebar');
+            const overlay = document.getElementById('mobile-nav-overlay');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            menuBtn.classList.remove('active');
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
+            
+            // Close all submenus
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
 
-  // Close dropdowns when clicking outside
-  document.addEventListener('click', function(event) {
-    const notifications = document.getElementById('notifications-dropdown');
-    if (!event.target.closest('.nav-item')) {
-      notifications.style.opacity = '0';
-      notifications.style.visibility = 'hidden';
+        function toggleMobileSubmenu(event, element) {
+            event.preventDefault();
+            const navItem = element.closest('.mobile-nav-item');
+            navItem.classList.toggle('active');
+        }
+
+        function toggleMobileSubSubmenu(event, element) {
+            event.preventDefault();
+            event.stopPropagation();
+            const navItem = element.closest('.mobile-nav-item');
+            navItem.classList.toggle('active');
+        }
+
+        function toggleNotifications(event) {
+            event.preventDefault();
+            const dropdown = document.getElementById('notifications-dropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const notifications = document.getElementById('notifications-dropdown');
+            if (!event.target.closest('.nav-item')) {
+                notifications.classList.remove('active');
+            }
+        });
+
+// Handle escape key to close mobile menu
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeMobileMenu();
+        document.getElementById('notifications-dropdown').classList.remove('active');
     }
-  });
+});
 
-  // Handle window resize
-  window.addEventListener('resize', function() {
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href !== '#' && document.querySelector(href)) {
+            e.preventDefault();
+            document.querySelector(href).scrollIntoView({
+                behavior: 'smooth'
+            });
+            closeMobileMenu();
+        }
+    });
+});
+
+
+
+
+
+
+// Notification functionality
+function updateNotificationCount(count) {
+    const notificationBadge = document.getElementById('notification-count');
+    if (notificationBadge) {
+        notificationBadge.textContent = count;
+        notificationBadge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+}
+
+
+
+// Handle window resize
+window.addEventListener('resize', function() {
     if (window.innerWidth > 768) {
-      document.getElementById('bottom-nav').classList.remove('mobile-open');
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('mobile-open');
-      });
+        closeMobileMenu();
+    }
+});
+
+// Touch events for mobile swipe
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+document.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+    const swipeThreshold = 100;
+    const sidebar = document.getElementById('mobile-nav-sidebar');
+    
+    if (touchEndX < touchStartX - swipeThreshold && sidebar.classList.contains('active')) {
+        // Swipe left to close menu
+        closeMobileMenu();
+    }
+    
+    if (touchEndX > touchStartX + swipeThreshold && !sidebar.classList.contains('active') && touchStartX < 50) {
+        // Swipe right from edge to open menu
+        toggleMobileMenu();
+    }
+}
+
+// Auto-close mobile menu after inactivity
+let menuInactivityTimer;
+const MENU_TIMEOUT = 30000; // 30 seconds
+
+function resetMenuTimer() {
+    clearTimeout(menuInactivityTimer);
+    const sidebar = document.getElementById('mobile-nav-sidebar');
+    
+    if (sidebar.classList.contains('active')) {
+        menuInactivityTimer = setTimeout(() => {
+            closeMobileMenu();
+        }, MENU_TIMEOUT);
+    }
+}
+
+// Reset timer on menu interactions
+document.getElementById('mobile-nav-sidebar').addEventListener('click', resetMenuTimer);
+document.getElementById('mobile-nav-sidebar').addEventListener('touchstart', resetMenuTimer);
+
+
+
+// Accessibility improvements
+function handleKeyboardNavigation(event) {
+    const focusableElements = document.querySelectorAll(
+        'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+    const focusableArray = Array.prototype.slice.call(focusableElements);
+    const currentIndex = focusableArray.indexOf(document.activeElement);
+
+    if (event.key === 'Tab') {
+        const sidebar = document.getElementById('mobile-nav-sidebar');
+        
+        if (sidebar.classList.contains('active')) {
+            const sidebarElements = sidebar.querySelectorAll(
+                'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
+            );
+            
+            if (event.shiftKey) {
+                // Shift + Tab (backward)
+                if (document.activeElement === sidebarElements[0]) {
+                    event.preventDefault();
+                    sidebarElements[sidebarElements.length - 1].focus();
+                }
+            } else {
+                // Tab (forward)
+                if (document.activeElement === sidebarElements[sidebarElements.length - 1]) {
+                    event.preventDefault();
+                    sidebarElements[0].focus();
+                }
+            }
+        }
+    }
+}
+
+document.addEventListener('keydown', handleKeyboardNavigation);
+
+// Performance optimization - throttle scroll events
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// Header scroll behavior
+let lastScrollTop = 0;
+const header = document.querySelector('.main-header');
+
+const handleScroll = throttle(function() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    if (scrollTop > lastScrollTop && scrollTop > 100) {
+        // Scrolling down
+        header.style.transform = 'translateY(-100%)';
+    } else {
+        // Scrolling up
+        header.style.transform = 'translateY(0)';
+    }
+    
+    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+}, 100);
+
+window.addEventListener('scroll', handleScroll);
+
+// Add CSS transition for header
+header.style.transition = 'transform 0.3s ease-in-out';
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Mobile navigation initialized');
+    
+    // Set initial cart count
+    updateCartCount(0);
+    
+    // Set initial notification count
+    updateNotificationCount(0);
+}); 
+// Desktop Navigation JavaScript
+function toggleDropdown(event, element) {
+    event.preventDefault();
+    // This function is now handled by CSS hover states
+    // But keeping it for potential click-based interactions
+}
+
+// Close dropdowns when clicking outside (optional enhancement)
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.nav-item')) {
+        // Optional: Add click-based dropdown closing logic here
+        // For now, we're using pure CSS hover states
+    }
+});
+
+// Get all nav links
+const navLinks = document.querySelectorAll('.nav-link');
+
+// Add event listener to each nav link
+navLinks.forEach(link => {
+  link.addEventListener('click', function(event) {
+    const dropdownMenu = link.nextElementSibling;
+    
+    // Only prevent default if there is a dropdown menu
+    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+      event.preventDefault();
+      dropdownMenu.classList.toggle('active');
     }
   });
-</script>
+});
+
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+  if (!event.target.closest('.nav-item')) {
+    const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+    dropdownMenus.forEach(menu => {
+      menu.classList.remove('active');
+    });
+  }
+});
+// Keyboard navigation for dropdowns
+document.addEventListener('keydown', function(event) {
+    const activeElement = document.activeElement;
+    
+    if (activeElement.classList.contains('nav-link')) {
+        const navItem = activeElement.closest('.nav-item');
+        const dropdown = navItem.querySelector('.dropdown-menu');
+        
+        if (event.key === 'ArrowDown' && dropdown) {
+            event.preventDefault();
+            const firstItem = dropdown.querySelector('.dropdown-item');
+            if (firstItem) firstItem.focus();
+        }
+    }
+    
+    if (activeElement.classList.contains('dropdown-item')) {
+        const dropdown = activeElement.closest('.dropdown-menu');
+        const items = dropdown.querySelectorAll('.dropdown-item');
+        const currentIndex = Array.from(items).indexOf(activeElement);
+        
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                const nextItem = items[currentIndex + 1];
+                if (nextItem) nextItem.focus();
+                break;
+                
+            case 'ArrowUp':
+                event.preventDefault();
+                if (currentIndex === 0) {
+                    const navLink = dropdown.closest('.nav-item').querySelector('.nav-link');
+                    navLink.focus();
+                } else {
+                    const prevItem = items[currentIndex - 1];
+                    if (prevItem) prevItem.focus();
+                }
+                break;
+                
+            case 'ArrowRight':
+                const submenu = activeElement.querySelector('.sub-dropdown-menu');
+                if (submenu) {
+                    event.preventDefault();
+                    const firstSubItem = submenu.querySelector('.dropdown-item');
+                    if (firstSubItem) firstSubItem.focus();
+                }
+                break;
+                
+            case 'Escape':
+                event.preventDefault();
+                const navLink = dropdown.closest('.nav-item').querySelector('.nav-link');
+                navLink.focus();
+                break;
+        }
+    }
+});
+
+// Add focus styles for keyboard navigation
+const style = document.createElement('style');
+style.textContent = `
+    .nav-link:focus,
+    .dropdown-item:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+        background: var(--hover-bg);
+        color: var(--primary-color);
+    }
+`;
+document.head.appendChild(style);
+
+    </script>

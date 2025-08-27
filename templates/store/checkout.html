@@ -1,141 +1,739 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
-
 {% block content %}
 
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-<section class="section-content padding-y bg">
-<div class="container">
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #1a1a1a;
+    }
 
-<!-- ============================ COMPONENT 1 ================================= -->
+    .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
 
-<div class="row">
-	<aside class="col-lg-6">
-<div class="card">
-  <div class="card-body">
-    <h4 class="card-title mb-4">Delivery Address</h4>
-    <form action="{% url 'place_order' %}" method="POST">
-      {% csrf_token %}
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">First Name</label>
-          <input type="text" name="first_name" class="form-control" required>
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .checkout-header h1 {
+        color: rgb(65, 124, 201);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .checkout-header p {
+        color: rgba(138, 112, 231, 0.8);
+        font-size: 1.1rem;
+    }
+
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row.single {
+        grid-template-columns: 1fr;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #4a5568;
+        font-size: 0.9rem;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+  .form-control {
+    appearance: none; /* Remove default browser styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: white;
+    line-height: 1.5;
+    height: auto; /* Ensure height adapts to content */
+}
+
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-control.error {
+        border-color: #e53e3e;
+    }
+
+    .form-control.success {
+        border-color: #38a169;
+    }
+
+    .error-message {
+        color: #e53e3e;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    .success-message {
+        color: #38a169;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+
+    .product-table th {
+        background: #f7fafc;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #4a5568;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .product-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .product-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .product-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .product-info h6 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+
+    .product-info p {
+        font-size: 0.8rem;
+        color: #718096;
+    }
+
+    .quantity-badge {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .price-info {
+        text-align: right;
+    }
+
+    .price-main {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 1.1rem;
+    }
+
+    .price-unit {
+        font-size: 0.8rem;
+        color: #718096;
+    }
+
+    .order-summary {
+        background: #f7fafc;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-row.total {
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: #2d3748;
+        border-top: 2px solid #e2e8f0;
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-block {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .security-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #38a169;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 75%;
+        transition: width 0.3s ease;
+    }
+
+    .loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .loading .btn-primary {
+        background: #a0aec0;
+    }
+
+    .empty-cart-message {
+        text-align: center;
+        padding: 3rem;
+        color: white;
+    }
+
+    .empty-cart-message h2 {
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .empty-cart-message p {
+        color: rgba(255,255,255,0.8);
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .checkout-header h1 {
+            font-size: 2rem;
+        }
+
+        .card {
+            padding: 1.5rem;
+        }
+
+        .product-table {
+            font-size: 0.9rem;
+        }
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #a0aec0;
+    }
+
+    .phone-input {
+        position: relative;
+    }
+
+    .phone-input::before {
+        content: "+233";
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #718096;
+        font-weight: 500;
+        z-index: 1;
+    }
+
+    .phone-input .form-control {
+        padding-left: 4rem;
+    }
+
+    .variations-display {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-top: 0.25rem;
+    }
+
+    .variation-badge {
+        background: #e2e8f0;
+        color: #4a5568;
+        padding: 0.15rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1><i class="fas fa-shopping-cart"></i> Complete Your Order</h1>
+        <p>Fill in your details to proceed with the order</p>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill"></div>
+    </div>
+
+    {% if not cart_items %}
+        <div class="empty-cart-message">
+            <h2>Your cart is empty</h2>
+            <p>You need to add items to your cart before you can checkout.</p>
+            <a href="{% url 'store' %}" class="btn btn-primary">
+                <i class="fas fa-shopping-bag"></i> Continue Shopping
+            </a>
         </div>
-        <div class="col form-group">
-          <label for="">Last Name</label>
-          <input type="text" name="last_name" class="form-control" required>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">Email</label>
-          <input type="email" name="email" class="form-control" required>
-        </div>
-        <div class="col form-group">
-          <label for="">Phone Number</label>
-          <input type="text" name="phone" class="form-control" required>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">Address Line 1</label>
-          <input type="text" name="address_line_1" class="form-control" required>
-        </div>
-        <div class="col form-group">
-          <label for="">Address Line 2</label>
-          <input type="text" name="address_line_2" class="form-control">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="col form-group">
-          <label for="">City</label>
-          <input type="text" name="city" class="form-control" required>
-        </div>
-        <div class="col form-group">
-          <label for="">State</label>
-          <input type="text" name="state" class="form-control" required>
-        </div>
-        <div class="col form-group">
-          <label for="">Country</label>
-          <input type="text" name="country" class="form-control" required>
-        </div>
-        </div>
-        <div class="form-row">
-          <label for="">Order Note</label>
-          <textarea name="order_note" rows="2" class="form-control"></textarea>
-        </div>
+    {% else %}
+        <form id="checkoutForm" action="{% url 'place_order' %}" method="POST">
+            {% csrf_token %}
+            <div class="checkout-grid">
+                <!-- Delivery Information -->
+                <div class="card">
+                    <h4 class="card-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Delivery Information
+                    </h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <div class="input-group">
+                                <input type="text" id="firstName" name="first_name" class="form-control" required>
+                                <div class="error-message">Please enter your first name</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <div class="input-group">
+                                <input type="text" id="lastName" name="last_name" class="form-control" required>
+                                <div class="error-message">Please enter your last name</div>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <div class="input-group">
+                                <input type="email" id="email" name="email" class="form-control" required>
+                                <i class="fas fa-envelope input-icon"></i>
+                                <div class="error-message">Please enter a valid email address</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <div class="input-group phone-input">
+                                <input type="tel" id="phone" name="phone" class="form-control" maxlength="10" required>
+                                <i class="fas fa-phone input-icon"></i>
+                                <div class="error-message">Please enter a valid 10-digit phone number</div>
+                            </div>
+                        </div>
+                    </div>
 
-  </div>
-</div> <!-- card.// -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="address1">Address Line 1 *</label>
+                            <div class="input-group">
+                                <input type="text" id="address1" name="address_line_1" class="form-control" required>
+                                <div class="error-message">Please enter your address</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="address2">Address Line 2</label>
+                            <input type="text" id="address2" name="address_line_2" class="form-control">
+                        </div>
+                    </div>
 
-	</aside> <!-- col.// -->
-	<aside class="col-lg-6">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <div class="input-group">
+                                <input type="text" id="city" name="city" class="form-control" required>
+                                <div class="error-message">Please enter your city</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State/Region *</label>
+                            <div class="input-group">
+                                <input type="text" id="state" name="state" class="form-control" required>
+                                <div class="error-message">Please enter your state/region</div>
+                            </div>
+                        </div>
+                    </div>
 
-		<div class="card">
-		<div class="card-body">
-      <table class="table table-borderless table-shopping-cart">
-      <thead class="text-muted">
-      <tr class="small text-uppercase">
-        <th scope="col">Product</th>
-        <th scope="col" width="120">Quantity</th>
-        <th scope="col" width="120">Price</th>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <label for="country">Country *</label>
+                            <div class="input-group">
+                                <select id="country" name="country" class="form-control" required>
+                                    <option value="">Select Country</option>
+                                    <option value="Ghana" selected>Ghana</option>
+                                    <option value="Nigeria">Nigeria</option>
+                                    <option value="Kenya">Kenya</option>
+                                    <option value="South Africa">South Africa</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div class="error-message">Please select your country</div>
+                            </div>
+                        </div>
+                    </div>
 
-      </tr>
-      </thead>
-      <tbody>
+                    <div class="form-group">
+                        <label for="orderNote">Order Notes (Optional)</label>
+                        <textarea id="orderNote" name="order_note" class="form-control" placeholder="Any special instructions for your order..."></textarea>
+                    </div>
+                </div>
 
-      {% for cart_item in cart_items %}
-      <tr>
-      	<td>
-      		<figure class="itemside align-items-center">
-      			<div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
-      			<figcaption class="info">
-      				<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-      				<p class="text-muted small">
-      					{% if cart_item.variations.all %}
-      						{% for item in cart_item.variations.all %}
-      							{{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
-      						{% endfor %}
-      					{% endif %}
-      				</p>
-      			</figcaption>
-      		</figure>
-      	</td>
-      	<td>
-      		<!-- col.// -->
-      				<label for="">{{cart_item.quantity}}</label>
-      	</td>
-      	<td>
-      		<div class="price-wrap">
-      			<var class="price">GHS {{ cart_item.sub_total }}</var>
-      			<small class="text-muted"> GHS {{ cart_item.product.price|intcomma }} each </small>
-      		</div> <!-- price-wrap .// -->
-      	</td>
+                <!-- Order Summary -->
+                <div class="card">
+                    <h4 class="card-title">
+                        <i class="fas fa-receipt"></i>
+                        Order Summary
+                    </h4>
 
-      </tr>
-      {% endfor %}
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cart_item in cart_items %}
+                            <tr>
+                                <td>
+                                    <div class="product-item">
+                                        <img src="{{ cart_item.product.primary_image_url }}" 
+                                             alt="{{ cart_item.product.product_name }}" 
+                                             class="product-image">
+                                        <div class="product-info">
+                                            <h6>{{ cart_item.product.product_name }}</h6>
+                                            <p>SKU: {{ cart_item.product.sku }}</p>
+                                            {% if cart_item.variations.all %}
+                                                <div class="variations-display">
+                                                    {% for variation in cart_item.variations.all %}
+                                                        <span class="variation-badge">
+                                                            {{ variation.variation_category|capfirst }}: {{ variation.variation_value|capfirst }}
+                                                        </span>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="quantity-badge">{{ cart_item.quantity }}</span>
+                                </td>
+                                <td>
+                                    <div class="price-info">
+                                        <div class="price-main">GHS {{ cart_item.sub_total|intcomma }}</div>
+                                        <div class="price-unit">GHS {{ cart_item.product.price|intcomma }} each</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
-      </tbody>
-      </table>
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span>Subtotal ({{ cart_items|length }} item{{ cart_items|length|pluralize }})</span>
+                            <span>GHS {{ total|intcomma }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Delivery Fee</span>
+                            <span>Free</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Tax</span>
+                            <span>GHS {{ tax|intcomma }}</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span>GHS {{ grand_total|intcomma }}</span>
+                        </div>
+                    </div>
 
-      <button type="submit" name="submit" class="btn btn-primary btn-block">Place Order</button>
-			<a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
-      </form>
-		</div> <!-- card-body.// -->
-		</div> <!-- card.// -->
+                    <div class="security-badge">
+                        <i class="fas fa-lock"></i>
+                        <span>Your information is secure and encrypted</span>
+                    </div>
 
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-credit-card"></i>
+                        Place Order - GHS {{ grand_total|intcomma }}
+                    </button>
+                    <a href="{% url 'cart' %}" class="btn btn-secondary btn-block">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Cart
+                    </a>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+</div>
 
-</aside> <!-- col.// -->
+<script>
+    // Phone number validation
+    const phoneInput = document.getElementById('phone');
+    const form = document.getElementById('checkoutForm');
+    
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            // Remove any non-digit characters
+            let value = e.target.value.replace(/\D/g, '');
+            
+            // Limit to 10 digits
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            e.target.value = value;
+            
+            // Validate phone number
+            validatePhone(e.target);
+        });
+    }
 
+    function validatePhone(input) {
+        const value = input.value;
+        const errorMsg = input.parentElement.querySelector('.error-message');
+        
+        if (value.length === 0) {
+            input.classList.remove('success', 'error');
+            errorMsg.style.display = 'none';
+        } else if (value.length !== 10) {
+            input.classList.add('error');
+            input.classList.remove('success');
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = 'Phone number must be exactly 10 digits';
+        } else {
+            input.classList.add('success');
+            input.classList.remove('error');
+            errorMsg.style.display = 'none';
+        }
+    }
 
-</div> <!-- row.// -->
+    // Form validation
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('input[required], select[required]');
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('error');
+                    const errorMsg = field.parentElement.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.style.display = 'block';
+                    }
+                    isValid = false;
+                } else {
+                    field.classList.remove('error');
+                    const errorMsg = field.parentElement.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.style.display = 'none';
+                    }
+                }
+            });
 
-<!-- ============================ COMPONENT 1 END .// ================================= -->
+            // Special validation for phone
+            const phone = document.getElementById('phone');
+            if (phone && phone.value.length !== 10) {
+                phone.classList.add('error');
+                const errorMsg = phone.parentElement.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.style.display = 'block';
+                }
+                isValid = false;
+            }
 
-</div> <!-- container .//  -->
-</section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
+            if (!isValid) {
+                e.preventDefault();
+                // Scroll to first error
+                const firstError = form.querySelector('.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                // Add loading state
+                const submitBtn = document.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Order...';
+                    submitBtn.disabled = true;
+                }
+            }
+        });
+    }
+
+    // Real-time validation for email
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        emailInput.addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const errorMsg = this.parentElement.querySelector('.error-message');
+            
+            if (email && !emailRegex.test(email)) {
+                this.classList.add('error');
+                if (errorMsg) {
+                    errorMsg.style.display = 'block';
+                    errorMsg.textContent = 'Please enter a valid email address';
+                }
+            } else if (email) {
+                this.classList.add('success');
+                this.classList.remove('error');
+                if (errorMsg) {
+                    errorMsg.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Progress bar animation
+    window.addEventListener('load', function() {
+        const progressFill = document.querySelector('.progress-fill');
+        if (progressFill) {
+            setTimeout(() => {
+                progressFill.style.width = '90%';
+            }, 500);
+        }
+    });
+</script>
 
 {% endblock %}

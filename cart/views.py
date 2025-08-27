@@ -13,6 +13,41 @@ def _cart_id(request):
         cart = request.session.create()
     return cart
 
+def transfer_guest_cart_to_user(request, user):
+    """
+    Transfer items from guest cart (session-based) to user cart after login
+    """
+    try:
+        # Get the guest cart
+        guest_cart = Cart.objects.get(cart_id=_cart_id(request))
+        guest_cart_items = CartItem.objects.filter(cart=guest_cart)
+        
+        for guest_item in guest_cart_items:
+            try:
+                # Check if user already has this product in their cart
+                user_cart_item = CartItem.objects.get(
+                    product=guest_item.product, 
+                    user=user
+                )
+                # If exists, add the quantities together
+                user_cart_item.quantity += guest_item.quantity
+                user_cart_item.save()
+            except CartItem.DoesNotExist:
+                # If doesn't exist, create new cart item for user
+                CartItem.objects.create(
+                    product=guest_item.product,
+                    quantity=guest_item.quantity,
+                    user=user
+                )
+        
+        # Delete guest cart items and cart after transfer
+        guest_cart_items.delete()
+        guest_cart.delete()
+        
+    except Cart.DoesNotExist:
+        # No guest cart exists, nothing to transfer
+        pass
+
 def add_cart(request, product_id):
     current_user = request.user
 

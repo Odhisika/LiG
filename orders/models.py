@@ -1,3 +1,4 @@
+# orders/models.py - Fixed default_expiry function
 from django.db import models
 from accounts.models import Account
 from store.models import Product
@@ -5,6 +6,17 @@ from datetime import timedelta
 from django.utils.timezone import now
 from decimal import Decimal
 import datetime
+from django.db.models import Sum, Count, Q
+from django.utils import timezone
+from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
+import requests
+
+
+def default_expiry():
+    return now() + timedelta(days=7)
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -30,20 +42,18 @@ class Order(models.Model):
     order_note = models.TextField(blank=True, null=True)
     order_total = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
+    paid = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending Payment')
     ip = models.GenericIPAddressField(blank=True, null=True)
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+    expires_at = models.DateTimeField(default=default_expiry)  
 
-    def default_expiry():
-       return datetime.datetime.now() + datetime.timedelta(days=7)
-    expires_at = models.DateTimeField(default=default_expiry)
-
+    @classmethod
     def order_count(cls):
+        """Fixed: Made this a class method"""
         return cls.objects.count()
-
 
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
@@ -53,6 +63,8 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.order_number} - {self.status}"
+    
+    
 
 
 class OrderProduct(models.Model):
@@ -86,3 +98,20 @@ class PaymentProof(models.Model):
 
     def __str__(self):
         return f'Proof for Order #{self.order.order_number}'
+
+
+class OrderManager(models.Manager):
+    def get_user_statistics(self, user):
+        """Get order statistics for a specific user"""
+        orders = self.filter(user=user)
+        total_spent = orders.aggregate(total=Sum('order_total'))['total'] or 0
+        total_orders = orders.count()
+        
+        current_year = timezone.now().year
+        orders_this_year = orders.filter(created_at__year=current_year).count()
+        
+        return {
+            'total_orders': total_orders,
+            'total_spent': total_spent,
+            'orders_this_year': orders_this_year,
+        }

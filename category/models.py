@@ -31,11 +31,18 @@ class ComputerTypes(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(max_length=255, blank=True)
     cat_image = models.ImageField(upload_to='photos/computer_types', blank=True)
-    
+
     # New additions
     is_active = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
-   
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name='subcategories',
+        null=True,
+        blank=True,
+        help_text="Leave blank if this is a top-level category like Laptop or Desktop."
+    )
 
     class Meta:
         verbose_name = 'computer type'
@@ -46,7 +53,10 @@ class ComputerTypes(models.Model):
         return reverse('products_by_computer_type', args=[self.slug])
 
     def __str__(self):
+        if self.parent:
+            return f"{self.parent.computer_type} → {self.computer_type}"
         return self.computer_type
+
 
 
 class SoftwareTypes(models.Model):

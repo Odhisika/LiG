@@ -16,17 +16,6 @@ from django.shortcuts import render
 from .models import Product, ReviewRating
 from django.db.models import Count, Avg
 
-@staff_member_required
-def product_reports_view(request):
-    context = {
-        'total_products': Product.objects.count(),
-        'available_products': Product.objects.filter(is_available=True).count(),
-        'total_reviews': ReviewRating.objects.count(),
-        'average_rating': ReviewRating.objects.aggregate(avg=Avg('rating'))['avg'] or 0,
-        'products_by_category': Product.objects.values('category__category_name').annotate(count=Count('id')),
-        'top_rated_products': Product.objects.annotate(avg_rating=Avg('reviewrating__rating')).order_by('-avg_rating')[:5],
-    }
-    return render(request, 'admin/reports/product_reports.html', context)
 
 
 def store(request, category_slug=None):
@@ -66,36 +55,32 @@ def store(request, category_slug=None):
 
 
 
-# views.py
 from django.shortcuts import get_object_or_404, render
-from .models import Product, ReviewRating, ProductGallery
+from .models import Product, ReviewRating
 
 def product_detail(request, category_slug, product_slug):
-    # Get the product with all related sub-products in one query
     product = get_object_or_404(
         Product.objects.select_related(
             'computerproduct',
             'softwareproduct',
             'peripheralproduct'
-        ).prefetch_related('productgallery_set'),
+        ).prefetch_related('gallery_images'),
         category__slug=category_slug,
         slug=product_slug,
         is_available=True
     )
-    
-    # Get product gallery images
-    product_gallery = ProductGallery.objects.filter(product=product)
     
     # Get reviews
     reviews = ReviewRating.objects.filter(product=product, status=True)
     
     context = {
         'single_product': product,
-        'product_gallery': product_gallery,
+        'product_gallery': product.gallery_images.all(),  
         'reviews': reviews,
     }
     
     return render(request, 'store/product_detail.html', context)
+
 
 def search(request):
     print("Search function triggered")  

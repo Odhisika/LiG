@@ -9,6 +9,8 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.urls import reverse
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 
 from accounts.forms import RegistrationForm, UserForm, UserProfileForm
@@ -16,6 +18,44 @@ from accounts.models import Account, UserProfile
 from orders.models import Order, OrderProduct
 from cart.views import _cart_id
 from cart.models import Cart, CartItem
+from django.db.models import Sum, Count, Q
+from django.core.paginator import Paginator
+
+
+def transfer_guest_cart_to_user(request, user):
+    """
+    Transfer items from guest cart (session-based) to user cart after login
+    """
+    try:
+        # Get the guest cart
+        guest_cart = Cart.objects.get(cart_id=_cart_id(request))
+        guest_cart_items = CartItem.objects.filter(cart=guest_cart)
+        
+        for guest_item in guest_cart_items:
+            try:
+                # Check if user already has this product in their cart
+                user_cart_item = CartItem.objects.get(
+                    product=guest_item.product, 
+                    user=user
+                )
+                # If exists, add the quantities together
+                user_cart_item.quantity += guest_item.quantity
+                user_cart_item.save()
+                # Delete the guest cart item since it's been merged
+                guest_item.delete()
+            except CartItem.DoesNotExist:
+                # If doesn't exist, transfer the cart item to the user
+                guest_item.user = user
+                guest_item.cart = None  # Remove cart association
+                guest_item.save()
+        
+        # Delete the guest cart after all items are transferred
+        if not CartItem.objects.filter(cart=guest_cart).exists():
+            guest_cart.delete()
+            
+    except Cart.DoesNotExist:
+        # No guest cart exists, nothing to transfer
+        pass
 
 
 def register(request):
@@ -83,22 +123,24 @@ def login(request):
         user = auth.authenticate(username=email, password=password)  # Use 'username' instead of 'email'
 
         if user:
+            # Transfer guest cart items to user BEFORE logging in
+            transfer_guest_cart_to_user(request, user)
+            
+            # Now log in the user
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
             
-            # Handle cart items merging
-            try:
-                cart = Cart.objects.get(cart_id=_cart_id(request))
-                if CartItem.objects.filter(cart=cart).exists():
-                    cart_items = CartItem.objects.filter(cart=cart)
-                    for item in cart_items:
-                        item.user = user
-                        item.save()
-            except Cart.DoesNotExist:
-                pass
-            
+            # Handle redirect - prioritize checkout if that's where they came from
             next_url = request.GET.get('next')
-            return redirect(next_url if next_url else 'home')
+            if next_url:
+                # If they were trying to access checkout, redirect there
+                if 'checkout' in next_url:
+                    return redirect('checkout')
+                else:
+                    return redirect(next_url)
+            else:
+                # Default redirect to cart to show merged items, then to home
+                return redirect('cart')
         else:
             messages.error(request, 'Invalid login credentials')
     
@@ -226,11 +268,66 @@ def change_password(request):
 
 
 
-@login_required(login_url='login')
+
+
+@login_required
 def my_orders(request):
-    # orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'accounts/my_orders.html', {'orders': orders})
+    """
+    Display user's order history with pagination and statistics
+    """
+    # Get all orders for the current user
+    all_orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Calculate statistics on ALL orders (before filtering)
+    total_spent = all_orders.aggregate(total=Sum('order_total'))['total'] or 0
+    
+    # Get orders from this year
+    current_year = timezone.now().year
+    orders_this_year = all_orders.filter(created_at__year=current_year).count()
+    
+    # Start with all orders for filtering
+    orders = all_orders
+    
+    # Handle search and filtering
+    search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')
+    date_filter = request.GET.get('date', '')
+    
+    if search_query:
+        orders = orders.filter(
+            Q(order_number__icontains=search_query) |
+            Q(full_name__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+    
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+    
+    if date_filter:
+        try:
+            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+            orders = orders.filter(created_at__date=filter_date)
+        except ValueError:
+            pass  # Invalid date format, ignore filter
+    
+    # Pagination
+    paginator = Paginator(orders, 10)  # Show 10 orders per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'orders': page_obj,  # This will be used in the template for the table
+        'all_orders': all_orders,  # This is for the statistics
+        'total_spent': total_spent,
+        'orders_this_year': orders_this_year,
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'date_filter': date_filter,
+        'is_paginated': page_obj.has_other_pages(),
+        'page_obj': page_obj,
+    }
+    
+    return render(request, 'accounts/my_orders.html', context)
 
 
 @login_required(login_url='login')

@@ -1,57 +1,538 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
+<style>
+/* Modern Order History Styles */
+.order-history-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 0;
+}
 
-<section class="section-conten padding-y bg">
+.order-history-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
 
-{% include 'includes/alerts.html' %}
-<div class="container">
-	<div class="row">
-	{% include 'includes/dashboard_sidebar.html' %}
-	<main class="col-md-9">
-		<article class="card">
-		<header class="card-header">
-			<strong class="d-inline-block mr-3">Your order history</strong>
+.order-dashboard-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    align-items: start;
+}
 
-		</header>
-		<div class="card-body">
-			<div class="row">
-			<div class="col-md-12">
-				<table class="table table-hover">
-				  <thead>
-				    <tr>
-				      <th scope="col">Order #</th>
-				      <th scope="col">Billing Name</th>
-				      <th scope="col">Phone</th>
-				      <th scope="col">Order Total</th>
-							<th scope="col">Date</th>
-				    </tr>
-				  </thead>
-				  <tbody>
-						{% for order in orders %}
-				    <tr>
-				      <th scope="row"><a href="{% url 'order_detail' order.order_number %}">{{order.order_number}}</a></th>
-				      <td>{{order.full_name}}</td>
-				      <td>{{order.phone}}</td>
-				      <td>₵{{order.order_total}}</td>
-							<td>{{order.created_at}}</td>
-				    </tr>
-				{% endfor %}
+.order-sidebar-placeholder {
+    /* Placeholder for existing sidebar - will be styled separately */
+}
 
-				  </tbody>
-				</table>
-			</div>
+.order-main-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
 
-			</div> <!-- row.// -->
-		</div> <!-- card-body .// -->
+.order-header-section {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    padding: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
 
-		</article> <!-- order-group.// -->
-	</main>
-</div> <!-- row.// -->
-</div>
+.order-header-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
 
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
 
+.order-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.order-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.order-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.order-stat-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 1rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.order-stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.order-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: block;
+}
+
+.order-stat-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+.order-content-body {
+    padding: 2rem;
+}
+
+.order-filters-section {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e2e8f0;
+}
+
+.order-filters-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.order-filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.order-filter-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.order-filter-input {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.order-filter-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.order-filter-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.order-table-container {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.order-table-header {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    color: white;
+}
+
+.order-table-header th {
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.order-table-body tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: all 0.3s ease;
+}
+
+.order-table-body tr:hover {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    transform: scale(1.01);
+}
+
+.order-table-body td {
+    padding: 1.25rem 1rem;
+    font-size: 0.875rem;
+    vertical-align: middle;
+}
+
+.order-number-link {
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 8px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.order-number-link:hover {
+    background: rgba(99, 102, 241, 0.2);
+    transform: translateX(5px);
+    text-decoration: none;
+    color: #4f46e5;
+}
+
+.order-total-amount {
+    font-weight: 700;
+    color: #059669;
+    font-size: 1rem;
+}
+
+.order-date {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.order-status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.order-status-completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.order-status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.order-status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.order-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+}
+
+.order-empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.order-empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.order-empty-text {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.order-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    gap: 0.5rem;
+}
+
+.order-pagination a,
+.order-pagination span {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.order-pagination a {
+    background: white;
+    color: #6366f1;
+    border: 1px solid #e5e7eb;
+}
+
+.order-pagination a:hover {
+    background: #6366f1;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.order-pagination .current {
+    background: #6366f1;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .order-dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .order-filters-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .order-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .order-history-wrapper {
+        padding: 1rem 0;
+    }
+    
+    .order-main-content {
+        border-radius: 16px;
+    }
+    
+    .order-header-section {
+        padding: 1.5rem;
+    }
+    
+    .order-title {
+        font-size: 1.5rem;
+    }
+    
+    .order-content-body {
+        padding: 1rem;
+    }
+    
+    .order-table-container {
+        overflow-x: auto;
+    }
+    
+    .order-table {
+        min-width: 600px;
+    }
+    
+    .order-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Alert Styles */
+.order-alerts {
+    margin-bottom: 1rem;
+}
+
+.order-alert {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    font-weight: 500;
+}
+
+.order-alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+
+.order-alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.order-alert-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+.order-alert-info {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #bfdbfe;
+}
+</style>
+
+<section class="order-history-wrapper">
+    <div class="order-alerts">
+        {% include 'includes/alerts.html' %}
+    </div>
+    
+    <div class="order-history-container">
+        <div class="order-dashboard-grid">
+            <!-- Sidebar -->
+            <div class="order-sidebar-placeholder">
+                {% include 'includes/dashboard_sidebar.html' %}
+            </div>
+            
+            <!-- Main Content -->
+            <div class="order-main-content">
+                <!-- Header Section -->
+                <div class="order-header-section">
+                    <h1 class="order-title">Order History</h1>
+                    <p class="order-subtitle">Track and manage all your orders</p>
+                    
+                    <!-- Statistics Cards -->
+                    <div class="order-stats-grid">
+                        <div class="order-stat-card">
+                            <span class="order-stat-value">{{ orders.paginator.count }}</span>
+                            <span class="order-stat-label">Total Orders</span>
+                        </div>
+                        <div class="order-stat-card">
+                            <span class="order-stat-value">₵{{ total_spent|floatformat:2 }}</span>
+                            <span class="order-stat-label">Total Spent</span>
+                        </div>
+                        <div class="order-stat-card">
+                            <span class="order-stat-value">{{ orders_this_year }}</span>
+                            <span class="order-stat-label">This Year</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Content Body -->
+                <div class="order-content-body">
+                    
+                    <!-- Orders Table -->
+                    <div class="order-table-container">
+                        {% if orders %}
+                            <table class="order-table">
+                                <thead class="order-table-header">
+                                    <tr>
+                                        <th>Order Number</th>
+                                        <th>Customer</th>
+                                        <th>Phone</th>
+                                        <th>Total</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="order-table-body">
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'order_detail' order.order_number %}" 
+                                               class="order-number-link">
+                                                {{ order.order_number }}
+                                            </a>
+                                        </td>
+                                        <td>{{ order.full_name }}</td>
+                                        <td>{{ order.phone }}</td>
+                                        <td>
+                                            <span class="order-total-amount">₵{{ order.order_total }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="order-date">{{ order.created_at|date:"M d, Y" }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="order-status-badge order-status-{{ order.status|lower }}">
+                                                {{ order.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="order-empty-state">
+                                <div class="order-empty-icon">📦</div>
+                                <h3 class="order-empty-title">No Orders Found</h3>
+                                <p class="order-empty-text">
+                                    {% if search_query or status_filter or date_filter %}
+                                        Try adjusting your filters to find more orders.
+                                    {% else %}
+                                        You haven't placed any orders yet. Start shopping to see your orders here!
+                                    {% endif %}
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                        <div class="order-pagination">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">First</a>
+                                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">Previous</a>
+                            {% endif %}
+                            
+                            <span class="current">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                            
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">Next</a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">Last</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 {% endblock %}

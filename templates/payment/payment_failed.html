@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-danger text-white text-center py-4">
+                        <i class="fas fa-times-circle fa-3x mb-3"></i>
+                        <h2 class="mb-0">Payment Failed</h2>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <p class="lead text-muted">Unfortunately, your payment could not be processed at this time.</p>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-sm-6">
+                                <strong>Order Number:</strong>
+                                <p class="text-muted">{{ order.order_number }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Payment Reference:</strong>
+                                <p class="text-muted">{{ payment.ref }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-sm-6">
+                                <strong>Attempted Amount:</strong>
+                                <p class="text-muted">GHS {{ payment.amount }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Payment Method:</strong>
+                                <p class="text-muted">
+                                    {% if payment.channel %}
+                                        {{ payment.channel|title }}
+                                        {% if payment.last4 %}
+                                            (****{{ payment.last4 }})
+                                        {% endif %}
+                                    {% else %}
+                                        Card Payment
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-sm-6">
+                                <strong>Status:</strong>
+                                <p class="text-danger fw-bold">{{ payment.status|title }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Date:</strong>
+                                <p class="text-muted">{{ payment.created_at|date:"F d, Y g:i A" }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if payment.gateway_response %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <strong>Reason:</strong>
+                                <p class="text-muted">{{ payment.gateway_response }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Don't worry!</strong><br>
+                            No charges have been made to your account. You can try again with a different payment method or contact our support team for assistance.
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'order_detail' order.order_number %}" class="btn btn-primary">
+                                <i class="fas fa-redo me-2"></i>Try Again
+                            </a>
+                            <a href="/" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-2"></i>Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Transaction Details Section -->
+                <div class="card mt-4 border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Transaction Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row small">
+                            <div class="col-6"><strong>Transaction ID:</strong></div>
+                            <div class="col-6">{{ payment.paystack_reference|default:payment.ref }}</div>
+                            
+                            {% if payment.bank %}
+                            <div class="col-6"><strong>Bank:</strong></div>
+                            <div class="col-6">{{ payment.bank }}</div>
+                            {% endif %}
+                            
+                            {% if payment.card_type %}
+                            <div class="col-6"><strong>Card Type:</strong></div>
+                            <div class="col-6">{{ payment.card_type|title }}</div>
+                            {% endif %}
+                            
+                            {% if payment.failure_reason %}
+                            <div class="col-6"><strong>Failure Code:</strong></div>
+                            <div class="col-6 text-danger">{{ payment.failure_reason }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Support Section -->
+                <div class="card mt-4 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="mb-3"><i class="fas fa-headset me-2"></i>Need Help?</h6>
+                        <p class="small text-muted mb-3">
+                            If you continue to experience issues, our support team is ready to assist you.
+                        </p>
+                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                            <a href="mailto:support@yourstore.com" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-envelope me-1"></i>Email Support
+                            </a>
+                            <a href="tel:+233123456789" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-phone me-1"></i>Call Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

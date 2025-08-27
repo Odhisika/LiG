@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from django.utils.timezone import now
+from django.utils.timezone import now,timedelta
 from django.urls import reverse
 from decimal import Decimal
 
@@ -35,6 +35,7 @@ def place_order(request):
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR', '')
             data.status = 'Pending Payment'
+            data.expires_at = now() + timedelta(days=7)
             data.save()
 
             # Generate order number

@@ -213,7 +213,9 @@
                     <div class="product-card card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="product-img-container">
+                                <a href="{% url 'store' %}">
                                 <img src="{% static 'images/items/laptop.jpeg' %}" alt="Laptop">
+                            </a>
                             </div>
                             <a href="{% url 'store' %}" class="product-title d-block">
                                 Laptops
@@ -227,7 +229,9 @@
                     <div class="product-card card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="product-img-container">
+                                <a href="{% url 'store' %}">
                                 <img src="{% static 'images/items/printer.jpeg' %}" alt="Printer">
+                            </a>
                             </div>
                             <a href="{% url 'store' %}" class="product-title d-block">
                                 Printers
@@ -241,7 +245,9 @@
                     <div class="product-card card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="product-img-container">
+                                <a href="{% url 'store' %}">
                                 <img src="{% static 'images/items/monitor.jpeg' %}" alt="Monitor">
+                            </a>
                             </div>
                             <a href="{% url 'store' %}" class="product-title d-block">
                                 Monitors
@@ -255,7 +261,9 @@
                     <div class="product-card card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="product-img-container">
+                                <a href="{% url 'store' %}">
                                 <img src="{% static 'images/items/networking.jpeg' %}" alt="Networking">
+                            </a>
                             </div>
                             <a href="{% url 'store' %}" class="product-title d-block">
                                 Networking
@@ -269,7 +277,9 @@
                     <div class="product-card card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="product-img-container">
+                                <a href="{% url 'store' %}">
                                 <img src="{% static 'images/items/desktop.jpeg' %}" alt="Desktop">
+                            </a>
                             </div>
                             <a href="{% url 'store' %}" class="product-title d-block">
                                 Desktops
@@ -279,18 +289,21 @@
                 </div>
                 
                 <!-- Software -->
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="product-card card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="product-img-container">
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="product-card card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="product-img-container">
+                            <a href="{% url 'store' %}">
                                 <img src="{% static 'images/items/software.jpeg' %}" alt="Software">
-                            </div>
-                            <a href="{% url 'store' %}" class="product-title d-block">
-                                Software
                             </a>
                         </div>
+                        <a href="{% url 'store' %}" class="product-title d-block">
+                            Software
+                        </a>
                     </div>
                 </div>
+            </div>
+
             </div>
         </div>
     </section>

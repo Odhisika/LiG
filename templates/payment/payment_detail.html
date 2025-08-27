@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0">
+                    <!-- Dynamic Header Based on Payment Status -->
+                    {% if payment.status == 'successful' %}
+                    <div class="card-header bg-success text-white text-center py-4">
+                        <i class="fas fa-check-circle fa-3x mb-3"></i>
+                        <h2 class="mb-0">Payment Details</h2>
+                        <span class="badge bg-light text-success mt-2 fs-6">
+                            <i class="fas fa-check-circle me-1"></i>Successful
+                        </span>
+                    </div>
+                    {% elif payment.status == 'failed' %}
+                    <div class="card-header bg-danger text-white text-center py-4">
+                        <i class="fas fa-times-circle fa-3x mb-3"></i>
+                        <h2 class="mb-0">Payment Details</h2>
+                        <span class="badge bg-light text-danger mt-2 fs-6">
+                            <i class="fas fa-times-circle me-1"></i>Failed
+                        </span>
+                    </div>
+                    {% elif payment.status == 'pending' %}
+                    <div class="card-header bg-warning text-white text-center py-4">
+                        <i class="fas fa-clock fa-3x mb-3"></i>
+                        <h2 class="mb-0">Payment Details</h2>
+                        <span class="badge bg-light text-warning mt-2 fs-6">
+                            <i class="fas fa-clock me-1"></i>Pending
+                        </span>
+                    </div>
+                    {% else %}
+                    <div class="card-header bg-secondary text-white text-center py-4">
+                        <i class="fas fa-credit-card fa-3x mb-3"></i>
+                        <h2 class="mb-0">Payment Details</h2>
+                        <span class="badge bg-light text-secondary mt-2 fs-6">
+                            <i class="fas fa-question-circle me-1"></i>{{ payment.status|title }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body p-4">
+                        <!-- Payment Information -->
+                        <div class="row mb-4">
+                            <div class="col-sm-6">
+                                <strong>Order Number:</strong>
+                                <p class="text-muted">{{ order.order_number }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Payment Reference:</strong>
+                                <p class="text-muted">{{ payment.ref }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-sm-6">
+                                <strong>Amount:</strong>
+                                <p class="{% if payment.status == 'successful' %}text-success{% else %}text-muted{% endif %} fw-bold">GHS {{ payment.amount }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Payment Method:</strong>
+                                <p class="text-muted">
+                                    {% if payment.channel %}
+                                        {{ payment.channel|title }}
+                                        {% if payment.last4 %}
+                                            (****{{ payment.last4 }})
+                                        {% endif %}
+                                    {% else %}
+                                        Card Payment
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-sm-6">
+                                <strong>Email:</strong>
+                                <p class="text-muted">{{ payment.email }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Date:</strong>
+                                <p class="text-muted">{{ payment.created_at|date:"F d, Y g:i A" }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if payment.transaction_date and payment.transaction_date != payment.created_at %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <strong>Transaction Date:</strong>
+                                <p class="text-muted">{{ payment.transaction_date|date:"F d, Y g:i A" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Status-specific alerts -->
+                        {% if payment.status == 'successful' %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Payment Completed!</strong><br>
+                            Your payment was processed successfully and your order is confirmed.
+                        </div>
+                        {% elif payment.status == 'failed' %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Payment Failed</strong><br>
+                            Your payment could not be processed. No charges were made to your account.
+                        </div>
+                        {% elif payment.status == 'pending' %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-clock me-2"></i>
+                            <strong>Payment Pending</strong><br>
+                            Your payment is being processed. This may take a few minutes.
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'order_detail' order.order_number %}" class="btn btn-primary">
+                                <i class="fas fa-eye me-2"></i>View Order Details
+                            </a>
+                            
+                            {% if payment.status == 'pending' %}
+                            <button class="btn btn-warning" onclick="checkPaymentStatus()">
+                                <i class="fas fa-sync me-2"></i>Check Status
+                            </button>
+                            {% elif payment.status == 'failed' %}
+                            <a href="{% url 'order_detail' order.order_number %}" class="btn btn-success">
+                                <i class="fas fa-redo me-2"></i>Try Again
+                            </a>
+                            {% endif %}
+                            
+                            <a href="/" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-2"></i>Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Transaction Details Section -->
+                <div class="card mt-4 border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Transaction Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row small">
+                            <div class="col-6"><strong>Transaction ID:</strong></div>
+                            <div class="col-6">{{ payment.paystack_reference|default:payment.ref }}</div>
+                            
+                            {% if payment.currency %}
+                            <div class="col-6"><strong>Currency:</strong></div>
+                            <div class="col-6">{{ payment.currency }}</div>
+                            {% endif %}
+                            
+                            {% if payment.bank %}
+                            <div class="col-6"><strong>Bank:</strong></div>
+                            <div class="col-6">{{ payment.bank }}</div>
+                            {% endif %}
+                            
+                            {% if payment.card_type %}
+                            <div class="col-6"><strong>Card Type:</strong></div>
+                            <div class="col-6">{{ payment.card_type|title }}</div>
+                            {% endif %}
+                            
+                            {% if payment.paystack_fees %}
+                            <div class="col-6"><strong>Processing Fee:</strong></div>
+                            <div class="col-6">GHS {{ payment.paystack_fees }}</div>
+                            {% endif %}
+                            
+                            {% if payment.gateway_response %}
+                            <div class="col-6"><strong>Gateway Response:</strong></div>
+                            <div class="col-6">{{ payment.gateway_response }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Support Section for Failed Payments -->
+                {% if payment.status == 'failed' %}
+                <div class="card mt-4 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="mb-3"><i class="fas fa-headset me-2"></i>Need Help?</h6>
+                        <p class="small text-muted mb-3">
+                            If you continue to experience issues, our support team is ready to assist you.
+                        </p>
+                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                            <a href="mailto:support@yourstore.com" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-envelope me-1"></i>Email Support
+                            </a>
+                            <a href="tel:+233123456789" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-phone me-1"></i>Call Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function checkPaymentStatus() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
+            btn.disabled = true;
+            
+            fetch(`/payments/status/{{ payment.id }}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message and reload after a brief delay
+                        btn.innerHTML = '<i class="fas fa-check me-2"></i>Updated!';
+                        btn.classList.remove('btn-warning');
+                        btn.classList.add('btn-success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        // Show error state
+                        btn.innerHTML = '<i class="fas fa-exclamation me-2"></i>Still Pending';
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.innerHTML = '<i class="fas fa-times me-2"></i>Error';
+                    btn.classList.remove('btn-warning');
+                    btn.classList.add('btn-danger');
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-warning');
+                        btn.disabled = false;
+                    }, 2000);
+                });
+        }
+        
+        // Auto-refresh for pending payments
+        {% if payment.status == 'pending' %}
+        setTimeout(() => {
+            console.log('Auto-checking payment status...');
+            checkPaymentStatus();
+        }, 30000); // Check after 30 seconds for pending payments
+        {% endif %}
+    </script>
+    
+    <!-- Example Pay Now button handler for other pages -->
+    <script>
+        function initializePayment(orderId) {
+            const payBtn = document.getElementById('pay-btn');
+            if (payBtn) {
+                const originalText = payBtn.innerHTML;
+                payBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                payBtn.disabled = true;
+                
+                // Redirect to payment initialization
+                window.location.href = `/payments/initialize/${orderId}/`;
+            }
+        }
+    </script>
+</body>
+</html>

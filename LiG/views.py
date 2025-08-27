@@ -4,6 +4,7 @@ from research.models import BlogModel
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from research.form import ProjectBookingForm
+from django.db.models import Q
 from category.models import ResearchTypes, ComputerTypes, SoftwareTypes
   # Import the form
 
@@ -78,10 +79,11 @@ def used_desktops(request):
         'products': products
     }
     return render(request, 'hardware/used_desktops.html', context)
+
 def fresh_laptops(request):
     try:
-        desktops_category = ComputerTypes.objects.get(slug="fresh-laptop")
-        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+        laptops_category = ComputerTypes.objects.get(slug="new-laptop")
+        products = ComputerProduct.objects.filter(computer_type=laptops_category, is_available=True)
 
     except ComputerTypes.DoesNotExist:
         products = []  
@@ -91,10 +93,11 @@ def fresh_laptops(request):
     }
     return render(request, 'hardware/fresh_laptops.html', context)
 
+
 def used_laptops(request):
     try:
-        desktops_category = ComputerTypes.objects.get(slug="used-laptop")
-        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+        laptops_category = ComputerTypes.objects.get(slug="used-laptop")
+        products = ComputerProduct.objects.filter(computer_type=laptops_category, is_available=True)
 
     except ComputerTypes.DoesNotExist:
         products = []  
@@ -104,11 +107,16 @@ def used_laptops(request):
     }
     return render(request, 'hardware/used_laptops.html', context)
 
+
+
 def laptops(request):
     try:
-        
-        desktops_category = ComputerTypes.objects.get(slug="laptop")
-        products = ComputerProduct.objects.filter(computer_type=desktops_category, is_available=True)
+        laptop_category = ComputerTypes.objects.get(slug="laptop")
+        subcategories = laptop_category.subcategories.all()
+        products = ComputerProduct.objects.filter(
+            Q(computer_type=laptop_category) | Q(computer_type__in=subcategories),
+            is_available=True
+        )
 
     except ComputerTypes.DoesNotExist:
         products = []  
@@ -116,7 +124,7 @@ def laptops(request):
     context = {
         'products': products
     }
-    return render(request, 'hardware/laptop.html',context) 
+    return render(request, 'hardware/laptop.html', context)
 
 
 

@@ -1,0 +1,13 @@
+Error verifying payment PAY_22A66D41EE9A: 'Cart' object has no attribute 'clear'
+Error verifying payment PAY_22A66D41EE9A: 'Cart' object has no attribute 'clear'
+Error initializing payment for order 6: 'orders' is not a registered namespace
+Error initializing payment for order 6: 'orders' is not a registered namespace
+Error initializing payment for order 6: 'orders' is not a registered namespace
+Error initializing payment for order 6: 'orders' is not a registered namespace
+Error verifying payment PAY_F25B53E4C47A: 'Cart' object has no attribute 'clear'
+Error verifying payment PAY_3DD01D74B43B: 'orders' is not a registered namespace
+Error verifying payment PAY_7EBB9D8F5F37: 'orders' is not a registered namespace
+Error verifying payment PAY_D498DFEBB7CF: 'orders' is not a registered namespace
+Error verifying payment PAY_25EE3333AE1C: 'orders' is not a registered namespace
+Error verifying payment PAY_2769D9BA1469: 'orders' is not a registered namespace
+Error verifying payment PAY_2AA5F0A2BE02: 'orders' is not a registered namespace

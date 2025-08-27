@@ -8,16 +8,14 @@
     <center><i class="fas fa-check-circle" style="font-size: 72px;margin-bottom: 20px;color: #28A745;"></i></center>
     <h2 class="text-center">Order Successful</h2>
     <br>
-    <div class="text-center">
-        <a href="{% url 'store' %}" class="btn btn-success">Shop more</a>
-    </div>
 
     <hr>
-    <!-- Pay Now Button -->
     <div class="text-center mt-3">
-        <button class="btn btn-primary" data-toggle="modal" data-target="#paymentModal">Pay Now</button>
+        <a href="{% url 'initialize_payment' order.id %}" class="btn btn-success">
+            Pay Now - GHS {{ order.order_total }}
+        </a>
     </div>
-
+    
 </div>
 
 <div class="container"
@@ -201,48 +199,5 @@
         </form>
     </div>
 </div>
-<!-- <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <form method="POST" enctype="multipart/form-data"
-            action="{% url 'submit_proof' order_number=order.order_number %}">
-            {% csrf_token %}
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel">Payment Instructions</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-
-                    <p>Please send your total payment (₵{{ order.order_total }}) to the following account:</p>
-                    <ul>
-                        <li><strong>MoMo Number:</strong> 0593 021 696</li>
-                        <li><strong>Name:</strong> Francis</li>
-                        <li><strong>Reference:</strong> <code>{{ order_number }}</code></li>
-                        <li><strong>Please make sure you use the order number as reference.</strong></li>
-                    </ul>
-
-                    <hr>
-                    <div class="form-group">
-                        <label for="proof">Upload Payment Screenshot:</label>
-                        <input type="file" name="proof" class="form-control-file" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="notes">Additional Note (optional):</label>
-                        <textarea class="form-control" name="note" rows="2"></textarea>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Submit Proof</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div> -->
-
 
 {% endblock %}

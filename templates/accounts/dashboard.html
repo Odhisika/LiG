@@ -1,55 +1,472 @@
 {% extends 'base.html' %}
+
 {% load static %}
 
-
 {% block content %}
+<section class="dashboard-container">
+    {% include 'includes/alerts.html' %}
+    
+    <div class="dashboard-wrapper">
+        <div class="dashboard-grid">
+            <!-- Modern Sidebar -->
+            {% include 'includes/dashboard_sidebar.html' %}
+            
+            <!-- Main Dashboard Content -->
+            <main class="dashboard-main">
+                <!-- User Header Card -->
+                <div class="user-header-card">
+                    <div class="user-info-section">
+                        <div class="user-avatar-container">
+                            {% if userprofile.profile_picture %}
+                                <img src="{{ userprofile.profile_picture.url }}" 
+                                     alt="User Profile Picture" 
+                                     class="user-avatar">
+                            {% else %}
+                                <img src="{% static './images/defualt_user.png' %}" 
+                                     alt="Default Profile Picture" 
+                                     class="user-avatar">
+                            {% endif %}
+                            <div class="avatar-status-indicator"></div>
+                        </div>
+                        <div class="user-details">
+                            <h2 class="user-name">{{ user.full_name }}</h2>
+                            <p class="user-email">{{ user.email }}</p>
+                            <p class="user-phone">{{ user.phone_number }}</p>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <a href="{% url 'edit_profile' %}" class="btn-modern btn-primary">
+                            <i class="icon-edit"></i>
+                            Edit Profile
+                        </a>
+                    </div>
+                </div>
 
-<section class="section-conten padding-y bg">
+                <!-- Dashboard Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card orders-card">
+                        <div class="stat-icon">
+                            <i class="icon-package"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-title">Total Orders</h3>
+                            <a href="{% url 'my_orders' %}" class="stat-link">
+                                View All Orders
+                                <i class="icon-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
 
-{% include 'includes/alerts.html' %}
-<div class="container">
-	<div class="row">
-	{% include 'includes/dashboard_sidebar.html' %}
-	<main class="col-md-9">
-		<article class="card">
-		<header class="card-header">
-			<strong class="d-inline-block mr-3">Logged in as:</strong>
-			<span>{{user.full_name}}</span>
-		</header>
-		<div class="card-body">
-			<div class="row">
+                    <div class="stat-card activity-card">
+                        <div class="stat-icon">
+                            <i class="icon-activity"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-title">Account Status</h3>
+                            <p class="stat-value status-active">Active</p>
+                            <p class="stat-subtitle">Last login: Today</p>
+                        </div>
+                    </div>
 
-			<div class="col-md-6">
-				<div class="card" style="text-align:center;">
-					<div class="card-body">
-						<h5 class="card-title">Total Orders</h5>
-						<a href="{% url 'my_orders' %}">View Orders</a>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-6">
-				<div class="card" style="text-align:center;">
-					<div class="card-body">
-						{% if userprofile.profile_picture %}
-							<img src="{{ userprofile.profile_picture.url }}" alt="User Profile Picture" width="50" height="50" style="border-radius:50%;">
-						{% else %}
-							<img src="{% static './images/defualt_user.png' %}" alt="Default Profile Picture" width="50" height="50" style="border-radius:50%;">
-						{% endif %}
-						<p class="mb-0">{{user.email}}</p>
-						<p>{{user.phone_number}}</p>
-					</div>
-				</div>
-			</div>
+                    <div class="stat-card security-card">
+                        <div class="stat-icon">
+                            <i class="icon-shield"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-title">Security</h3>
+                            <p class="stat-value">Strong</p>
+                            <a href="{% url 'change_password' %}" class="stat-link">
+                                Change Password
+                                <i class="icon-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
-			</div> <!-- row.// -->
-		</div> <!-- card-body .// -->
-
-		</article> <!-- order-group.// -->
-	</main>
-</div> <!-- row.// -->
-</div>
-
-
+                <!-- Recent Activity Section -->
+                <!-- <div class="activity-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Recent Activity</h3>
+                        <button class="btn-modern btn-ghost">View All</button>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="icon-user"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p class="activity-title">Profile Updated</p>
+                                    <p class="activity-time">2 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="icon-shopping-bag"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p class="activity-title">New Order Placed</p>
+                                    <p class="activity-time">1 day ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </main>
+        </div>
+    </div>
 </section>
 
+<style>
+/* Modern Dashboard Styles */
+.dashboard-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eee8e8 0%, #e6dede 100%);
+    padding: 2rem 0;
+}
+
+.dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+/* User Header Card */
+.user-header-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-info-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-avatar-container {
+    position: relative;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.avatar-status-indicator {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    background: #00d4aa;
+    border-radius: 50%;
+    border: 3px solid #fff;
+}
+
+.user-details {
+    color: #2d3748;
+}
+
+.user-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.user-email {
+    font-size: 1rem;
+    color: #718096;
+    margin: 0.25rem 0;
+}
+
+.user-phone {
+    font-size: 0.9rem;
+    color: #a0aec0;
+    margin: 0;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.orders-card .stat-icon {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.activity-card .stat-icon {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+.security-card .stat-icon {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.stat-content {
+    flex: 1;
+    color: #2d3748;
+}
+
+.stat-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: #2d3748;
+}
+
+.status-active {
+    color: #00d4aa !important;
+}
+
+.stat-subtitle {
+    font-size: 0.875rem;
+    color: #a0aec0;
+    margin: 0;
+}
+
+.stat-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.stat-link:hover {
+    color: #764ba2;
+}
+
+/* Activity Section */
+.activity-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 12px;
+    transition: background 0.2s ease;
+}
+
+.activity-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 0.25rem 0;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: #718096;
+    margin: 0;
+}
+
+/* Modern Buttons */
+.btn-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.btn-ghost:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+/* Icon placeholders - replace with your icon system */
+.icon-edit:before { content: "✏️"; }
+.icon-package:before { content: "📦"; }
+.icon-activity:before { content: "📊"; }
+.icon-shield:before { content: "🛡️"; }
+.icon-arrow-right:before { content: "→"; }
+.icon-user:before { content: "👤"; }
+.icon-shopping-bag:before { content: "🛍️"; }
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .user-header-card {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem 0;
+    }
+    
+    .dashboard-wrapper {
+        padding: 0 0.5rem;
+    }
+    
+    .user-header-card,
+    .stat-card,
+    .activity-section {
+        padding: 1.5rem;
+    }
+    
+    .user-info-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+</style>
 {% endblock %}

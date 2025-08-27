@@ -88,6 +88,53 @@ class Product(models.Model):
         if self.compare_price and self.compare_price > self.price:
             return round(((self.compare_price - self.price) / self.compare_price) * 100)
         return 0
+    
+    def get_url(self):
+        return reverse('product_detail', args=[self.category.slug, self.slug])
+
+    def __str__(self):
+        return self.product_name
+
+    def is_in_stock(self):
+        if not self.track_inventory:
+            return True
+        return self.stock > 0 or self.allow_backorders
+
+    def is_low_stock(self):
+        return self.track_inventory and self.stock <= self.low_stock_threshold
+
+    def get_discount_percentage(self):
+        if self.compare_price and self.compare_price > self.price:
+            return round(((self.compare_price - self.price) / self.compare_price) * 100)
+        return 0
+
+    def average_review(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
+        return round(float(reviews['average']), 1) if reviews['average'] else 0
+
+    def count_review(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('id'))
+        return int(reviews['count']) if reviews['count'] else 0
+
+    # ADD THIS METHOD
+    @property
+    def primary_image_url(self):
+        """Return the primary image URL for the product"""
+        # First, check if the main images field has an image
+        if self.images:
+            return self.images.url
+        
+        # Then check gallery images
+        first_gallery = self.gallery_images.filter(is_active=True).first()
+        if first_gallery:
+            return first_gallery.image.url
+        
+        # Return a default image path (make sure this file exists in your static files)
+        return '/static/images/default-product.jpg'  # or use a placeholder service
+
+    # Alternative method name for compatibility
+    def get_primary_image_url(self):
+        return self.primary_image_url
 
     def average_review(self):
         reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
@@ -398,3 +445,15 @@ class ProductTagRelation(models.Model):
     
     class Meta:
         unique_together = ['product', 'tag']
+
+
+# In Product model
+
+@property
+def primary_image_url(self):
+    if self.images:
+        return self.images.url
+    first_gallery = self.gallery_images.first()
+    if first_gallery:
+        return first_gallery.image.url
+    return 'https://via.placeholder.com/300x300?text=No+Image'

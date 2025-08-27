@@ -31,14 +31,18 @@
 <header class="section-heading">
 	<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
 	<h3 class="section-title">Popular products</h3>
-</header>sect-heading
+</header>
 
 	
 <div class="row">
 	{% for product in products %}
 	<div class="col-md-3">
 		<div class="card card-product-grid">
-			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.images.url }}"> </a>
+			<a href="{{ product.get_url }}" class="product-link">
+				<img src="{{ product.primary_image_url }}" 
+					 alt="{{ product.product_name }}" 
+					 class="product-image">
+			</a>
 			<figcaption class="info-wrap">
 				<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
 				<div class="price mt-1">GHS {{ product.price|intcomma }}</div> <!-- price-wrap.// -->

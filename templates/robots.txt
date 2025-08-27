@@ -1,0 +1,12 @@
+User-agent: *
+
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /securelogin/
+Disallow: /accounts/
+Disallow: /orders/
+Disallow: /api/
+Disallow: /search/
+
+Sitemap: https://lig.com.gh/sitemap.xml

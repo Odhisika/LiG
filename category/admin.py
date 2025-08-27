@@ -10,7 +10,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class ComputerTypesAdmin(admin.ModelAdmin):   
     prepopulated_fields = {'slug': ('computer_type',)}
-    list_display = ('computer_type', 'slug')
+    list_display = ('computer_type', 'slug', 'parent', 'is_active', 'sort_order')
+    list_filter = ('parent', 'is_active')
+    search_fields = ('computer_type', 'slug')
+    ordering = ('sort_order',)
 
 class SoftwareTypesAdmin(admin.ModelAdmin):   
     prepopulated_fields = {'slug': ('software_type',)}

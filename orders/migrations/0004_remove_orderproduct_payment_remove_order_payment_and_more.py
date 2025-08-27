@@ -26,12 +26,23 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='expires_at',
-            field=models.DateTimeField(default=orders.models.Order.default_expiry),
+            field=models.DateTimeField(default=orders.models.default_expiry),  # ✅ FIXED
         ),
         migrations.AlterField(
             model_name='order',
             name='status',
-            field=models.CharField(choices=[('New', 'New'), ('Pending Payment', 'Pending Payment'), ('Expired', 'Expired'), ('Accepted', 'Accepted'), ('Completed', 'Completed'), ('Cancelled', 'Cancelled')], default='Pending Payment', max_length=20),
+            field=models.CharField(
+                choices=[
+                    ('New', 'New'),
+                    ('Pending Payment', 'Pending Payment'),
+                    ('Expired', 'Expired'),
+                    ('Accepted', 'Accepted'),
+                    ('Completed', 'Completed'),
+                    ('Cancelled', 'Cancelled')
+                ],
+                default='Pending Payment',
+                max_length=20
+            ),
         ),
         migrations.DeleteModel(
             name='Payment',

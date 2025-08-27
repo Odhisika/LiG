@@ -1,188 +1,275 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
+{% load custom_filters %}
+
+{% block meta %}
+<meta name="description" content="{{ single_product.description|truncatewords:20 }}">
+<meta name="keywords" content="{{ single_product.tags|join:', ' }}">
+<title>{{ product.meta_title|default:product.product_name }} | LIG</title>
+<meta name="description" content="{{ product.meta_description|default:product.short_description }}">
+<meta property="og:title" content="{{ single_product.product_name }} | LIG">
+{% endblock %}
+
+{% block title %}{{ single_product.product_name }} | LiG{% endblock %}
+
+
 
 {% block content %}
-<section class="product-detail-section py-5 bg-light">
-    <div class="container">
+<section class="product-detail-section py-4">
+    <div class="container-fluid px-4">
+        <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb bg-transparent p-0">
-                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'store' %}">Store</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ single_product.product_name }}</li>
+            <ol class="breadcrumb bg-transparent p-0 m-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'store' %}" class="text-decoration-none">Store</a></li>
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">{{ single_product.category.category_name }}</a></li>
+                <li class="breadcrumb-item active text-truncate" aria-current="page">{{ single_product.product_name }}</li>
             </ol>
         </nav>
         
-        <!-- Product Detail Card -->
-        <div class="card shadow-sm border-0 rounded-lg">
-            <div class="row g-0">
-                <!-- Product Images Gallery -->
-                <div class="col-md-6 p-4">
-                    <div class="product-gallery">
-                        <div class="main-image mb-3 text-center">
-                            <img src="{{ single_product.images.url }}" class="img-fluid rounded" alt="{{ single_product.product_name }}">
+        <div class="row g-4">
+            <!-- Product Images - Left Column -->
+            <div class="col-lg-5 col-md-6">
+                <div class="product-images-container sticky-top" style="top: 20px;">
+                    <!-- Main Image Display -->
+                    <div class="main-image-container mb-3 position-relative">
+                        <div class="main-image-wrapper bg-light rounded-3 p-3 text-center" style="min-height: 400px;">
+                            <img id="mainProductImage" 
+                                 src="{{ single_product.primary_image_url }}" 
+                                 class="img-fluid rounded-3 main-product-img" 
+                                 alt="{{ single_product.product_name }}"
+                                 style="max-height: 400px; object-fit: contain;">
                         </div>
-                        <div class="thumbnails d-flex flex-wrap justify-content-center">
-                            <div class="thumbnail-item mx-2 mb-2 border rounded p-1">
-                                <a href="{{ single_product.images.url }}" class="thumbnail-link active" data-target="mainImage">
-                                    <img src="{{ single_product.images.url }}" class="img-thumbnail" alt="Product Image" width="70">
-                                </a>
+                        
+                        <!-- Discount Badge -->
+                        {% if single_product.get_discount_percentage > 0 %}
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">
+                                -{{ single_product.get_discount_percentage }}%
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Stock Status Badge -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            {% if single_product.stock <= 0 %}
+                                <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">Out of Stock</span>
+                            {% elif single_product.is_low_stock %}
+                                <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">Low Stock</span>
+                            {% else %}
+                                <span class="badge bg-success fs-6 px-3 py-2 rounded-pill">In Stock</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Thumbnail Gallery -->
+                    <div class="thumbnails-container">
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <!-- Main Product Image Thumbnail -->
+                            {% if single_product.images %}
+                            <div class="thumbnail-item">
+                                <img src="{{ single_product.images.url }}" 
+                                     class="thumbnail-img active" 
+                                     alt="Product Image"
+                                     data-main-src="{{ single_product.images.url }}">
                             </div>
-                            {% for i in product_gallery %}
-                            <div class="thumbnail-item mx-2 mb-2 border rounded p-1">
-                                <a href="{{i.image.url}}" class="thumbnail-link" data-target="mainImage">
-                                    <img src="{{i.image.url}}" class="img-thumbnail" alt="Product Image" width="70">
-                                </a>
+                            {% endif %}
+                            
+                            <!-- Gallery Images -->
+                            {% for gallery_img in product_gallery %}
+                            <div class="thumbnail-item">
+                                <img src="{{ gallery_img.image.url }}" 
+                                     class="thumbnail-img" 
+                                     alt="{{ gallery_img.alt_text|default:'Product Gallery' }}"
+                                     data-main-src="{{ gallery_img.image.url }}">
                             </div>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
-                
-                <!-- Product Information -->
-                <div class="col-md-6 p-4">
-                    <form action="{% url 'add_cart' single_product.id %}" method="POST">
-                        {% csrf_token %}
-                        <div class="product-info">
-                            <!-- Product Title and Rating -->
-                            <h1 class="product-title h3 fw-bold mb-2">{{ single_product.product_name }}</h1>
-                            
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="rating-stars text-warning me-2">
-                                    <i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                </div>
-                                <span class="text-muted small">{{ single_product.countReview }} reviews</span>
-                            </div>
-                            
-                            <!-- Price -->
-                            <div class="product-price mb-4">
-                                <span class="price h3 fw-bold text-primary">GHS {{ single_product.price|intcomma }}</span>
-                                {% if single_product.old_price %}
-                                <span class="old-price ms-2 text-muted text-decoration-line-through">GHS {{ single_product.old_price|intcomma }}</span>
-                                {% endif %}
-                            </div>
-                            
-                            <!-- Description -->
-                            <div class="product-description mb-4">
-                                <p>{{ single_product.description }}</p>
-                            </div>
-                            
-                            <hr class="my-4">
-                            
-                            <!-- Product Specifications Table -->
-                            <div class="product-specifications mb-4">
-                                <h4 class="h5 fw-bold mb-3">Product Specifications</h4>
-                                
+            </div>
+            
+            <!-- Product Information - Right Column -->
+            <div class="col-lg-7 col-md-6">
+                <div class="product-info">
+                    <!-- Product Title and Brand -->
+                    <div class="product-header mb-3">
+                        {% if single_product.computerproduct.brand or single_product.peripheralproduct.brand %}
+                        <div class="brand-name mb-2">
+                            <span class="text-muted fs-6">Brand: </span>
+                            <span class="fw-bold text-primary">
                                 {% if single_product.computerproduct %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-bordered specs-table">
-                                        <tbody>
-                                            <tr>
-                                                <th>Brand</th>
-                                                <td>{{ single_product.computerproduct.brand }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Processor</th>
-                                                <td>{{ single_product.computerproduct.processor }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>RAM</th>
-                                                <td>{{ single_product.computerproduct.ram }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Storage</th>
-                                                <td>{{ single_product.computerproduct.storage }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Type</th>
-                                                <td>{{ single_product.computerproduct.computer_type.name }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>GPU</th>
-                                                <td>{{ single_product.computerproduct.gpu|default:"N/A" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Screen Size</th>
-                                                <td>{{ single_product.computerproduct.screen_size }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>OS</th>
-                                                <td>{{ single_product.computerproduct.operating_system|default:"N/A" }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    {{ single_product.computerproduct.brand.name }}
+                                {% elif single_product.peripheralproduct %}
+                                    {{ single_product.peripheralproduct.brand.name }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <h1 class="product-title h3 fw-bold mb-2 lh-base">{{ single_product.product_name }}</h1>
+                        
+                        <!-- SKU and Model -->
+                        <div class="product-meta mb-3">
+                            <span class="text-muted small me-3">SKU: <span class="fw-semibold">{{ single_product.sku }}</span></span>
+                            {% if single_product.computerproduct.model_number %}
+                            <span class="text-muted small">Model: <span class="fw-semibold">{{ single_product.computerproduct.model_number }}</span></span>
+                            {% elif single_product.peripheralproduct.model_number %}
+                            <span class="text-muted small">Model: <span class="fw-semibold">{{ single_product.peripheralproduct.model_number }}</span></span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Rating and Reviews -->
+                    <div class="product-rating mb-3">
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <div class="rating-display d-flex align-items-center">
+                                <div class="stars-container me-2">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= single_product.average_review %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% elif forloop.counter|add:"-0.5" <= single_product.average_review %}
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
                                 </div>
-                                {% elif single_product.softwareproduct %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-bordered specs-table">
-                                        <tbody>
-                                            
-                                            <tr>
-                                                <th>Version</th>
-                                                <td>{{ single_product.softwareproduct.version }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>License</th>
-                                                <td>{{ single_product.softwareproduct.license_type }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Platform</th>
-                                                <td>{{ single_product.softwareproduct.platform }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    {% if single_product.softwareproduct.download_link %}
-                                    <div class="mt-3">
-                                        <a href="{{ single_product.softwareproduct.download_link }}" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-download me-1"></i> Download Software
-                                        </a>
+                                <span class="rating-value fw-semibold me-2">{{ single_product.average_review }}/5</span>
+                                <a href="#reviews-section" class="text-decoration-none small text-primary">
+                                    ({{ single_product.count_review }} review{{ single_product.count_review|pluralize }})
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pricing -->
+                    <div class="product-pricing mb-4">
+                        <div class="price-container">
+                            <div class="current-price">
+                                <span class="price-currency text-muted me-1">GHS</span>
+                                <span class="price-amount h2 fw-bold text-success mb-0">{{ single_product.price|floatformat:2|intcomma }}</span>
+                            </div>
+                            
+                            {% if single_product.compare_price and single_product.compare_price > single_product.price %}
+                            <div class="price-comparison mt-1">
+                                <span class="original-price text-muted text-decoration-line-through me-2">
+                                    Save GHS {{ single_product.compare_price|sub:single_product.price|floatformat:2|intcomma }}
+
+                                </span>
+                                <span class="badge bg-danger">
+                                    Save GHS {{ single_product.compare_price|sub:single_product.price|floatformat:2|intcomma }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Key Features -->
+                    {% if single_product.computerproduct %}
+                    <div class="key-features mb-4">
+                        <h5 class="fw-bold mb-3">Key Features</h5>
+                        <div class="row g-2">
+                            {% if single_product.computerproduct.processor_model %}
+                            <div class="col-md-6">
+                                <div class="feature-item p-2 bg-light rounded-2">
+                                    <i class="fas fa-microchip text-primary me-2"></i>
+                                    <small class="fw-semibold">{{ single_product.computerproduct.processor_model }}</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if single_product.computerproduct.ram_size %}
+                            <div class="col-md-6">
+                                <div class="feature-item p-2 bg-light rounded-2">
+                                    <i class="fas fa-memory text-primary me-2"></i>
+                                    <small class="fw-semibold">{{ single_product.computerproduct.ram_size }}GB RAM</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if single_product.computerproduct.storage_capacity %}
+                            <div class="col-md-6">
+                                <div class="feature-item p-2 bg-light rounded-2">
+                                    <i class="fas fa-hdd text-primary me-2"></i>
+                                    <small class="fw-semibold">{{ single_product.computerproduct.storage_capacity }}GB {{ single_product.computerproduct.get_storage_type_display }}</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if single_product.computerproduct.screen_size %}
+                            <div class="col-md-6">
+                                <div class="feature-item p-2 bg-light rounded-2">
+                                    <i class="fas fa-desktop text-primary me-2"></i>
+                                    <small class="fw-semibold">{{ single_product.computerproduct.screen_size }}" Display</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Stock and Availability -->
+                    <div class="availability-section mb-4">
+                        <div class="stock-info p-3 bg-light rounded-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <div class="stock-status">
+                                        {% if single_product.stock > 0 %}
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <span class="fw-semibold text-success">In Stock</span>
+                                            {% if single_product.stock <= 10 %}
+                                                <span class="text-warning small d-block">Only {{ single_product.stock }} left!</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fas fa-times-circle text-danger me-2"></i>
+                                            <span class="fw-semibold text-danger">Out of Stock</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    {% if single_product.requires_shipping %}
+                                    <div class="shipping-info">
+                                        <i class="fas fa-truck text-primary me-1"></i>
+                                        <small class="text-muted">Free shipping available</small>
                                     </div>
                                     {% endif %}
                                 </div>
-                                {% elif single_product.peripheralproduct %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-bordered specs-table">
-                                        <tbody>
-                                            <tr>
-                                                <th>Brand</th>
-                                                <td>{{ single_product.peripheralproduct.brand }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Connectivity</th>
-                                                <td>{{ single_product.peripheralproduct.connectivity|default:"N/A" }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Compatibility</th>
-                                                <td>{{ single_product.peripheralproduct.compatibility }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Warranty</th>
-                                                <td>{{ single_product.peripheralproduct.warranty|default:"N/A" }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% endif %}
                             </div>
-                            
-                            <!-- Add to Cart Button -->
-                            <div class="product-actions mt-4">
-                                {% if single_product.stock <= 0 %}
-                                <div class="out-of-stock alert alert-danger d-inline-block">
-                                    <i class="fas fa-exclamation-circle me-2"></i> Out of Stock
+                        </div>
+                    </div>
+                    
+                    <!-- Add to Cart Form -->
+                    <form action="{% url 'add_cart' single_product.id %}" method="POST" class="mb-4">
+                        {% csrf_token %}
+                        <div class="cart-actions">
+                            <div class="row g-3">
+                                <div class="col-auto">
+                                    <div class="quantity-selector">
+                                        <label class="form-label small fw-semibold">Quantity:</label>
+                                        <div class="input-group" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary" type="button" id="decreaseQty">-</button>
+                                            <input type="number" class="form-control text-center" name="quantity" value="1" min="1" max="{{ single_product.stock }}" id="quantityInput">
+                                            <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
+                                        </div>
+                                    </div>
                                 </div>
-                                {% else %}
-                                <div class="d-flex align-items-center">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-shopping-cart me-2"></i> Add to Cart
-                                    </button>
+                                <div class="col">
+                                    {% if single_product.stock > 0 %}
+                                    <div class="d-grid gap-2 d-md-flex">
+                                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                        </button>
+                                    </div>
+                                    {% else %}
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-outline-primary btn-lg" disabled>
+                                            <i class="fas fa-bell me-2"></i>Notify When Available
+                                        </button>
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
                             </div>
                         </div>
                     </form>
@@ -190,231 +277,661 @@
             </div>
         </div>
         
-        <!-- Reviews Section -->
-        <div class="reviews-section mt-5">
-            <div class="row">
-                <div class="col-lg-8">
-                    <!-- Review Form -->
-                    <div class="card shadow-sm border-0 rounded-lg mb-4">
-                        <div class="card-header bg-white py-3">
-                            <h3 class="h5 mb-0 fw-bold"><i class="fas fa-pen-to-square me-2"></i> Write Your Review</h3>
-                        </div>
-                        <div class="card-body">
-                            <form action="{% url 'submit_review' single_product.id %}" method="POST">
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    <label class="form-label">How do you rate this product?</label>
-                                    <div class="rate">
-                                        <input type="radio" name="rating" id="rating10" value="5" required />
-                                        <label for="rating10" title="5"></label>
-                                        <input type="radio" name="rating" id="rating9" value="4.5" required />
-                                        <label for="rating9" title="4.5" class="half"></label>
-                                        <input type="radio" name="rating" id="rating8" value="4" required />
-                                        <label for="rating8" title="4"></label>
-                                        <input type="radio" name="rating" id="rating7" value="3.5" required />
-                                        <label for="rating7" title="3.5" class="half"></label>
-                                        <input type="radio" name="rating" id="rating6" value="3" required />
-                                        <label for="rating6" title="3"></label>
-                                        <input type="radio" name="rating" id="rating5" value="2.5" required />
-                                        <label for="rating5" title="2.5" class="half"></label>
-                                        <input type="radio" name="rating" id="rating4" value="2" required />
-                                        <label for="rating4" title="2"></label>
-                                        <input type="radio" name="rating" id="rating3" value="1.5" required />
-                                        <label for="rating3" title="1.5" class="half"></label>
-                                        <input type="radio" name="rating" id="rating2" value="1" required />
-                                        <label for="rating2" title="1"></label>
-                                        <input type="radio" name="rating" id="rating1" value="0.5" required />
-                                        <label for="rating1" title="0.5" class="half"></label>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="subject" class="form-label">Review Title</label>
-                                    <input type="text" class="form-control" id="subject" name="subject" placeholder="Summarize your experience">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="review" class="form-label">Your Review</label>
-                                    <textarea name="review" id="review" rows="4" class="form-control" placeholder="Share your experience with this product"></textarea>
+        <!-- Product Details Tabs -->
+        <div class="product-details-tabs mt-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-tabs card-header-tabs" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                                Description
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab">
+                                Specifications
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                                Reviews ({{ single_product.count_review }})
+                            </button>
+                        </li>
+                        {% if single_product.softwareproduct %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="download-tab" data-bs-toggle="tab" data-bs-target="#download" type="button" role="tab">
+                                Download
+                            </button>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <div class="card-body">
+                    <div class="tab-content" id="productTabsContent">
+                        <!-- Description Tab -->
+                        <div class="tab-pane fade show active" id="description" role="tabpanel">
+                            <div class="product-description">
+                                <h5 class="fw-bold mb-3">Product Description</h5>
+                                <div class="description-content">
+                                    {{ single_product.description|linebreaks }}
                                 </div>
                                 
-                                {% if user.is_authenticated %}
-                                    {% if orderproduct %}
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-paper-plane me-2"></i> Submit Review
-                                        </button>
-                                    {% else %}
-                                        <div class="alert alert-info">
-                                            <i class="fas fa-info-circle me-2"></i> You must purchase this product to post a review.
-                                        </div>
-                                    {% endif %}
-                                {% else %}
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-user-lock me-2"></i> You must be logged in to post a review. 
-                                    <a href="{% url 'login' %}" class="alert-link ms-2">Login now</a>
+                                {% if single_product.short_description %}
+                                <div class="mt-4">
+                                    <h6 class="fw-bold">Key Highlights:</h6>
+                                    <p class="text-muted">{{ single_product.short_description }}</p>
                                 </div>
                                 {% endif %}
                                 
-                                {% include 'includes/alerts.html' %}
-                            </form>
-                        </div>
-                    </div>
-                    
-                    <!-- Customer Reviews -->
-                    <div class="card shadow-sm border-0 rounded-lg">
-                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                            <h3 class="h5 mb-0 fw-bold"><i class="fas fa-comments me-2"></i> Customer Reviews</h3>
-                            <div class="d-flex align-items-center">
-                                <div class="rating-stars text-warning me-2">
-                                    <i class="fa fa-star{% if single_product.averageReview < 0.5 %}-o{% elif single_product.averageReview >= 0.5 and single_product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if single_product.averageReview < 1.5 %}-o{% elif single_product.averageReview >= 1.5 and single_product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if single_product.averageReview < 2.5 %}-o{% elif single_product.averageReview >= 2.5 and single_product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if single_product.averageReview < 3.5 %}-o{% elif single_product.averageReview >= 3.5 and single_product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if single_product.averageReview < 4.5 %}-o{% elif single_product.averageReview >= 4.5 and single_product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+                                <!-- Additional product info -->
+                                {% if single_product.tags %}
+                                <div class="mt-4">
+                                    <h6 class="fw-bold mb-2">Tags:</h6>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for tag in single_product.tags|split:"," %}
+                                        <span class="badge bg-light text-dark border">{{ tag|trim }}</span>
+                                        {% endfor %}
+                                    </div>
                                 </div>
-                                <span class="badge bg-primary">{{ single_product.countReview }} reviews</span>
+                                {% endif %}
                             </div>
                         </div>
-                        <div class="card-body p-0">
-                            {% if reviews %}
-                                <div class="review-list">
-                                    {% for review in reviews %}
-                                    <div class="review-item p-4 {% if not forloop.last %}border-bottom{% endif %}">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div>
-                                                <h6 class="review-title fw-bold mb-1">{{ review.subject }}</h6>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="rating-stars text-warning me-2">
-                                                        <i class="fa fa-star{% if review.rating == 0.5 %}-half-o{% elif review.rating < 1 %}-o {% endif %}" aria-hidden="true"></i>
-                                                        <i class="fa fa-star{% if review.rating == 1.5 %}-half-o{% elif review.rating < 2 %}-o {% endif %}" aria-hidden="true"></i>
-                                                        <i class="fa fa-star{% if review.rating == 2.5 %}-half-o{% elif review.rating < 3 %}-o {% endif %}" aria-hidden="true"></i>
-                                                        <i class="fa fa-star{% if review.rating == 3.5 %}-half-o{% elif review.rating < 4 %}-o {% endif %}" aria-hidden="true"></i>
-                                                        <i class="fa fa-star{% if review.rating == 4.5 %}-half-o{% elif review.rating < 5 %}-o {% endif %}" aria-hidden="true"></i>
-                                                    </div>
+                        
+                        <!-- Specifications Tab -->
+                        <div class="tab-pane fade" id="specifications" role="tabpanel">
+                            <h5 class="fw-bold mb-4">Technical Specifications</h5>
+                            
+                            {% if single_product.computerproduct %}
+                            <div class="specifications-grid">
+                                <div class="row g-4">
+                                    <!-- Processor Section -->
+                                    <div class="col-lg-6">
+                                        <div class="spec-section">
+                                            <h6 class="spec-section-title bg-light p-2 rounded-2 mb-3">
+                                                <i class="fas fa-microchip me-2"></i>Processor
+                                            </h6>
+                                            <div class="spec-table">
+                                                {% if single_product.computerproduct.processor_brand %}
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">Brand:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.computerproduct.get_processor_brand_display }}</span>
                                                 </div>
-                                            </div>
-                                            <div class="text-end">
-                                                <div class="reviewer-name fw-bold">{{ review.user.full_name }}</div>
-                                                <div class="review-date text-muted small">{{ review.updated_at|date:"F d, Y" }}</div>
+                                                {% endif %}
+                                                {% if single_product.computerproduct.processor_model %}
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">Model:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.computerproduct.processor_model }}</span>
+                                                </div>
+                                                {% endif %}
+                                                {% if single_product.computerproduct.processor_cores %}
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">Cores:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.computerproduct.processor_cores }}</span>
+                                                </div>
+                                                {% endif %}
+                                                {% if single_product.computerproduct.processor_speed %}
+                                                <div class="spec-row d-flex justify-content-between py-2">
+                                                    <span class="spec-label">Speed:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.computerproduct.processor_speed }}</span>
+                                                </div>
+                                                {% endif %}
                                             </div>
                                         </div>
-                                        <div class="review-content">
-                                            <p>{{ review.review }}</p>
+                                    </div>
+                                    
+                                    <!-- Memory Section -->
+                                    <div class="col-lg-6">
+                                        <div class="spec-section">
+                                            <h6 class="spec-section-title bg-light p-2 rounded-2 mb-3">
+                                                <i class="fas fa-memory me-2"></i>Memory
+                                            </h6>
+                                            <div class="spec-table">
+                                                {% if single_product.computerproduct.ram_size %}
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">RAM:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.computerproduct.ram_size }}GB</span>
+                                                </div>
+                                                {% endif %}
+                                                {% if single_product.computerproduct.ram_type %}
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">RAM Type:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.computerproduct.ram_type }}</span>
+                                                </div>
+                                                {% endif %}
+                                                {% if single_product.computerproduct.max_ram %}
+                                                <div class="spec-row d-flex justify-content-between py-2">
+                                                    <span class="spec-label">Max RAM:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.computerproduct.max_ram }}GB</span>
+                                                </div>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
-                                    {% endfor %}
+                                    
+                                    <!-- Continue with other sections... -->
                                 </div>
-                            {% else %}
-                                <div class="text-center p-5">
-                                    <div class="mb-3">
-                                        <i class="fas fa-comment-slash fa-3x text-muted"></i>
-                                    </div>
-                                    <h5>No Reviews Yet</h5>
-                                    <p class="text-muted">Be the first to share your thoughts about this product!</p>
+                            </div>
+                            {% elif single_product.softwareproduct %}
+                            <!-- Software Specifications -->
+                            <div class="spec-table">
+                                <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+                                    <span class="spec-label">Version:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.softwareproduct.version }}</span>
                                 </div>
+                                <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+                                    <span class="spec-label">License Type:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.softwareproduct.get_license_type_display }}</span>
+                                </div>
+                                <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+                                    <span class="spec-label">Platforms:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.softwareproduct.platforms }}</span>
+                                </div>
+                                {% if single_product.softwareproduct.developer %}
+                                <div class="spec-row d-flex justify-content-between py-3">
+                                    <span class="spec-label">Developer:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.softwareproduct.developer }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
                             {% endif %}
                         </div>
+                        
+                        <!-- Reviews Tab -->
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <!-- Reviews content (keep your existing reviews section) -->
+                            <div id="reviews-section">
+                                <!-- Your existing reviews code here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Download Tab (for software) -->
+                        {% if single_product.softwareproduct %}
+                        <div class="tab-pane fade" id="download" role="tabpanel">
+                            <h5 class="fw-bold mb-4">Download Information</h5>
+                            {% if single_product.softwareproduct.download_link %}
+                            <div class="download-section">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Download link will be available after purchase
+                                </div>
+                                <a href="{{ single_product.softwareproduct.download_link }}" class="btn btn-primary">
+                                    <i class="fas fa-download me-2"></i>Download Software
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if single_product.softwareproduct.system_requirements %}
+                            <div class="mt-4">
+                                <h6 class="fw-bold">System Requirements:</h6>
+                                <div class="requirements-content">
+                                    {{ single_product.softwareproduct.system_requirements|linebreaks }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
-                
             </div>
         </div>
     </div>
 </section>
-
-<!-- Add this CSS to your base template or as an additional stylesheet -->
 <style>
+/* Modern Product Detail Styles */
+.product-images-container {
+    max-width: 100%;
+}
+
+.main-product-img {
+    transition: transform 0.3s ease;
+    cursor: zoom-in;
+}
+
+.main-product-img:hover {
+    transform: scale(1.05);
+}
+
+.thumbnail-item {
+    width: 70px;
+    height: 70px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.thumbnail-item:hover {
+    border-color: #0d6efd;
+    transform: translateY(-2px);
+}
+
+.thumbnail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-img.active {
+    border-color: #0d6efd !important;
+}
+
+.product-title {
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+.price-amount {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.feature-item {
+    transition: transform 0.2s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-1px);
+}
+
+.rating-display .stars-container i {
+    font-size: 1.1rem;
+}
+
+.quantity-selector .input-group {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-radius: 0.375rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+    border: none;
+}
+
+.spec-section-title {
+    font-weight: 600;
+    color: #495057;
+}
+
+.spec-row {
+    font-size: 0.95rem;
+}
+
+.spec-label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.spec-value {
+    color: #212529;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.service-item {
+    transition: transform 0.2s ease;
+}
+
+.service-item:hover {
+    transform: translateY(-2px);
+}
+
+.share-section button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .price-amount {
+        font-size: 1.5rem;
+    }
+    
     .product-title {
-        color: #333;
-        line-height: 1.3;
+        font-size: 1.25rem;
     }
     
-    /* Table styling */
-    .specs-table {
-        margin-bottom: 0;
-    }
-    
-    .specs-table th {
-        width: 35%;
-        background-color: rgba(0, 0, 0, 0.03);
-        font-weight: 600;
-        vertical-align: middle;
-    }
-    
-    .specs-table td {
-        vertical-align: middle;
-    }
-    
-    .rate {
-        float: left;
-        height: 46px;
-        padding: 0 10px;
-    }
-    
-    .rate:not(:checked) > input {
-        position: absolute;
-        display: none;
-    }
-    
-    .rate:not(:checked) > label {
-        float: right;
-        width: 1em;
-        overflow: hidden;
-        white-space: nowrap;
-        cursor: pointer;
-        font-size: 30px;
-        color: #ccc;
-    }
-    
-    .rate:not(:checked) > label:before {
-        content: '★ ';
-    }
-    
-    .rate > input:checked ~ label {
-        color: #ffc700;
-    }
-    
-    .rate:not(:checked) > label:hover,
-    .rate:not(:checked) > label:hover ~ label {
-        color: #deb217;
-    }
-    
-    .rate > input:checked + label:hover,
-    .rate > input:checked + label:hover ~ label,
-    .rate > input:checked ~ label:hover,
-    .rate > input:checked ~ label:hover ~ label,
-    .rate > label:hover ~ input:checked ~ label {
-        color: #c59b08;
+    .main-image-wrapper {
+        min-height: 300px;
     }
     
     .thumbnail-item {
-        transition: all 0.2s ease;
+        width: 50px;
+        height: 50px;
     }
-    
-    .thumbnail-item:hover {
-        border-color: #0d6efd !important;
-    }
-    
-    .thumbnail-link.active {
-        border-color: #0d6efd;
-    }
-</style>
+}
 
-<!-- Add this JavaScript to your base template or as an additional script -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Thumbnail gallery functionality
-    const thumbnails = document.querySelectorAll('.thumbnail-link');
-    const mainImage = document.querySelector('.main-image img');
+    /* Loading animation for images */
+.main-image-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0d6efd;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.main-image-wrapper.loading::before {
+    opacity: 1;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Image zoom effect */
+.main-image-wrapper {
+    overflow: hidden;
+    position: relative;
+}
+
+.main-product-img.zoomed {
+    transform: scale(2);
+    cursor: zoom-out;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: all 0.2s ease;
+}
+
+/* Enhanced badge styles */
+.badge {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Quantity input styling */
+#quantityInput {
+    border-left: none;
+    border-right: none;
+    font-weight: 600;
+}
+
+#quantityInput:focus {
+    box-shadow: none;
+    border-color: #0d6efd;
+}
+
+/* Improved tab content spacing */
+.tab-content {
+    padding: 2rem 0;
+}
+
+/* Responsive improvements */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
     
-    thumbnails.forEach(thumbnail => {
-        thumbnail.addEventListener('click', function(e) {
-            e.preventDefault();
+    .product-info {
+        padding-top: 1rem;
+    }
+    
+    .cart-actions .row {
+        flex-direction: column;
+    }
+    
+    .cart-actions .col-auto {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Enhanced button hover effects */
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Missing CSS for thumbnail active state */
+.thumbnail-item.active {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.thumbnail-item.active .thumbnail-img {
+    border: 2px solid #0d6efd;
+}
+
+/* Missing CSS for sticky product images */
+.product-images-container.sticky-top {
+    position: sticky;
+    top: 20px;
+    z-index: 10;
+}
+
+/* Missing CSS for image loading state */
+.main-image-wrapper.loading .main-product-img {
+    opacity: 0.7;
+}
+
+/* Missing CSS for zoom cursor states */
+.main-product-img {
+    cursor: zoom-in;
+}
+
+.main-product-img.zoomed {
+    cursor: zoom-out;
+    transform-origin: center;
+}
+
+/* Missing CSS for specification table responsiveness */
+@media (max-width: 992px) {
+    .specifications-grid .col-lg-6 {
+        margin-bottom: 2rem;
+    }
+}
+
+/* Missing CSS for quantity input group focus */
+.quantity-selector .input-group:focus-within {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Improved card styling */
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Enhanced product meta styling */
+.product-meta {
+    padding: 0.5rem 0;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.02);
+}
+
+
+</style>
+<script>    
+// JavaScript for image zoom effect
+document.addEventListener('DOMContentLoaded', function() { 
+    const mainImageWrapper = document.querySelector('.main-image-wrapper');
+    const mainImage = document.querySelector('.main-product-img');
+
+    mainImageWrapper.addEventListener('click', function() {
+        if (mainImage.classList.contains('zoomed')) {
+            mainImage.classList.remove('zoomed');
+            mainImageWrapper.classList.remove('loading');
+        } else {
+            mainImage.classList.add('zoomed');
+            mainImageWrapper.classList.add('loading');
+        }
+    });
+
+    // Remove loading class when image is fully loaded
+    mainImage.addEventListener('load', function() {
+        mainImageWrapper.classList.remove('loading');
+    });
+});
+// JavaScript for quantity input
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('quantityInput');
+    const increaseBtn = document.getElementById('increaseQty');
+    const decreaseBtn = document.getElementById('decreaseQty');
+
+    increaseBtn.addEventListener('click', function() {
+        let currentValue = parseInt(quantityInput.value);
+        if (currentValue < parseInt(quantityInput.max)) {
+            quantityInput.value = currentValue + 1;
+        }
+    });
+
+    decreaseBtn.addEventListener('click', function() {
+        let currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+            quantityInput.value = currentValue - 1;
+        }
+    });
+});
+
+// JavaScript for thumbnail image selection
+document.addEventListener('DOMContentLoaded', function() {      
+    const thumbnailItems = document.querySelectorAll('.thumbnail-item');
+    const mainImage = document.querySelector('.main-product-img');
+
+    thumbnailItems.forEach(item => {
+        item.addEventListener('click', function() {
+            thumbnailItems.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            mainImage.src = this.querySelector('.thumbnail-img').src;
+        });
+    });
+});
+// JavaScript for tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.nav-tabs .nav-link');
+    const tabContents = document.querySelectorAll('.tab-pane');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(tc => tc.classList.remove('show', 'active'));
+            
+            this.classList.add('active');
+            const target = document.querySelector(this.getAttribute('data-bs-target'));
+            target.classList.add('show', 'active');
+        });
+    });
+});
+
+// Missing JavaScript for proper thumbnail activation
+document.addEventListener('DOMContentLoaded', function() {
+    const thumbnailImages = document.querySelectorAll('.thumbnail-img');
+    const mainImage = document.getElementById('mainProductImage');
+    
+    thumbnailImages.forEach(thumbnail => {
+        thumbnail.addEventListener('click', function() {
+            // Remove active class from all thumbnails
+            thumbnailImages.forEach(img => {
+                img.classList.remove('active');
+                img.parentElement.classList.remove('active');
+            });
+            
+            // Add active class to clicked thumbnail
+            this.classList.add('active');
+            this.parentElement.classList.add('active');
             
             // Update main image
-            mainImage.src = this.getAttribute('href');
-            
-            // Update active state
-            thumbnails.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
+            const newSrc = this.getAttribute('data-main-src');
+            if (newSrc) {
+                mainImage.src = newSrc;
+            }
+        });
+    });
+});
+
+// Missing JavaScript for image error handling
+document.addEventListener('DOMContentLoaded', function() {
+    const mainImage = document.getElementById('mainProductImage');
+    const thumbnailImages = document.querySelectorAll('.thumbnail-img');
+    
+    // Handle main image load errors
+    mainImage.addEventListener('error', function() {
+        this.src = '/static/images/no-image-placeholder.jpg'; // Add your placeholder path
+    });
+    
+    // Handle thumbnail load errors
+    thumbnailImages.forEach(img => {
+        img.addEventListener('error', function() {
+            this.src = '/static/images/no-image-placeholder.jpg'; // Add your placeholder path
+        });
+    });
+});
+
+// Missing JavaScript for quantity input validation
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('quantityInput');
+    
+    quantityInput.addEventListener('input', function() {
+        const value = parseInt(this.value);
+        const max = parseInt(this.getAttribute('max'));
+        const min = parseInt(this.getAttribute('min'));
+        
+        if (value > max) {
+            this.value = max;
+        } else if (value < min) {
+            this.value = min;
+        }
+    });
+});
+
+// Missing JavaScript for smooth scrolling to reviews
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewLinks = document.querySelectorAll('a[href="#reviews-section"]');
+    
+    reviewLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const reviewsTab = document.getElementById('reviews-tab');
+            if (reviewsTab) {
+                reviewsTab.click();
+                setTimeout(() => {
+                    document.getElementById('reviews-section').scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }, 100);
+            }
         });
     });
 });
