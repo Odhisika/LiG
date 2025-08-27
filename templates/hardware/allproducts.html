@@ -1,71 +1,504 @@
-
-
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
-
 {% block content %}
 
-
-
-
-
-<!-- ========================= SECTION MAIN ========================= -->
-<section class="section-intro padding-y-sm">
-<div class="container">
-
-<div class="intro-banner-wrap">
-	<img src="{% static 'images/banners/banner1.jpg' %}" class="img-fluid rounded">
-</div>
-
-</div> <!-- container //  -->
+<!-- Hero Banner Section -->
+<section class="hero-banner">
+    <div class="container-fluid px-0">
+        <div class="banner-container position-relative">
+            <img src="{% static 'images/banners/banner1.jpg' %}" class="hero-image img-fluid w-100" alt="Banner">
+            <div class="banner-overlay">
+                <div class="container">
+                    <div class="banner-content">
+                        <h1 class="banner-title">Find Everything You Need</h1>
+                        <p class="banner-subtitle">Discover amazing products at unbeatable prices</p>
+                        <a href="{% url 'store' %}" class="btn btn-primary btn-lg">Shop Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
-<!-- ========================= SECTION MAIN END// ========================= -->
 
-<!-- ========================= SECTION  ========================= -->
-<section class="section-name padding-y-sm">
-<div class="container">
+<!-- Products Section -->
+<section class="products-section py-5">
+    <div class="container">
+        <!-- Section Header -->
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title mb-1">Popular Products</h2>
+                <p class="section-subtitle text-muted mb-0">Trending items you might like</p>
+            </div>
+            <a href="{% url 'store' %}" class="btn btn-outline-primary">
+                See All Products
+                <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
 
+        <!-- Products Grid -->
+        <div class="row g-3">
+            {% for product in products %}
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="product-card h-100">
+                    <!-- Product Image -->
+                    <div class="product-image-container">
+                        <a href="{{ product.get_url }}" class="product-link">
+                            <img src="{{ product.primary_image_url }}" 
+                                 alt="{{ product.product_name }}" 
+                                 class="product-image">
+                        </a>
+                        {% if product.get_discount_percentage > 0 %}
+                        <span class="discount-badge">-{{ product.get_discount_percentage }}%</span>
+                        {% endif %}
+                        <div class="product-actions">
+                            <button class="action-btn wishlist-btn" title="Add to Wishlist">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <button class="action-btn compare-btn" title="Compare">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                        </div>
+                    </div>
 
+                    <!-- Product Info -->
+                    <div class="product-info">
+                        <h3 class="product-title">
+                            <a href="{{ product.get_url }}">{{ product.product_name }}</a>
+                        </h3>
+                        
+                        <!-- Rating -->
+                        <div class="product-rating mb-2">
+                            <div class="stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= product.averageReview %}
+                                        <i class="fas fa-star"></i>
+                                    {% elif forloop.counter|add:"-0.5" <= product.averageReview %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class="rating-count">({{ product.countReview }})</span>
+                        </div>
 
-<header class="section-heading">
-	<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
-	<h3 class="section-title">Popular products</h3>
-</header>
+                        <!-- Price -->
+                        <div class="product-price">
+                            <span class="current-price">GHS {{ product.price|intcomma }}</span>
+                            {% if product.compare_price and product.compare_price > product.price %}
+                            <span class="original-price">GHS {{ product.compare_price|intcomma }}</span>
+                            {% endif %}
+                        </div>
 
-	
-<div class="row">
-	{% for product in products %}
-	<div class="col-md-3">
-		<div class="card card-product-grid">
-			<a href="{{ product.get_url }}" class="product-link">
-				<img src="{{ product.primary_image_url }}" 
-					 alt="{{ product.product_name }}" 
-					 class="product-image">
-			</a>
-			<figcaption class="info-wrap">
-				<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
-				<div class="price mt-1">GHS {{ product.price|intcomma }}</div> <!-- price-wrap.// -->
-				<div class="rating-star">
-					<span>
-						<i class="fa fa-star{% if product.averageReview < 0.5 %}-o{% elif product.averageReview >= 0.5 and product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if product.averageReview < 1.5 %}-o{% elif product.averageReview >= 1.5 and product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if product.averageReview < 2.5 %}-o{% elif product.averageReview >= 2.5 and product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if product.averageReview < 3.5 %}-o{% elif product.averageReview >= 3.5 and product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-						<i class="fa fa-star{% if product.averageReview < 4.5 %}-o{% elif product.averageReview >= 4.5 and product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-						</span>
-				</div>
-			</figcaption>
-		</div>
-	</div> <!-- col.// -->
-	{% endfor %}
-</div> <!-- row.// -->
+                        <!-- Stock Status -->
+                        <div class="stock-status mb-3">
+                            {% if product.stock > 0 %}
+                                {% if product.stock <= 10 %}
+                                    <span class="stock-low">Only {{ product.stock }} left in stock</span>
+                                {% else %}
+                                    <span class="stock-available">In Stock</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="stock-out">Out of Stock</span>
+                            {% endif %}
+                        </div>
 
-</div><!-- container // -->
+                        <!-- Add to Cart Button -->
+                        <form action="{% url 'add_cart' product.id %}" method="POST" class="add-to-cart-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            {% if product.stock > 0 %}
+                            <button type="submit" class="btn btn-primary btn-add-cart w-100">
+                                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                                Out of Stock
+                            </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Load More Button -->
+        <div class="text-center mt-5">
+            <a href="{% url 'store' %}" class="btn btn-outline-primary btn-lg">
+                View All Products
+                <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
 </section>
-<!-- ========================= SECTION  END// ========================= -->
 
-</body>
-</html>
+<style>
+/* Hero Banner Styles */
+.hero-banner {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.banner-container {
+    height: 400px;
+    overflow: hidden;
+    border-radius: 0;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
+    display: flex;
+    align-items: center;
+}
+
+.banner-content {
+    color: white;
+    max-width: 500px;
+}
+
+.banner-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.banner-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* Section Header */
+.section-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1rem;
+}
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #232f3e;
+    margin-bottom: 0;
+}
+
+.section-subtitle {
+    font-size: 0.95rem;
+}
+
+/* Product Card Styles */
+.product-card {
+    background: white;
+    border: 1px solid #e7e7e7;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.product-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    border-color: #ddd;
+}
+
+.product-image-container {
+    position: relative;
+    background: #f8f9fa;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+.discount-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #ff4444;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 2;
+}
+
+.product-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-card:hover .product-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.product-info {
+    padding: 1rem;
+}
+
+.product-title {
+    margin-bottom: 0.5rem;
+}
+
+.product-title a {
+    color: #232f3e;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-title a:hover {
+    color: #007185;
+}
+
+.product-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stars {
+    color: #ffa500;
+    font-size: 0.85rem;
+}
+
+.stars i {
+    margin-right: 1px;
+}
+
+.rating-count {
+    color: #007185;
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+.rating-count:hover {
+    text-decoration: underline;
+}
+
+.product-price {
+    margin-bottom: 0.75rem;
+}
+
+.current-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #232f3e;
+}
+
+.original-price {
+    font-size: 0.9rem;
+    color: #999;
+    text-decoration: line-through;
+    margin-left: 0.5rem;
+}
+
+.stock-status {
+    font-size: 0.8rem;
+}
+
+.stock-available {
+    color: #007600;
+    font-weight: 500;
+}
+
+.stock-low {
+    color: #ff6600;
+    font-weight: 500;
+}
+
+.stock-out {
+    color: #cc0000;
+    font-weight: 500;
+}
+
+.btn-add-cart {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-add-cart:hover {
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .banner-title {
+        font-size: 2rem;
+    }
+    
+    .banner-subtitle {
+        font-size: 1rem;
+    }
+    
+    .banner-container {
+        height: 250px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: start !important;
+        gap: 1rem;
+    }
+    
+    .product-actions {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 576px) {
+    .products-section {
+        padding: 2rem 0;
+    }
+    
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .row {
+        margin-left: -0.375rem;
+        margin-right: -0.375rem;
+    }
+    
+    .row > * {
+        padding-left: 0.375rem;
+        padding-right: 0.375rem;
+    }
+}
+
+/* Loading Animation */
+.product-image {
+    transition: opacity 0.3s ease;
+}
+
+.product-image[src=""] {
+    opacity: 0;
+}
+
+/* Hover Effects */
+.product-link {
+    display: block;
+    text-decoration: none;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add to cart with loading state
+    const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+    
+    addToCartForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const button = this.querySelector('.btn-add-cart');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding...';
+            button.disabled = true;
+            
+            // Re-enable button after 2 seconds (adjust based on your backend response time)
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 2000);
+        });
+    });
+    
+    // Wishlist functionality (placeholder)
+    const wishlistBtns = document.querySelectorAll('.wishlist-btn');
+    
+    wishlistBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                this.style.color = '#ff4444';
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                this.style.color = '';
+            }
+        });
+    });
+    
+    // Image lazy loading
+    const productImages = document.querySelectorAll('.product-image');
+    
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.style.opacity = '1';
+                observer.unobserve(img);
+            }
+        });
+    });
+    
+    productImages.forEach(img => {
+        imageObserver.observe(img);
+    });
+});
+</script>
 
 {% endblock %}
