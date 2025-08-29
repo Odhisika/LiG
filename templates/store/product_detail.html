@@ -241,38 +241,29 @@
                     </div>
                     
                     <!-- Add to Cart Form -->
-                    <form action="{% url 'add_cart' single_product.id %}" method="POST" class="mb-4">
-                        {% csrf_token %}
-                        <div class="cart-actions">
-                            <div class="row g-3">
-                                <div class="col-auto">
-                                    <div class="quantity-selector">
-                                        <label class="form-label small fw-semibold">Quantity:</label>
-                                        <div class="input-group" style="width: 120px;">
-                                            <button class="btn btn-outline-secondary" type="button" id="decreaseQty">-</button>
-                                            <input type="number" class="form-control text-center" name="quantity" value="1" min="1" max="{{ single_product.stock }}" id="quantityInput">
-                                            <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
-                                        </div>
-                                    </div>
+                <form action="{% url 'add_cart' single_product.id %}" method="POST" class="mb-4">
+                    {% csrf_token %}
+                    <div class="cart-actions">
+                        <div class="row g-3">
+                            <!-- Add to Cart Button -->
+                            <div class="col">
+                                {% if single_product.stock > 0 %}
+                                <div class="d-grid gap-2 d-md-flex">
+                                    <button type="submit" class="btn btn-primary btn-lg flex-grow-1" id="addToCartBtn">
+                                        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                    </button>
                                 </div>
-                                <div class="col">
-                                    {% if single_product.stock > 0 %}
-                                    <div class="d-grid gap-2 d-md-flex">
-                                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
-                                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-                                        </button>
-                                    </div>
-                                    {% else %}
-                                    <div class="d-grid">
-                                        <button type="button" class="btn btn-outline-primary btn-lg" disabled>
-                                            <i class="fas fa-bell me-2"></i>Notify When Available
-                                        </button>
-                                    </div>
-                                    {% endif %}
+                                {% else %}
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-outline-primary btn-lg" disabled>
+                                        <i class="fas fa-bell me-2"></i>Notify When Available
+                                    </button>
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
-                    </form>
+                    </div>
+                </form>
                 </div>
             </div>
         </div>
@@ -935,5 +926,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// JavaScript for enhanced quantity input with stock warning
+document.addEventListener("DOMContentLoaded", function() {
+    const decreaseBtn = document.getElementById("decreaseQty");
+    const increaseBtn = document.getElementById("increaseQty");
+    const qtyInput = document.getElementById("quantityInput");
+    const stockWarning = document.getElementById("stockWarning");
+    const addToCartBtn = document.getElementById("addToCartBtn");
+
+    const maxStock = parseInt(qtyInput.max);
+
+    function updateControls() {
+        let qty = parseInt(qtyInput.value);
+
+        // Prevent going below min
+        decreaseBtn.disabled = (qty <= 1);
+
+        // Prevent going above stock
+        if (qty >= maxStock) {
+            increaseBtn.disabled = true;
+            stockWarning.classList.remove("d-none"); // show warning
+        } else {
+            increaseBtn.disabled = false;
+            stockWarning.classList.add("d-none"); // hide warning
+        }
+    }
+
+    decreaseBtn.addEventListener("click", () => {
+        qtyInput.value = Math.max(1, parseInt(qtyInput.value) - 1);
+        updateControls();
+    });
+
+    increaseBtn.addEventListener("click", () => {
+        qtyInput.value = Math.min(maxStock, parseInt(qtyInput.value) + 1);
+        updateControls();
+    });
+
+    qtyInput.addEventListener("input", () => {
+        let value = parseInt(qtyInput.value);
+        if (isNaN(value) || value < 1) qtyInput.value = 1;
+        if (value > maxStock) qtyInput.value = maxStock;
+        updateControls();
+    });
+
+    // Initialize on load
+    updateControls();
+});
+
+
 </script>
 {% endblock %}
