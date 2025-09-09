@@ -8,6 +8,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -58,6 +60,7 @@ def transfer_guest_cart_to_user(request, user):
         pass
 
 
+
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -71,37 +74,41 @@ def register(request):
 
             # Create user
             user = Account.objects.create_user(
-                first_name=first_name, 
-                last_name=last_name, 
-                email=email, 
-                username=username, 
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                username=username,
                 password=password
             )
             user.phone_number = phone_number
             user.save()
 
             # Create a user profile
-            profile = UserProfile.objects.create(
+            UserProfile.objects.create(
                 user=user,
                 profile_picture='default/default-user.png'
             )
 
-            # USER ACTIVATION
+            # USER ACTIVATION EMAIL
             current_site = get_current_site(request)
             mail_subject = 'Please activate your account'
-            message = render_to_string('accounts/account_verification_email.html', {
+            context = {
                 'user': user,
                 'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),  # Fixed syntax issue
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
-            })
-            to_email = email
-            
+            }
+
+            # Render templates
+            text_content = render_to_string('accounts/account_verification_email.txt', context)
+            html_content = render_to_string('accounts/account_verification_email.html', context)
+
             try:
-                send_email = EmailMessage(mail_subject, message, to=[to_email])
-                send_email.send()
+                email_message = EmailMultiAlternatives(mail_subject, text_content, to=[email])
+                email_message.attach_alternative(html_content, "text/html")
+                email_message.send()
             except Exception as e:
-                print(f"Email sending failed: {e}")  # Log the error for debugging
+                print(f"Email sending failed: {e}")  # Debugging
 
             # Redirect to login with verification message
             redirect_url = reverse('login') + f"?command=verification&email={email}"
@@ -112,6 +119,7 @@ def register(request):
 
     context = {'form': form}
     return render(request, 'accounts/register.html', context)
+
 
 
 def login(request):
@@ -194,17 +202,27 @@ def forgot_password(request):
             user = Account.objects.get(email=email)
             current_site = get_current_site(request)
             mail_subject = 'Reset Your Password'
-            message = render_to_string('accounts/reset_password_email.html', {
+
+            context = {
                 'user': user,
                 'domain': current_site.domain,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
-            })
-            EmailMessage(mail_subject, message, to=[email]).send()
+            }
+
+            # Render both templates
+            text_content = render_to_string('accounts/password_reset_email.txt', context)
+            html_content = render_to_string('accounts/reset_password_email.html', context)
+
+            # Send multi-part email
+            email_message = EmailMultiAlternatives(mail_subject, text_content, to=[email])
+            email_message.attach_alternative(html_content, "text/html")
+            email_message.send()
+
             messages.success(request, 'Password reset email sent.')
         except Account.DoesNotExist:
             messages.error(request, 'Account does not exist!')
-    
+
     return render(request, 'accounts/forgotPassword.html')
 
 

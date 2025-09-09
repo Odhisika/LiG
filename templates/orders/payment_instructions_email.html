@@ -1,9 +1,29 @@
-{% autoescape off %}
+{% extends "emails/base_email.html" %}
 
-Hi {{user.first_name}},
+{% block title %}Complete Your Payment{% endblock %}
+{% block header %}Order #{{ order.order_number }}{% endblock %}
 
-YOUR ORDER HAS BEEN RECIEVED
+{% block content %}
+Hi {{ user.first_name }},<br><br>
+Thank you for placing your order with us!<br><br>
 
-Order Number: {{order.order_number}}
+Here are the details of your order:
+<ul>
+  <li><b>Order Number:</b> {{ order.order_number }}</li>
+  <li><b>Total Amount:</b> GHS {{ order.order_total }}</li>
+</ul>
 
-{% endautoescape %}
+Please log in to your account and visit the <b>My Orders</b> page to complete your payment.  
+If you have already made the payment, kindly ignore this message.
+{% endblock %}
+
+{% block button %}
+<tr>
+  <td align="center" style="padding:20px;">
+    <span style="background:#6c757d; color:#fff; text-decoration:none;
+                 padding:15px 30px; border-radius:5px; font-size:16px; display:inline-block;">
+       Pay from My Orders
+    </span>
+  </td>
+</tr>
+{% endblock %}

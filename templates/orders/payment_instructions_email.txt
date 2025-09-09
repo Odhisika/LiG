@@ -1,0 +1,10 @@
+Hi {{ user.first_name }},
+
+Thank you for placing your order!
+
+Order Number: {{ order.order_number }}
+Total Amount: GHS {{ order.order_total }}
+
+
+
+If you have already paid, please ignore this email.

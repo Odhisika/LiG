@@ -1,10 +1,22 @@
-{% autoescape off %}
+{% extends "emails/base_email.html" %}
 
-Hi {{user.first_name}},
+{% block title %}Activate Your Account{% endblock %}
 
-Please click on below link to confirm your registration.
-http://{{domain}}{% url 'activate' uidb64=uid token=token %}
+{% block header %}Activate Your Account{% endblock %}
 
-If you think it's not you, please ignore this email.
+{% block content %}
+Hi {{ user.first_name }},<br><br>
+Thanks for signing up! Please confirm your email address by clicking the button below.
+{% endblock %}
 
-{% endautoescape %}
+{% block button %}
+<tr>
+  <td align="center" style="padding:20px;">
+    <a href="http://{{ domain }}{% url 'activate' uidb64=uid token=token %}"
+       style="background:#007bff; color:#fff; text-decoration:none;
+              padding:15px 30px; border-radius:5px; font-size:16px; display:inline-block;">
+      Confirm Your Account
+    </a>
+  </td>
+</tr>
+{% endblock %}

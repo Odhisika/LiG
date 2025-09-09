@@ -29,51 +29,61 @@ def place_order(request):
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
-            data = form.save(commit=False)
-            data.user = current_user
-            data.order_total = grand_total
-            data.tax = tax
-            data.ip = request.META.get('REMOTE_ADDR', '')
-            data.status = 'Pending Payment'
-            data.expires_at = now() + timedelta(days=7)
-            data.save()
+            # Create order
+            order = form.save(commit=False)
+            order.user = current_user
+            order.order_total = grand_total
+            order.tax = tax
+            order.ip = request.META.get('REMOTE_ADDR', '')
+            order.status = 'Pending Payment'
+            order.expires_at = now() + timedelta(days=7)
+            order.save()
 
             # Generate order number
-            data.save()
-            data.refresh_from_db()  # Ensures ID is present
-            data.order_number = now().strftime("%Y%m%d") + str(data.id)
-            data.save()
+            order.order_number = now().strftime("%Y%m%d") + str(order.id)
+            order.save()
 
             # Move cart items to OrderProduct
             for item in cart_items:
-                order_product = OrderProduct.objects.create(
-                    order=data,
+                OrderProduct.objects.create(
+                    order=order,
                     user=current_user,
                     product=item.product,
                     quantity=item.quantity,
                     product_price=item.product.price,
                     ordered=True
                 )
-                order_product.save()
 
             # Clear cart
             cart_items.delete()
 
-            # Send confirmation email with payment instructions
-            mail_subject = 'Order Placed - Make Payment'
-            message = render_to_string('orders/payment_instructions_email.html', {
-                'user': request.user,
-                'order': data,
-            })
+            # Send email
             try:
-                send_email = EmailMessage(mail_subject, message, to=[request.user.email])
-                send_email.send()
+                mail_subject = 'Order Placed - Make Payment'
+                context = {'user': current_user, 'order': order}
+                text_content = render_to_string('orders/payment_instructions_email.txt', context)
+                html_content = render_to_string('orders/payment_instructions_email.html', context)
+
+                email_message = EmailMultiAlternatives(mail_subject, text_content, to=[current_user.email])
+                email_message.attach_alternative(html_content, "text/html")
+                email_message.send()
             except Exception as e:
                 print(f"Email sending failed: {e}")
 
-            return redirect(reverse('order_complete', kwargs={'order_number': data.order_number}))
+            # ✅ Always redirect after successful order
+            return redirect(reverse('order_complete', kwargs={'order_number': order.order_number}))
 
+        else:
+            messages.error(request, "Invalid order details. Please check your form.")
+            return redirect('checkout')
+
+    # If GET request
     return redirect('checkout')
+
+
+
+
+
 
 
 @login_required

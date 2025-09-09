@@ -11,3 +11,11 @@ Error verifying payment PAY_D498DFEBB7CF: 'orders' is not a registered namespace
 Error verifying payment PAY_25EE3333AE1C: 'orders' is not a registered namespace
 Error verifying payment PAY_2769D9BA1469: 'orders' is not a registered namespace
 Error verifying payment PAY_2AA5F0A2BE02: 'orders' is not a registered namespace
+Payment verification failed for PAY_19B1B701AC81: {'status': True, 'message': 'Verification successful', 'data': {'id': 5279873954, 'domain': 'test', 'status': 'abandoned', 'reference': 'PAY_19B1B701AC81', 'receipt_number': None, 'amount': 400000, 'message': None, 'gateway_response': 'The transaction was not completed', 'paid_at': None, 'created_at': '2025-08-27T12:39:45.000Z', 'channel': 'card', 'currency': 'GHS', 'ip_address': '143.105.209.246', 'metadata': {'order_id': '11', 'order_number': '2025082611', 'payment_id': '16'}, 'log': None, 'fees': None, 'fees_split': None, 'authorization': {}, 'customer': {'id': 301884028, 'first_name': None, 'last_name': None, 'email': 'francisganyo64@gmail.com', 'customer_code': 'CUS_99b4vt3w1am5hb9', 'phone': None, 'metadata': None, 'risk_action': 'default', 'international_format_phone': None}, 'plan': None, 'split': {}, 'order_id': None, 'paidAt': None, 'createdAt': '2025-08-27T12:39:45.000Z', 'requested_amount': 400000, 'pos_transaction_data': None, 'source': None, 'fees_breakdown': None, 'connect': None, 'transaction_date': '2025-08-27T12:39:45.000Z', 'plan_object': {}, 'subaccount': {}}}
+Paystack API request failed: 400 Client Error: Bad Request for url: https://api.paystack.co/transaction/initialize
+Paystack API request failed: 400 Client Error: Bad Request for url: https://api.paystack.co/transaction/initialize
+Paystack API request failed: 400 Client Error: Bad Request for url: https://api.paystack.co/transaction/initialize
+Paystack API request failed: 400 Client Error: Bad Request for url: https://api.paystack.co/transaction/initialize
+Paystack API request failed: 400 Client Error: Bad Request for url: https://api.paystack.co/transaction/initialize
+Paystack API request failed: 400 Client Error: Bad Request for url: https://api.paystack.co/transaction/initialize
+Paystack API request failed: 400 Client Error: Bad Request for url: https://api.paystack.co/transaction/initialize
