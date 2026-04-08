@@ -11,9 +11,22 @@
 
     <hr>
     <div class="text-center mt-3">
-        <a href="{% url 'initialize_payment' order.id %}" class="btn btn-success">
-            Pay Now - GHS {{ order.order_total }}
-        </a>
+        <p class="text-muted mb-3">Select a payment method to complete your order:</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <!-- Paystack Button -->
+            <a href="{% url 'initialize_payment_gateway' order.id 'paystack' %}" class="btn btn-lg" style="background: #3AB83A; color: white;">
+                <i class="fas fa-credit-card me-2"></i>
+                Pay with Paystack
+            </a>
+            <!-- Hubtel Button -->
+            <a href="{% url 'initialize_payment_gateway' order.id 'hubtel' %}" class="btn btn-lg" style="background: #FF6600; color: white;">
+                <i class="fas fa-mobile-alt me-2"></i>
+                Pay with Hubtel
+            </a>
+        </div>
+        <div class="mt-3">
+            <strong>Total: GHS {{ order.order_total }}</strong>
+        </div>
     </div>
     
 </div>

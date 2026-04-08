@@ -40,6 +40,23 @@
                                 <p class="text-success fw-bold">GHS {{ payment.amount }}</p>
                             </div>
                             <div class="col-sm-6">
+                                <strong>Payment Gateway:</strong>
+                                <p class="text-muted">
+                                    {% if payment.gateway == 'hubtel' %}
+                                        <span class="badge" style="background: #FF6600; color: white;">
+                                            <i class="fas fa-mobile-alt me-1"></i> Hubtel
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-credit-card me-1"></i> Paystack
+                                        </span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-sm-6">
                                 <strong>Payment Method:</strong>
                                 <p class="text-muted">
                                     {% if payment.channel %}
@@ -48,14 +65,11 @@
                                             (****{{ payment.last4 }})
                                         {% endif %}
                                     {% else %}
-                                        Card Payment
+                                        {{ payment.gateway|title }}
                                     {% endif %}
                                 </p>
                             </div>
-                        </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-12">
+                            <div class="col-sm-6">
                                 <strong>Date:</strong>
                                 <p class="text-muted">{{ payment.created_at|date:"F d, Y g:i A" }}</p>
                             </div>
@@ -87,7 +101,18 @@
                     <div class="card-body">
                         <div class="row small">
                             <div class="col-6"><strong>Transaction ID:</strong></div>
-                            <div class="col-6">{{ payment.paystack_reference|default:payment.ref }}</div>
+                            <div class="col-6">
+                                {% if payment.gateway == 'hubtel' %}
+                                    {{ payment.hubtel_token|default:payment.ref }}
+                                {% else %}
+                                    {{ payment.paystack_reference|default:payment.ref }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-6"><strong>Gateway:</strong></div>
+                            <div class="col-6">
+                                {% if payment.gateway == 'hubtel' %}Hubtel{% else %}Paystack{% endif %}
+                            </div>
                             
                             {% if payment.bank %}
                             <div class="col-6"><strong>Bank:</strong></div>

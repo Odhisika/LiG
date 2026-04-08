@@ -1,0 +1,83 @@
+{% load static %}
+{% load humanize %}
+
+<div class="product-card h-100">
+    <!-- Product Image -->
+    <div class="product-image-container">
+        <a href="{{ product.get_url }}" class="product-link">
+            <img src="{{ product.primary_image_url }}" 
+                 alt="{{ product.product_name }}" 
+                 class="product-image">
+        </a>
+        {% if product.get_discount_percentage > 0 %}
+        <span class="discount-badge">-{{ product.get_discount_percentage }}%</span>
+        {% endif %}
+        <div class="product-actions">
+            <button class="action-btn wishlist-btn" title="Add to Wishlist">
+                <i class="far fa-heart"></i>
+            </button>
+            <button class="action-btn compare-btn" title="Compare">
+                <i class="fas fa-exchange-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="product-info">
+        <h3 class="product-title">
+            <a href="{{ product.get_url }}">{{ product.product_name }}</a>
+        </h3>
+        
+        <!-- Rating -->
+        <div class="product-rating mb-2">
+            <div class="stars">
+                {% for i in "12345" %}
+                    {% if forloop.counter <= product.averageReview %}
+                        <i class="fas fa-star"></i>
+                    {% elif forloop.counter|add:"-0.5" <= product.averageReview %}
+                        <i class="fas fa-star-half-alt"></i>
+                    {% else %}
+                        <i class="far fa-star"></i>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <span class="rating-count">({{ product.countReview }})</span>
+        </div>
+
+        <!-- Price -->
+        <div class="product-price">
+            <span class="current-price">GHS {{ product.price|intcomma }}</span>
+            {% if product.compare_price and product.compare_price > product.price %}
+            <span class="original-price">GHS {{ product.compare_price|intcomma }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Stock Status -->
+        <div class="stock-status mb-3">
+            {% if product.stock > 0 %}
+                {% if product.stock <= 10 %}
+                    <span class="stock-low">Only {{ product.stock }} left in stock</span>
+                {% else %}
+                    <span class="stock-available">In Stock</span>
+                {% endif %}
+            {% else %}
+                <span class="stock-out">Out of Stock</span>
+            {% endif %}
+        </div>
+
+        <!-- Add to Cart Button -->
+        <form action="{% url 'add_cart' product.id %}" method="POST" class="add-to-cart-form">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="1">
+            {% if product.stock > 0 %}
+            <button type="submit" class="btn btn-primary btn-add-cart w-100">
+                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+            </button>
+            {% else %}
+            <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                Out of Stock
+            </button>
+            {% endif %}
+        </form>
+    </div>
+</div>

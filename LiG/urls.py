@@ -31,6 +31,7 @@ sitemaps = {
 
 urlpatterns = [
     path('securelogin/', admin.site.urls),
+    path('dashboard/', include('analytics.urls')),
     path('', views.home, name='home'),
     path('store/', include('store.urls')),
     path("cart/", include("cart.urls")),

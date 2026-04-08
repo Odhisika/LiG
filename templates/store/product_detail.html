@@ -4,11 +4,26 @@
 {% load custom_filters %}
 
 {% block meta %}
-<meta name="description" content="{{ single_product.description|truncatewords:20 }}">
-<meta name="keywords" content="{{ single_product.tags|join:', ' }}">
-<title>{{ product.meta_title|default:product.product_name }} | LIG</title>
-<meta name="description" content="{{ product.meta_description|default:product.short_description }}">
-<meta property="og:title" content="{{ single_product.product_name }} | LIG">
+<title>{{ single_product.product_name }} | LiG - {{ single_product.price|floatformat:0 }} GHS</title>
+<meta name="description" content="{{ single_product.short_description|default:single_product.description|truncatewords:25 }}">
+<meta name="keywords" content="{{ single_product.tags }}">
+<meta property="og:type" content="product">
+<meta property="og:title" content="{{ single_product.product_name }} | LiG">
+<meta property="og:description" content="{{ single_product.short_description|default:single_product.description|truncatewords:25 }}">
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}">
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url }}">
+<meta property="og:site_name" content="LiG Store">
+<meta property="product:price:amount" content="{{ single_product.price }}">
+<meta property="product:price:currency" content="GHS">
+{% if single_product.condition == 'slightly_used' %}
+<meta property="og:availability" content="used">
+{% else %}
+<meta property="og:availability" content="new">
+{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ single_product.product_name }} | LiG">
+<meta name="twitter:description" content="{{ single_product.short_description|default:single_product.description|truncatewords:25 }}">
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}">
 {% endblock %}
 
 {% block title %}{{ single_product.product_name }} | LiG{% endblock %}
@@ -69,10 +84,10 @@
                             <!-- Main Product Image Thumbnail -->
                             {% if single_product.images %}
                             <div class="thumbnail-item">
-                                <img src="{{ single_product.images.url }}" 
+                                <img src="{{ single_product.primary_image_url }}" 
                                      class="thumbnail-img active" 
                                      alt="Product Image"
-                                     data-main-src="{{ single_product.images.url }}">
+                                     data-main-src="{{ single_product.primary_image_url }}">
                             </div>
                             {% endif %}
                             
@@ -96,27 +111,27 @@
                     <!-- Product Title and Brand -->
                     <div class="product-header mb-3">
                         {% if single_product.computerproduct.brand or single_product.peripheralproduct.brand %}
-                        <div class="brand-name mb-2">
-                            <span class="text-muted fs-6">Brand: </span>
-                            <span class="fw-bold text-primary">
+                        <div class="brand-name mb-1">
+                            <a href="#" class="text-decoration-none fw-bold" style="color: var(--royal-blue); font-size: 0.9rem;">
                                 {% if single_product.computerproduct %}
-                                    {{ single_product.computerproduct.brand.name }}
+                                    Visit the {{ single_product.computerproduct.brand.name }} Store
                                 {% elif single_product.peripheralproduct %}
-                                    {{ single_product.peripheralproduct.brand.name }}
+                                    Visit the {{ single_product.peripheralproduct.brand.name }} Store
                                 {% endif %}
-                            </span>
+                            </a>
                         </div>
                         {% endif %}
                         
-                        <h1 class="product-title h3 fw-bold mb-2 lh-base">{{ single_product.product_name }}</h1>
+                        <h1 class="product-title h4 fw-bold mb-2 lh-base" style="font-size: 1.5rem; letter-spacing: -0.2px;">{{ single_product.product_name }}</h1>
                         
                         <!-- SKU and Model -->
-                        <div class="product-meta mb-3">
-                            <span class="text-muted small me-3">SKU: <span class="fw-semibold">{{ single_product.sku }}</span></span>
+                        <div class="product-meta-inline d-flex align-items-center gap-3 mb-2">
+                            <span class="text-muted small">SKU: <span class="fw-semibold text-dark">{{ single_product.sku }}</span></span>
+                            <span class="text-muted" style="font-size: 0.8rem;">|</span>
                             {% if single_product.computerproduct.model_number %}
-                            <span class="text-muted small">Model: <span class="fw-semibold">{{ single_product.computerproduct.model_number }}</span></span>
+                            <span class="text-muted small">Model: <span class="fw-semibold text-dark">{{ single_product.computerproduct.model_number }}</span></span>
                             {% elif single_product.peripheralproduct.model_number %}
-                            <span class="text-muted small">Model: <span class="fw-semibold">{{ single_product.peripheralproduct.model_number }}</span></span>
+                            <span class="text-muted small">Model: <span class="fw-semibold text-dark">{{ single_product.peripheralproduct.model_number }}</span></span>
                             {% endif %}
                         </div>
                     </div>
@@ -145,103 +160,80 @@
                     </div>
                     
                     <!-- Pricing -->
-                    <div class="product-pricing mb-4">
-                        <div class="price-container">
-                            <div class="current-price">
-                                <span class="price-currency text-muted me-1">GHS</span>
-                                <span class="price-amount h2 fw-bold text-success mb-0">{{ single_product.price|floatformat:2|intcomma }}</span>
-                            </div>
-                            
-                            {% if single_product.compare_price and single_product.compare_price > single_product.price %}
-                            <div class="price-comparison mt-1">
-                                <span class="original-price text-muted text-decoration-line-through me-2">
-                                    Save GHS {{ single_product.compare_price|sub:single_product.price|floatformat:2|intcomma }}
-
-                                </span>
-                                <span class="badge bg-danger">
-                                    Save GHS {{ single_product.compare_price|sub:single_product.price|floatformat:2|intcomma }}
-                                </span>
-                            </div>
-                            {% endif %}
+                    <div class="product-pricing mb-3 pb-3 border-bottom">
+                        <div class="premium-price-display d-flex align-items-start gap-1">
+                            <span class="price-currency mt-2 fw-medium" style="font-size: 0.9rem; color: #565959;">GHS</span>
+                            <span class="price-amount-large fw-bold" style="font-size: 2.25rem; line-height: 1; color: #0F1111;">{{ single_product.price|floatformat:0|intcomma }}</span>
+                            <span class="price-decimal mt-2 fw-medium" style="font-size: 0.9rem; color: #565959;">00</span>
                         </div>
+                        
+                        {% if single_product.compare_price and single_product.compare_price > single_product.price %}
+                        <div class="price-comparison mt-2 d-flex align-items-center gap-2">
+                            <span class="text-muted small">List Price: <span class="text-decoration-line-through">GHS {{ single_product.compare_price|floatformat:2|intcomma }}</span></span>
+                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 py-1 px-2" style="font-size: 0.75rem;">
+                                Save {{ single_product.get_discount_percentage }}%
+                            </span>
+                        </div>
+                        {% endif %}
                     </div>
                     
-                    <!-- Key Features -->
+                    <!-- Key Features (About this item) -->
                     {% if single_product.computerproduct %}
-                    <div class="key-features mb-4">
-                        <h5 class="fw-bold mb-3">Key Features</h5>
-                        <div class="row g-2">
+                    <div class="key-highlights mb-4">
+                        <h6 class="fw-bold mb-3" style="color: #0F1111;">About this item</h6>
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
                             {% if single_product.computerproduct.processor_model %}
-                            <div class="col-md-6">
-                                <div class="feature-item p-2 bg-light rounded-2">
-                                    <i class="fas fa-microchip text-primary me-2"></i>
-                                    <small class="fw-semibold">{{ single_product.computerproduct.processor_model }}</small>
-                                </div>
-                            </div>
+                            <li class="d-flex align-items-start gap-2">
+                                <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                <span class="text-dark small"><span class="fw-bold text-muted">Processor:</span> {{ single_product.computerproduct.processor_model }}</span>
+                            </li>
                             {% endif %}
                             
                             {% if single_product.computerproduct.ram_size %}
-                            <div class="col-md-6">
-                                <div class="feature-item p-2 bg-light rounded-2">
-                                    <i class="fas fa-memory text-primary me-2"></i>
-                                    <small class="fw-semibold">{{ single_product.computerproduct.ram_size }}GB RAM</small>
-                                </div>
-                            </div>
+                            <li class="d-flex align-items-start gap-2">
+                                <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                <span class="text-dark small"><span class="fw-bold text-muted">RAM:</span> {{ single_product.computerproduct.ram_size }}GB DDR4 Memory</span>
+                            </li>
                             {% endif %}
                             
                             {% if single_product.computerproduct.storage_capacity %}
-                            <div class="col-md-6">
-                                <div class="feature-item p-2 bg-light rounded-2">
-                                    <i class="fas fa-hdd text-primary me-2"></i>
-                                    <small class="fw-semibold">{{ single_product.computerproduct.storage_capacity }}GB {{ single_product.computerproduct.get_storage_type_display }}</small>
-                                </div>
-                            </div>
+                            <li class="d-flex align-items-start gap-2">
+                                <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                <span class="text-dark small"><span class="fw-bold text-muted">Storage:</span> {{ single_product.computerproduct.storage_capacity }}GB {{ single_product.computerproduct.get_storage_type_display }}</span>
+                            </li>
                             {% endif %}
                             
                             {% if single_product.computerproduct.screen_size %}
-                            <div class="col-md-6">
-                                <div class="feature-item p-2 bg-light rounded-2">
-                                    <i class="fas fa-desktop text-primary me-2"></i>
-                                    <small class="fw-semibold">{{ single_product.computerproduct.screen_size }}" Display</small>
-                                </div>
-                            </div>
+                            <li class="d-flex align-items-start gap-2">
+                                <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                <span class="text-dark small"><span class="fw-bold text-muted">Display:</span> {{ single_product.computerproduct.screen_size }} inch Full HD Display</span>
+                            </li>
                             {% endif %}
-                        </div>
+                        </ul>
                     </div>
                     {% endif %}
                     
                     <!-- Stock and Availability -->
                     <div class="availability-section mb-4">
-                        <div class="stock-info p-3 bg-light rounded-3">
-                            <div class="row align-items-center">
-                                <div class="col-md-6">
-                                    <div class="stock-status">
-                                        {% if single_product.stock > 0 %}
-                                            <i class="fas fa-check-circle text-success me-2"></i>
-                                            <span class="fw-semibold text-success">In Stock</span>
-                                            {% if single_product.stock <= 10 %}
-                                                <span class="text-warning small d-block">Only {{ single_product.stock }} left!</span>
-                                            {% endif %}
-                                        {% else %}
-                                            <i class="fas fa-times-circle text-danger me-2"></i>
-                                            <span class="fw-semibold text-danger">Out of Stock</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-md-6 text-md-end">
-                                    {% if single_product.requires_shipping %}
-                                    <div class="shipping-info">
-                                        <i class="fas fa-truck text-primary me-1"></i>
-                                        <small class="text-muted">Free shipping available</small>
-                                    </div>
+                        <div class="availability-card p-3 border rounded-3 bg-white shadow-sm">
+                            <div class="d-flex flex-column gap-3">
+                                <div class="stock-info-premium">
+                                    {% if single_product.stock > 0 %}
+                                        <div class="text-success h5 fw-bold mb-1">In Stock</div>
+                                        <div class="text-muted small">Available for immediate delivery</div>
+                                    {% else %}
+                                        <div class="text-danger h5 fw-bold mb-1">Currently Unavailable</div>
+                                        <div class="text-muted small">We don't know when or if this item will be back in stock.</div>
                                     {% endif %}
                                 </div>
+                                
+
                             </div>
                         </div>
                     </div>
                     
                     <!-- Add to Cart Form -->
-                <form action="{% url 'add_cart' single_product.id %}" method="POST" class="mb-4">
+                <form action="{% url 'add_cart' single_product.id %}" method="POST" class="mb-3">
                     {% csrf_token %}
                     <div class="cart-actions">
                         <div class="row g-3">
@@ -264,6 +256,88 @@
                         </div>
                     </div>
                 </form>
+
+                <!-- Share Section -->
+                <div class="share-section mt-3 pt-3 border-top">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="share-text">
+                            <span class="text-muted small fw-medium"><i class="fas fa-share-alt me-1"></i> Share this product:</span>
+                        </div>
+                        <div class="share-buttons d-flex gap-2">
+                            <!-- Native Share Button (Mobile) -->
+                            <button onclick="shareProduct()" class="btn btn-outline-dark btn-share native-share-btn" id="nativeShareBtn" style="display: none;">
+                                <i class="fas fa-share-nodes"></i>
+                            </button>
+                            
+                            <!-- WhatsApp -->
+                            <a href="https://wa.me/?text={{ single_product.product_name|urlencode }}%0A%0A{{ single_product.short_description|default:single_product.description|truncatewords:15|urlencode }}%0A%0A{{ single_product.price|floatformat:0|intcomma }}%20GHS%0A%0ACheck%20it%20out:%20{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url|urlencode }}" 
+                               target="_blank" 
+                               class="btn btn-share whatsapp-brand" 
+                               title="Share on WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            
+                            <!-- Facebook -->
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url|urlencode }}" 
+                               target="_blank" 
+                               class="btn btn-share facebook-brand" 
+                               title="Share on Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            
+                            <!-- Twitter/X -->
+                            <a href="https://twitter.com/intent/tweet?text={{ single_product.product_name|urlencode }}%20-%20{{ single_product.price|floatformat:0|intcomma }}%20GHS&url={{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url|urlencode }}" 
+                               target="_blank" 
+                               class="btn btn-share x-twitter-brand" 
+                               title="Share on X (Twitter)">
+                                <i class="fab fa-x-twitter"></i>
+                            </a>
+                            
+                            <!-- Instagram -->
+                            <a href="https://instagram.com/" 
+                               target="_blank" 
+                               class="btn btn-share instagram-brand" 
+                               title="Share on Instagram"
+                               onclick="copyToClipboard('{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url|urlencode }}'); showToast('Link copied! Share to Instagram story or bio.'); return false;">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            
+                            <!-- Telegram -->
+                            <a href="https://t.me/share/url?url={{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url|urlencode }}&text={{ single_product.product_name|urlencode }}%20-%20{{ single_product.price|floatformat:0|intcomma }}%20GHS" 
+                               target="_blank" 
+                               class="btn btn-share telegram-brand" 
+                               title="Share on Telegram">
+                                <i class="fab fa-telegram-plane"></i>
+                            </a>
+                            
+                            <!-- Copy Link -->
+                            <button onclick="copyToClipboard('{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url|urlencode }}'); showToast('Link copied to clipboard!');" 
+                                    class="btn btn-outline-secondary btn-share link-brand" 
+                                    title="Copy Link">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            
+                            <!-- Email -->
+                            <a href="mailto:?subject=Check%20out%20this%20product%20-%20{{ single_product.product_name|urlencode }}&body=Hi,%0A%0AI%20thought%20you%20might%20like%20this:%0A%0A{{ single_product.product_name|urlencode }}%0A{{ single_product.short_description|default:single_product.description|truncatewords:20|urlencode }}%0A%0APrice:%20GHS%20{{ single_product.price|floatformat:0|intcomma }}%0A%0ACheck%20it%20out:%20{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url|urlencode }}" 
+                               class="btn btn-share email-brand" 
+                               title="Share via Email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toast Notification -->
+                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+                    <div id="shareToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body" id="toastMessage">
+                                Link copied!
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -304,9 +378,12 @@
                         <div class="tab-pane fade show active" id="description" role="tabpanel">
                             <div class="product-description">
                                 <h5 class="fw-bold mb-3">Product Description</h5>
-                                <div class="description-content">
-                                    {{ single_product.description|linebreaks }}
+                                <div class="description-wrapper" style="max-height: 300px; overflow-y: auto; padding-right: 10px; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; background: #f8f9fa;">
+                                    <div class="description-content">
+                                        {{ single_product.description|linebreaks }}
+                                    </div>
                                 </div>
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Scroll to read more</small>
                                 
                                 {% if single_product.short_description %}
                                 <div class="mt-4">
@@ -468,7 +545,136 @@
         </div>
     </div>
 </section>
+
+<!-- Related Products Section -->
+{% if related_products %}
+<section class="related-products-section py-5 bg-light">
+    <div class="container">
+        <h4 class="fw-bold mb-4">
+            <i class="fas fa-th-large text-primary me-2"></i>You May Also Like
+        </h4>
+        <div class="row g-4">
+            {% for product in related_products %}
+            <div class="col-lg-2 col-md-3 col-6">
+                <div class="card h-100 border-0 shadow-sm product-card">
+                    <a href="{{ product.get_url }}" class="img-wrap text-center py-3">
+                        <img src="{{ product.primary_image_url }}" 
+                             class="img-fluid" 
+                             style="max-height: 150px; object-fit: contain;"
+                             alt="{{ product.product_name }}">
+                    </a>
+                    <div class="card-body text-center">
+                        <h6 class="card-title text-truncate mb-2" style="font-size: 0.85rem;">
+                            <a href="{{ product.get_url }}" class="text-decoration-none text-dark">{{ product.product_name }}</a>
+                        </h6>
+                        <div class="price-tag fw-bold text-success">GHS {{ product.price|intcomma }}</div>
+                        {% if product.condition == 'slightly_used' %}
+                        <span class="badge bg-warning text-dark mt-2">Slightly Used</span>
+                        {% else %}
+                        <span class="badge bg-success mt-2">Fresh in Box</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<script>
+// Check for native share API support and show button
+document.addEventListener('DOMContentLoaded', function() {
+    if (navigator.share) {
+        document.getElementById('nativeShareBtn').style.display = 'inline-block';
+    }
+});
+
+// Native Web Share API function
+async function shareProduct() {
+    const productUrl = window.location.href;
+    const productName = "{{ single_product.product_name|escapejs }}";
+    const productPrice = "{{ single_product.price|floatformat:0|intcomma }} GHS";
+    const productDesc = "{{ single_product.short_description|default:single_product.description|truncatewords:20|escapejs }}";
+    const productImage = "{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}";
+    
+    const shareData = {
+        title: productName,
+        text: `${productName}\n\n${productDesc}\n\nPrice: ${productPrice}\n\nShop now:`,
+        url: productUrl,
+    };
+    
+    // Try to share with files (image) if supported
+    try {
+        if (navigator.canShare && navigator.canShare({ files: [new File([], '')] })) {
+            // Image sharing is supported
+            const imgResponse = await fetch(productImage);
+            const imgBlob = await imgResponse.blob();
+            const imgFile = new File([imgBlob], 'product.jpg', { type: imgBlob.type });
+            shareData.files = [imgFile];
+        }
+    } catch (err) {
+        console.log('File sharing not supported, sharing URL only');
+    }
+    
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            // Fallback to copying link
+            copyToClipboard(productUrl);
+            showToast('Link copied! Share it with friends.');
+        }
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            console.log('Error sharing:', err);
+            copyToClipboard(productUrl);
+            showToast('Link copied! Share it with friends.');
+        }
+    }
+}
+
+// Copy to clipboard function
+function copyToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+    } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+        document.body.removeChild(textArea);
+    }
+}
+
+// Show toast notification
+function showToast(message) {
+    const toastEl = document.getElementById('shareToast');
+    document.getElementById('toastMessage').textContent = message;
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+}
+</script>
+
 <style>
+/* Royal Blue Theme Variables */
+:root {
+    --royal-blue: #002366;
+    --royal-blue-light: #004e92;
+    --royal-blue-gradient: linear-gradient(135deg, #002366 0%, #004e92 100%);
+    --royal-blue-hover: linear-gradient(135deg, #001a4d 0%, #003d73 100%);
+    --amazon-black: #0F1111;
+    --amazon-gray: #565959;
+}
+
 /* Modern Product Detail Styles */
 .product-images-container {
     max-width: 100%;
@@ -486,26 +692,32 @@
 .thumbnail-item {
     width: 70px;
     height: 70px;
-    border: 2px solid #e9ecef;
+    border: 1px solid #e9ecef;
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    background: white;
+    padding: 2px;
 }
 
 .thumbnail-item:hover {
-    border-color: #0d6efd;
+    border-color: var(--royal-blue-light);
     transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
 .thumbnail-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    border-radius: 6px;
 }
 
-.thumbnail-img.active {
-    border-color: #0d6efd !important;
+.thumbnail-item.active {
+    border-color: var(--royal-blue) !important;
+    border-width: 2px;
+    box-shadow: 0 0 0 2px rgba(0, 35, 102, 0.1);
 }
 
 .product-title {
@@ -536,14 +748,24 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--royal-blue-gradient);
     border: none;
-    transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 35, 102, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+    background: var(--royal-blue-hover);
+    box-shadow: 0 5px 15px rgba(0, 35, 102, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-success {
@@ -578,9 +800,10 @@
 }
 
 .nav-tabs .nav-link.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--royal-blue-gradient);
     color: white;
     border-radius: 0.5rem 0.5rem 0 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
 
 .service-item {
@@ -770,6 +993,126 @@
     padding: 0.5rem 0;
     border-radius: 6px;
     background: rgba(0,0,0,0.02);
+}
+
+/* Share Button Styles */
+.share-section {
+    border-color: #e9ecef !important;
+}
+
+.btn-share {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 1rem;
+    border: none;
+    color: white !important;
+}
+
+.btn-share:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.whatsapp-brand { background-color: #25D366; }
+.facebook-brand { background-color: #1877F2; }
+.x-twitter-brand { 
+    background-color: #000000; 
+    border: 1px solid rgba(255,255,255,0.15) !important;
+}
+.x-twitter-brand i { 
+    color: #ffffff !important; 
+    font-size: 1.1rem;
+}
+.instagram-brand { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+.telegram-brand { background-color: #0088cc; }
+.email-brand { background-color: #EA4335; }
+.link-brand { background-color: #6c757d; }
+
+.btn-share.btn-outline-dark, .btn-share.btn-outline-secondary {
+    border: 1px solid #e9ecef !important;
+    background: white;
+    color: #495057 !important;
+}
+
+.share-buttons {
+    flex-wrap: wrap;
+    padding: 5px 0;
+}
+
+/* Sticky Image Column */
+.product-images-container.sticky-top {
+    position: sticky;
+    top: 30px;
+    z-index: 10;
+}
+
+/* Subtle animations */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.product-info {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.availability-card {
+    transition: all 0.3s ease;
+}
+
+.availability-card:hover {
+    border-color: var(--royal-blue-light) !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important;
+}
+
+.price-amount-large {
+    transition: color 0.3s ease;
+}
+
+.premium-price-display:hover .price-amount-large {
+    color: var(--royal-blue);
+}
+
+@media (max-width: 576px) {
+    .btn-share {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+    
+    .share-text {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .share-buttons {
+        justify-content: center;
+    }
+}
+
+/* Related products card hover effect */
+.product-card {
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.product-card .img-wrap {
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .img-wrap {
+    transform: scale(1.05);
 }
 
 

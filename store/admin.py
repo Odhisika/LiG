@@ -1,8 +1,9 @@
 from django.contrib import admin
 from .models import (
-    Product, ComputerProduct, SoftwareProduct, PeripheralProduct, 
+    Product, ComputerProduct, SoftwareProduct, PeripheralProduct,
     ReviewRating, ProductGallery, Brand, ProductSpecification,
-    ProductVariant, ProductTag, ProductTagRelation, ReviewHelpful
+    ProductVariant, ProductTag, ProductTagRelation, ReviewHelpful,
+    HomeBanner
 )
 
 
@@ -29,34 +30,42 @@ class ProductVariantInline(admin.TabularInline):
 class ReviewRatingInline(admin.TabularInline):
     model = ReviewRating
     extra = 0
-    fields = ('user', 'rating', 'subject', 'status')
-    readonly_fields = ('user', 'rating', 'subject', 'created_at')
+    readonly_fields = ('user', 'subject', 'review', 'rating', 'ip', 'status', 'created_at', 'updated_at')
+    can_delete = False
+    fields = ('user', 'subject', 'rating', 'status', 'created_at')
 
 
-# Base Product Admin
+class ProductTagRelationInline(admin.TabularInline):
+    model = ProductTagRelation
+    extra = 1
+    fields = ('tag',)
+
+
+# Admin Classes
 class ProductAdmin(admin.ModelAdmin):
-    list_display = [
-        'product_name', 'sku', 'category', 'price', 'stock', 
-        'is_available', 'is_featured', 'created_date'
-    ]
-    list_filter = [
-        'category', 'is_available', 'is_featured', 'is_digital', 
-        'requires_shipping', 'created_date'
-    ]
-    search_fields = ['product_name', 'sku', 'description', 'tags']
-    prepopulated_fields = {'slug': ('product_name',)}
-    list_editable = ['price', 'stock', 'is_available', 'is_featured']
-    list_per_page = 25
-    ordering = ['-created_date']
-    
+    list_display = ('product_name', 'price', 'stock', 'is_available', 'created_date', 'modified_date', 'is_featured')
+    list_editable = ('price', 'stock', 'is_available', 'is_featured')
+    list_filter = ('is_available', 'is_featured', 'category', 'created_date')
+    search_fields = ('product_name', 'slug', 'description')
+    ordering = ('-created_date',)
+    readonly_fields = ('created_date', 'modified_date')
+    inlines = [ProductGalleryInline, ProductSpecificationInline, ProductVariantInline, ProductTagRelationInline]
+
     fieldsets = (
         ('Basic Information', {
-            'fields': ('product_name', 'slug', 'description', 'short_description', 'category')
+            'fields': ('product_name', 'slug', 'category', 'brand', 'short_description')
         }),
-        ('Pricing & Inventory', {
+        ('Description', {
+            'fields': ('description',)
+        }),
+        ('Pricing', {
             'fields': (
                 ('price', 'compare_price', 'cost_price'),
-                ('sku', 'barcode'),
+                ('barcode',),
+            )
+        }),
+        ('Inventory', {
+            'fields': (
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders')
             )
@@ -64,7 +73,8 @@ class ProductAdmin(admin.ModelAdmin):
         ('Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital')
+                ('requires_shipping', 'is_digital'),
+                'condition'
             )
         }),
         ('SEO & Marketing', {
@@ -72,452 +82,242 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Physical Properties', {
-            'fields': (
-                'weight',
-                ('dimensions_length', 'dimensions_width', 'dimensions_height')
-            ),
+            'fields': ('weight', 'dimensions'),
             'classes': ('collapse',)
-        }),
-        ('Media', {
-            'fields': ('images',)
         }),
         ('Timestamps', {
             'fields': ('created_date', 'modified_date'),
             'classes': ('collapse',)
         })
     )
-    
-    readonly_fields = ('created_date', 'modified_date')
-    inlines = [ProductGalleryInline, ProductSpecificationInline]
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('category')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('slug', 'created_date', 'modified_date')
+        return ('created_date', 'modified_date')
 
 
-# Computer Product Admin
 class ComputerProductAdmin(admin.ModelAdmin):
-    list_display = [
-        'product_name', 'brand', 'computer_type', 'price', 'stock',
-        'get_processor_info', 'get_ram_info', 'get_storage_info',
-        'screen_size', 'is_available', 'created_date'
-    ]
-    list_filter = [
-        'brand', 'computer_type', 'processor_brand', 'operating_system',
-        'is_available', 'is_featured', 'created_date'
-    ]
-    search_fields = [
-        'product_name', 'brand__name', 'model_number', 'processor_model',
-        'sku', 'description'
-    ]
-    prepopulated_fields = {'slug': ('product_name',)}
-    list_editable = ['price', 'stock', 'is_available']
-    list_per_page = 25
-    ordering = ['-created_date']
-    
+    list_display = ('product_name', 'price', 'stock', 'brand', 'condition', 'is_available')
+    list_editable = ('price', 'stock', 'is_available')
+    list_filter = ['brand', 'condition', 'is_available', 'is_featured', 'created_date']
+    search_fields = ('product_name', 'slug', 'description')
+    ordering = ('-created_date',)
+    readonly_fields = ('created_date', 'modified_date')
+    inlines = [ProductGalleryInline, ProductSpecificationInline, ProductTagRelationInline]
+
     fieldsets = (
         ('Basic Information', {
-            'fields': (
-                'product_name', 'slug', 'description', 'short_description',
-                'category', 'brand', 'model_number', 'computer_type'
-            )
+            'fields': ('product_name', 'slug', 'category', 'brand', 'short_description')
+        }),
+        ('Description', {
+            'fields': ('description',)
         }),
         ('Pricing & Inventory', {
             'fields': (
                 ('price', 'compare_price', 'cost_price'),
-                ('sku', 'barcode'),
+                ('barcode',),
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders')
             )
         }),
-        ('Processor Specifications', {
-            'fields': (
-                ('processor_brand', 'processor_model'),
-                ('processor_generation', 'processor_cores'),
-                'processor_speed'
-            )
-        }),
-        ('Memory & Storage', {
-            'fields': (
-                ('ram_size', 'ram_type'),
-                ('ram_expandable', 'max_ram'),
-                ('storage_capacity', 'storage_type'),
-                'additional_storage_slots'
-            )
-        }),
-        ('Graphics', {
-            'fields': (
-                ('gpu_brand', 'gpu_model'),
-                'gpu_memory'
-            )
-        }),
-        ('Display', {
-            'fields': (
-                ('screen_size', 'screen_resolution'),
-                ('screen_type', 'refresh_rate'),
-                'touchscreen'
-            )
-        }),
-        ('System & Features', {
-            'fields': (
-                'operating_system',
-                ('wifi_standard', 'bluetooth_version'),
-                ('webcam', 'fingerprint_reader', 'backlit_keyboard')
-            )
-        }),
-        ('Physical Properties', {
-            'fields': (
-                ('battery_life', 'color'),
-                'weight',
-                ('dimensions_length', 'dimensions_width', 'dimensions_height')
-            ),
-            'classes': ('collapse',)
-        }),
         ('Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital')
+                ('requires_shipping', 'is_digital'),
+                'condition'
             )
         }),
-        ('SEO & Other', {
-            'fields': (
-                'meta_title', 'meta_description', 'tags',
-                'warranty_period'
-            ),
+        ('SEO & Marketing', {
+            'fields': ('meta_title', 'meta_description', 'tags'),
             'classes': ('collapse',)
         }),
-        ('Media', {
-            'fields': ('images',)
+        ('Physical Properties', {
+            'fields': ('weight', 'dimensions'),
+            'classes': ('collapse',)
         }),
         ('Timestamps', {
             'fields': ('created_date', 'modified_date'),
             'classes': ('collapse',)
         })
     )
-    
-    readonly_fields = ('created_date', 'modified_date')
-    inlines = [ProductGalleryInline, ProductSpecificationInline, ProductVariantInline]
-    
-    def get_processor_info(self, obj):
-        if obj.processor_brand and obj.processor_model:
-            return f"{obj.processor_brand} {obj.processor_model}"
-        return obj.processor_brand or obj.processor_model or '-'
-    get_processor_info.short_description = 'Processor'
-    
-    def get_ram_info(self, obj):
-        if obj.ram_size and obj.ram_type:
-            return f"{obj.ram_size}GB {obj.ram_type}"
-        return f"{obj.ram_size}GB" if obj.ram_size else '-'
-    get_ram_info.short_description = 'RAM'
-    
-    def get_storage_info(self, obj):
-        if obj.storage_capacity and obj.storage_type:
-            return f"{obj.storage_capacity}GB {obj.storage_type}"
-        return f"{obj.storage_capacity}GB" if obj.storage_capacity else '-'
-    get_storage_info.short_description = 'Storage'
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('brand', 'computer_type', 'category')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('slug', 'created_date', 'modified_date')
+        return ('created_date', 'modified_date')
 
 
-# Software Product Admin
 class SoftwareProductAdmin(admin.ModelAdmin):
-    list_display = [
-        'product_name', 'software_type', 'version', 'license_type',
-        'get_platform_info', 'price', 'stock', 'is_available', 'created_date'
-    ]
-    list_filter = [
-        'software_type', 'license_type', 'is_available', 'is_featured',
-        'is_digital', 'created_date'
-    ]
-    search_fields = [
-        'product_name', 'software_type', 'version', 'developer',
-        'publisher', 'sku', 'description'
-    ]
-    prepopulated_fields = {'slug': ('product_name',)}
-    list_editable = ['price', 'stock', 'is_available']
-    list_per_page = 25
-    ordering = ['-created_date']
-    
+    list_display = ('product_name', 'price', 'stock', 'condition', 'is_available')
+    list_editable = ('price', 'stock', 'is_available')
+    list_filter = ['condition', 'is_available', 'is_featured', 'created_date']
+    search_fields = ('product_name', 'slug', 'description')
+    ordering = ('-created_date',)
+    readonly_fields = ('created_date', 'modified_date')
+    inlines = [ProductGalleryInline, ProductTagRelationInline]
+
     fieldsets = (
         ('Basic Information', {
+            'fields': ('product_name', 'slug', 'category', 'short_description')
+        }),
+        ('Description', {
+            'fields': ('description',)
+        }),
+        ('Pricing', {
             'fields': (
-                'product_name', 'slug', 'description', 'short_description',
-                'category'
+                ('price', 'compare_price'),
+                ('stock', 'is_available'),
             )
         }),
         ('Software Details', {
-            'fields': (
-                ('software_type', 'version'),
-                ('developer', 'publisher'),
-                'license_type', 'platforms',
-                'system_requirements'
-            )
-        }),
-        ('Pricing & Inventory', {
-            'fields': (
-                ('price', 'compare_price', 'cost_price'),
-                ('sku', 'barcode'),
-                ('stock', 'low_stock_threshold'),
-                ('track_inventory', 'allow_backorders')
-            )
-        }),
-        ('Digital Delivery', {
-            'fields': (
-                'download_link', 'license_key', 'installation_guide'
-            )
-        }),
-        ('Subscription Details', {
-            'fields': (
-                ('subscription_duration', 'max_devices')
-            ),
+            'fields': ('software_type', 'license_type', 'license_key', 'download_link'),
             'classes': ('collapse',)
         }),
         ('Product Status', {
             'fields': (
-                ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital')
+                ('is_featured', 'condition',)
             )
         }),
         ('SEO & Marketing', {
             'fields': ('meta_title', 'meta_description', 'tags'),
             'classes': ('collapse',)
         }),
-        ('Media', {
-            'fields': ('images',)
-        }),
         ('Timestamps', {
             'fields': ('created_date', 'modified_date'),
             'classes': ('collapse',)
         })
     )
-    
-    readonly_fields = ('created_date', 'modified_date')
-    inlines = [ProductGalleryInline, ProductSpecificationInline]
-    
-    def get_platform_info(self, obj):
-        return obj.platforms[:50] + '...' if len(obj.platforms) > 50 else obj.platforms
-    get_platform_info.short_description = 'Platforms'
 
 
-# Peripheral Product Admin
 class PeripheralProductAdmin(admin.ModelAdmin):
-    list_display = [
-        'product_name', 'brand', 'connectivity', 'get_compatibility_info',
-        'get_warranty_info', 'price', 'stock', 'is_available', 'created_date'
-    ]
-    list_filter = [
-        'brand', 'connectivity', 'battery_required', 'is_available',
-        'is_featured', 'created_date'
-    ]
-    search_fields = [
-        'product_name', 'brand__name', 'model_number', 'compatibility',
-        'sku', 'description'
-    ]
-    prepopulated_fields = {'slug': ('product_name',)}
-    list_editable = ['price', 'stock', 'is_available']
-    list_per_page = 25
-    ordering = ['-created_date']
-    
+    list_display = ('product_name', 'price', 'stock', 'brand', 'condition', 'is_available')
+    list_editable = ('price', 'stock', 'is_available')
+    list_filter = ['brand', 'condition', 'is_available', 'is_featured', 'created_date']
+    search_fields = ('product_name', 'slug', 'description')
+    ordering = ('-created_date',)
+    readonly_fields = ('created_date', 'modified_date')
+    inlines = [ProductGalleryInline, ProductSpecificationInline, ProductTagRelationInline]
+
     fieldsets = (
         ('Basic Information', {
-            'fields': (
-                'product_name', 'slug', 'description', 'short_description',
-                'category', 'brand', 'model_number'
-            )
+            'fields': ('product_name', 'slug', 'category', 'brand', 'short_description')
         }),
-        ('Connection & Compatibility', {
-            'fields': ('connectivity', 'compatibility')
+        ('Description', {
+            'fields': ('description',)
         }),
         ('Pricing & Inventory', {
             'fields': (
                 ('price', 'compare_price', 'cost_price'),
-                ('sku', 'barcode'),
+                ('barcode',),
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders')
             )
+        }),
+        ('Product Status', {
+            'fields': (
+                ('is_available', 'is_featured'),
+                ('requires_shipping', 'is_digital'),
+                'condition'
+            )
+        }),
+        ('SEO & Marketing', {
+            'fields': ('meta_title', 'meta_description', 'tags'),
+            'classes': ('collapse',)
         }),
         ('Physical Properties', {
-            'fields': (
-                ('color', 'material'),
-                'weight',
-                ('dimensions_length', 'dimensions_width', 'dimensions_height')
-            ),
+            'fields': ('weight', 'dimensions'),
             'classes': ('collapse',)
-        }),
-        ('Power & Battery', {
-            'fields': (
-                'battery_required',
-                ('battery_type', 'battery_life'),
-                'power_consumption'
-            ),
-            'classes': ('collapse',)
-        }),
-        ('Warranty', {
-            'fields': (
-                ('warranty_period', 'warranty_type')
-            )
-        }),
-        ('Product Status', {
-            'fields': (
-                ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital')
-            )
-        }),
-        ('SEO & Marketing', {
-            'fields': ('meta_title', 'meta_description', 'tags'),
-            'classes': ('collapse',)
-        }),
-        ('Media', {
-            'fields': ('images',)
         }),
         ('Timestamps', {
             'fields': ('created_date', 'modified_date'),
             'classes': ('collapse',)
         })
     )
-    
-    readonly_fields = ('created_date', 'modified_date')
-    inlines = [ProductGalleryInline, ProductSpecificationInline]
-    
-    def get_compatibility_info(self, obj):
-        return (obj.compatibility[:50] + '...') if len(obj.compatibility) > 50 else obj.compatibility
-    get_compatibility_info.short_description = 'Compatibility'
-    
-    def get_warranty_info(self, obj):
-        return obj.warranty_period if obj.warranty_period else '-'
-    get_warranty_info.short_description = 'Warranty'
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('brand', 'category')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('slug', 'created_date', 'modified_date')
+        return ('created_date', 'modified_date')
 
 
-# Brand Admin
-class BrandAdmin(admin.ModelAdmin):
-    list_display = ['name', 'is_active', 'website']
-    list_filter = ['is_active']
-    search_fields = ['name', 'description']
-    prepopulated_fields = {'slug': ('name',)}
-    list_editable = ['is_active']
-    
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('name', 'slug', 'description')
-        }),
-        ('Media & Links', {
-            'fields': ('logo', 'website')
-        }),
-        ('Status', {
-            'fields': ('is_active',)
-        })
-    )
-
-
-# Review Rating Admin
 class ReviewRatingAdmin(admin.ModelAdmin):
-    list_display = [
-        'product', 'user', 'rating', 'subject', 'verified_purchase',
-        'helpful_count', 'status', 'created_at'
-    ]
-    list_filter = [
-        'rating', 'status', 'verified_purchase', 'created_at'
-    ]
-    search_fields = [
-        'subject', 'review', 'product__product_name', 'user__username'
-    ]
-    list_editable = ['status']
-    readonly_fields = ('created_at', 'updated_at', 'ip', 'user_agent')
-    list_per_page = 25
-    
-    fieldsets = (
-        ('Review Information', {
-            'fields': ('product', 'user', 'subject', 'review', 'rating')
-        }),
-        ('Status & Verification', {
-            'fields': (
-                ('status', 'verified_purchase'),
-                ('helpful_count', 'moderated_by')
-            )
-        }),
-        ('Metadata', {
-            'fields': ('ip', 'user_agent'),
-            'classes': ('collapse',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        })
-    )
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('product', 'user')
+    list_display = ('user', 'product', 'subject', 'rating', 'status', 'created_at')
+    list_editable = ('status',)
+    list_filter = ('status', 'rating', 'created_at')
+    search_fields = ('subject', 'review', 'user__email', 'product__product_name')
+    readonly_fields = ('user', 'product', 'subject', 'review', 'rating', 'ip', 'created_at', 'updated_at')
+    ordering = ('-created_at',)
 
 
-# Product Gallery Admin
 class ProductGalleryAdmin(admin.ModelAdmin):
-    list_display = ['product', 'image_type', 'alt_text', 'order', 'is_active']
-    list_filter = ['image_type', 'is_active']
-    search_fields = ['product__product_name', 'alt_text']
-    list_editable = ['order', 'is_active']
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('product')
+    list_display = ('product', 'image', 'alt_text', 'image_type', 'order', 'is_active')
+    list_editable = ('alt_text', 'image_type', 'order', 'is_active')
+    list_filter = ('image_type', 'is_active')
+    search_fields = ('product__product_name', 'alt_text')
 
 
-# Product Specification Admin
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'is_active')
+    list_editable = ('is_active',)
+    search_fields = ('name', 'slug')
+    readonly_fields = ('slug',)
+
+
 class ProductSpecificationAdmin(admin.ModelAdmin):
-    list_display = ['product', 'name', 'value', 'group', 'order']
-    list_filter = ['group']
-    search_fields = ['product__product_name', 'name', 'value']
-    list_editable = ['order']
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('product')
+    list_display = ('product', 'name', 'value', 'group', 'order')
+    list_editable = ('value', 'group', 'order')
+    list_filter = ('group',)
+    search_fields = ('product__product_name', 'name', 'value')
 
 
-# Product Variant Admin
 class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ['product', 'sku', 'get_attributes', 'price', 'stock', 'is_active']
-    list_filter = ['is_active']
-    search_fields = ['product__product_name', 'sku']
-    list_editable = ['price', 'stock', 'is_active']
-    
-    def get_attributes(self, obj):
-        return ', '.join([f"{k}: {v}" for k, v in obj.attributes.items()])
-    get_attributes.short_description = 'Attributes'
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('product')
+    list_display = ('product', 'sku', 'price', 'compare_price', 'stock', 'is_active')
+    list_editable = ('price', 'compare_price', 'stock', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('sku', 'product__product_name')
+    readonly_fields = ('sku',)
 
 
-# Product Tag Admin
 class ProductTagAdmin(admin.ModelAdmin):
-    list_display = ['name', 'color']
-    search_fields = ['name']
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ('name', 'slug')
+    search_fields = ('name', 'slug')
+    readonly_fields = ('slug',)
 
 
-# Review Helpful Admin
+class ProductTagRelationAdmin(admin.ModelAdmin):
+    list_display = ('product', 'tag')
+    list_filter = ('tag',)
+    search_fields = ('product__product_name', 'tag__name')
+
+
 class ReviewHelpfulAdmin(admin.ModelAdmin):
-    list_display = ['review', 'user', 'is_helpful', 'created_at']
-    list_filter = ['is_helpful', 'created_at']
-    readonly_fields = ('created_at',)
+    list_display = ('review', 'user', 'is_helpful')
+    list_filter = ('is_helpful',)
 
 
-# Register all models
+# Register Admin Classes
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ComputerProduct, ComputerProductAdmin)
 admin.site.register(SoftwareProduct, SoftwareProductAdmin)
 admin.site.register(PeripheralProduct, PeripheralProductAdmin)
-admin.site.register(Brand, BrandAdmin)
 admin.site.register(ReviewRating, ReviewRatingAdmin)
 admin.site.register(ProductGallery, ProductGalleryAdmin)
+admin.site.register(Brand, BrandAdmin)
 admin.site.register(ProductSpecification, ProductSpecificationAdmin)
 admin.site.register(ProductVariant, ProductVariantAdmin)
 admin.site.register(ProductTag, ProductTagAdmin)
+admin.site.register(ProductTagRelation, ProductTagRelationAdmin)
 admin.site.register(ReviewHelpful, ReviewHelpfulAdmin)
+
+@admin.register(HomeBanner)
+class HomeBannerAdmin(admin.ModelAdmin):
+    list_display = ('slide_number', 'title_main', 'is_active', 'updated_at')
+    list_editable = ('is_active',)
+    list_filter = ('is_active',)
+    ordering = ('slide_number',)
 
 # Customize admin site
 admin.site.site_header = "LiG Store Administration"
 admin.site.site_title = "LiG Store Admin"
 admin.site.index_title = "Welcome to LiG Store Administration"
-

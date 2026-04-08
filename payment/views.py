@@ -1,4 +1,4 @@
-# payment/views.py - Enhanced debugging version
+# payment/views.py - Enhanced debugging version with Hubtel support
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
@@ -15,13 +15,14 @@ from .models import Payment
 from orders.models import Order
 from cart.models import Cart
 from .paystack import Paystack
+from .hubtel import Hubtel, HubtelException
 from cart.models import Cart, CartItem
 
 logger = logging.getLogger(__name__)
 
 
-def initialize_payment(request, order_id):
-    """Initialize payment for an order"""
+def initialize_payment(request, order_id, gateway='paystack'):
+    """Initialize payment for an order with selected gateway"""
     try:
         order = get_object_or_404(Order, id=order_id)
         
@@ -34,28 +35,41 @@ def initialize_payment(request, order_id):
         existing_payment = Payment.get_successful_payment_for_order(order)
         if existing_payment:
             messages.info(request, "This order has already been paid for.")
-            return redirect('order_complete', order_number=order.order_number)  
+            return redirect('order_complete', order_number=order.order_number)
         
-        # Check for pending payment and use it if exists
-        pending_payment = Payment.objects.filter(
-            order=order, 
-            status='pending'
-        ).first()
+        # Validate gateway
+        if gateway not in ['paystack', 'hubtel']:
+            messages.error(request, "Invalid payment gateway selected.")
+            return redirect('cart')
         
-        if pending_payment:
-            # Reuse existing pending payment
-            payment = pending_payment
+        # Delete any existing pending payments for this order
+        Payment.objects.filter(order=order, status='pending').delete()
+        
+        # Create new payment record with selected gateway
+        payment = Payment.objects.create(
+            user=order.user,
+            order=order,
+            amount=order.order_total,
+            email=order.email,
+            status='pending',
+            gateway=gateway
+        )
+        
+        if gateway == 'hubtel':
+            return _initialize_hubtel_payment(request, order, payment)
         else:
-            # Create new payment record
-            payment = Payment.objects.create(
-                user=order.user,
-                order=order,
-                amount=order.order_total,
-                email=order.email,
-                status='pending'
-            )
-        
-        # Initialize with Paystack
+            return _initialize_paystack_payment(request, order, payment)
+            
+    except Exception as e:
+        logger.error(f"Error initializing payment for order {order_id}: {str(e)}")
+        print(f"Full traceback in initialize_payment: {traceback.format_exc()}")
+        messages.error(request, "An error occurred while processing your payment. Please try again.")
+        return redirect('cart')
+
+
+def _initialize_paystack_payment(request, order, payment):
+    """Initialize Paystack payment"""
+    try:
         paystack = Paystack()
         callback_url = request.build_absolute_uri(reverse('verify_payment'))
         
@@ -74,31 +88,80 @@ def initialize_payment(request, order_id):
         )
         
         if success:
-            # Update payment with Paystack response data
             payment.paystack_reference = result.get('reference', payment.ref)
             payment.authorization_url = result.get('authorization_url')
             payment.access_code = result.get('access_code')
             payment.save()
             
-            # Redirect to Paystack
             return redirect(payment.authorization_url)
         else:
             messages.error(
                 request, 
-                f"Payment initialization failed: {result.get('message', 'Unknown error')}"
+                f"Paystack payment failed: {result.get('message', 'Unknown error')}"
             )
-            return redirect('order_complete', order_number=order.order_number)  # Fixed: use order_number
+            payment.status = 'failed'
+            payment.save()
+            return redirect('order_complete', order_number=order.order_number)
             
     except Exception as e:
-        logger.error(f"Error initializing payment for order {order_id}: {str(e)}")
-        print(f"Full traceback in initialize_payment: {traceback.format_exc()}")
-        messages.error(request, "An error occurred while processing your payment. Please try again.")
+        logger.error(f"Paystack initialization error: {str(e)}")
+        messages.error(request, "Payment gateway error. Please try again.")
+        payment.status = 'failed'
+        payment.save()
+        return redirect('cart')
+
+
+def _initialize_hubtel_payment(request, order, payment):
+    """Initialize Hubtel payment"""
+    try:
+        hubtel = Hubtel()
+        callback_url = request.build_absolute_uri(reverse('verify_payment'))
+        
+        description = f"Order {order.order_number} - LiG Store"
+        customer_name = f"{order.first_name} {order.last_name}".strip() or "Customer"
+        
+        success, result = hubtel.initialize_transaction(
+            amount=float(payment.amount),
+            description=description,
+            customer_email=payment.email,
+            customer_name=customer_name,
+            reference=payment.ref,
+            callback_url=callback_url,
+            mobile_money=True
+        )
+        
+        if success:
+            payment.hubtel_token = result.get('token')
+            payment.hubtel_checkout_url = result.get('checkout_url')
+            payment.authorization_url = result.get('checkout_url')
+            payment.save()
+            
+            return redirect(payment.authorization_url)
+        else:
+            messages.error(
+                request, 
+                f"Hubtel payment failed: {result.get('message', 'Unknown error')}"
+            )
+            payment.status = 'failed'
+            payment.save()
+            return redirect('order_complete', order_number=order.order_number)
+            
+    except HubtelException as e:
+        logger.error(f"Hubtel initialization error: {str(e)}")
+        messages.error(request, "Hubtel authentication error. Please try Paystack instead.")
+        payment.status = 'failed'
+        payment.save()
+        return redirect('cart')
+    except Exception as e:
+        logger.error(f"Hubtel initialization error: {str(e)}")
+        messages.error(request, "Payment gateway error. Please try again.")
+        payment.status = 'failed'
+        payment.save()
         return redirect('cart')
 
 
 def verify_payment(request):
     reference = request.GET.get("reference")
-    print(f"DEBUG: Starting verify_payment with reference: {reference}")
     
     if not reference:
         messages.error(request, "No payment reference provided.")
@@ -107,30 +170,24 @@ def verify_payment(request):
     try:
         # Find payment by reference
         payment = Payment.objects.filter(
-            models.Q(ref=reference) | models.Q(paystack_reference=reference)
+            models.Q(ref=reference) | 
+            models.Q(paystack_reference=reference) |
+            models.Q(hubtel_token=reference)
         ).first()
-        
-        print(f"DEBUG: Found payment: {payment}")
         
         if not payment:
             messages.error(request, "Payment record not found.")
             return redirect('cart')
         
-        print(f"DEBUG: About to call payment.verify_payment()")
-        
-        # Verify the payment - THIS IS WHERE THE ERROR IS LIKELY HAPPENING
+        # Verify the payment
         try:
             verified = payment.verify_payment()
-            print(f"DEBUG: Payment verification result: {verified}")
         except Exception as verify_error:
-            print(f"DEBUG: Error in payment.verify_payment(): {str(verify_error)}")
-            print(f"DEBUG: Full traceback: {traceback.format_exc()}")
-            messages.error(request, "Payment verification failed due to system error.")
+            print(f"Error in payment.verify_payment(): {str(verify_error)}")
+            messages.error(request, "Payment verification failed.")
             return redirect('cart')
         
         if verified and payment.is_successful():
-            print(f"DEBUG: Payment verified successfully, clearing cart")
-            
             # Clear cart
             if request.user.is_authenticated:
                 CartItem.objects.filter(user=request.user, is_active=True).delete()
@@ -138,22 +195,20 @@ def verify_payment(request):
                 try:
                     cart = Cart.objects.get(cart_id=_cart_id(request))
                     CartItem.objects.filter(cart=cart, is_active=True).delete()
-                    cart.delete()  # Delete guest cart
+                    cart.delete()
                 except Cart.DoesNotExist:
                     pass
             
-            # Prepare context for success page
             context = {
                 "payment": payment,
                 "order": payment.order,
                 "success": True
             }
             
-            print(f"DEBUG: About to render payment_success.html")
-            messages.success(request, f"Payment successful! Order {payment.order.order_number} has been confirmed.")
+            gateway_name = "Hubtel" if payment.gateway == 'hubtel' else "Paystack"
+            messages.success(request, f"Payment successful via {gateway_name}! Order {payment.order.order_number} has been confirmed.")
             return render(request, "payment/payment_success.html", context)
         else:
-            print(f"DEBUG: Payment verification failed or not successful")
             messages.error(request, "Payment verification failed. Please contact support if you were charged.")
             context = {
                 "payment": payment,
@@ -164,9 +219,7 @@ def verify_payment(request):
             
     except Exception as e:
         logger.error(f"Error verifying payment {reference}: {str(e)}")
-        print(f"DEBUG: Exception in verify_payment: {str(e)}")
-        print(f"DEBUG: Full traceback: {traceback.format_exc()}")
-        messages.error(request, "An error occurred while verifying your payment. Please contact support.")
+        messages.error(request, "An error occurred while verifying your payment.")
         return redirect('cart')
 
 
@@ -242,3 +295,32 @@ def payment_detail(request, payment_id):
     }
     
     return render(request, 'payment/payment_detail.html', context)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def hubtel_webhook(request):
+    """Handle Hubtel webhook notifications"""
+    try:
+        data = json.loads(request.body)
+        logger.info(f"Hubtel webhook received: {data}")
+        
+        # Hubtel sends transaction status updates
+        status = data.get('status')
+        reference = data.get('reference')
+        
+        if reference and status:
+            payment = Payment.objects.filter(ref=reference).first()
+            
+            if payment:
+                if status in ['completed', 'success', 'approved']:
+                    payment.verify_payment()
+                elif status in ['failed', 'cancelled']:
+                    payment.status = 'failed'
+                    payment.save()
+        
+        return HttpResponse("OK", status=200)
+        
+    except Exception as e:
+        logger.error(f"Hubtel webhook error: {str(e)}")
+        return HttpResponse("Error", status=500)

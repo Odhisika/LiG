@@ -6,22 +6,26 @@
         <div class="hero-slide active" data-slide="1">
             <div class="hero-background">
                 <div class="gradient-overlay"></div>
+                {% if banners.1 %}
+                <img src="{{ banners.1.background_image.url }}" alt="Background" class="bg-image">
+                {% else %}
                 <img src="{% static 'images/banners/banner13.jpeg' %}" alt="Background" class="bg-image">
+                {% endif %}
             </div>
             <div class="hero-container">
                 <div class="hero-content">
                     <h1 class="hero-title">
-                        Next-Gen AI Performance
-                        <span class="highlight">Powered by Innovation</span>
+                        {% if banners.1 %}{{ banners.1.title_main }}{% else %}Next-Gen AI Performance{% endif %}
+                        <span class="highlight">{% if banners.1 %}{{ banners.1.title_highlight }}{% else %}Powered by Innovation{% endif %}</span>
                     </h1>
                     <p class="hero-description">
-                        Experience unprecedented AI capabilities with Intel® Core™ Ultra processors. 
-                        Our expert technicians configure Lenovo Aura Edition systems tailored to your needs.
+                        {% if banners.1 %}{{ banners.1.description }}{% else %}Experience unprecedented AI capabilities with Intel® Core™ Ultra processors. 
+                        Our expert technicians configure Lenovo Aura Edition systems tailored to your needs.{% endif %}
                     </p>
                     <div class="hero-actions">
                         <button class="btn-primary">
-                            <a href="{% url 'store' %}" class="btn-link" style="color: white; text-decoration: none;">
-                                <span>Explore Solutions</span>
+                            <a href="{% if banners.1 %}{{ banners.1.button_link }}{% else %}{% url 'store' %}{% endif %}" class="btn-link" style="color: white; text-decoration: none;">
+                                <span>{% if banners.1 %}{{ banners.1.button_text }}{% else %}Explore Solutions{% endif %}</span>
                             </a>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -45,7 +49,11 @@
         <div class="hero-slide" data-slide="2">
             <div class="hero-background">
                 <div class="gradient-overlay"></div>
+                {% if banners.2 %}
+                <img src="{{ banners.2.background_image.url }}" alt="Background" class="bg-image">
+                {% else %}
                 <img src="{% static 'images/banners/banner12.jpeg' %}" alt="Background" class="bg-image">
+                {% endif %}
             </div>
             <div class="hero-container">
                 <div class="hero-content">
@@ -55,17 +63,17 @@
                         </svg>
                     </div>
                     <h1 class="hero-title">
-                        Expert IT Hardware
-                        <span class="highlight">Repair & Maintenance</span>
+                        {% if banners.2 %}{{ banners.2.title_main }}{% else %}Expert IT Hardware{% endif %}
+                        <span class="highlight">{% if banners.2 %}{{ banners.2.title_highlight }}{% else %}Repair & Maintenance{% endif %}</span>
                     </h1>
                     <p class="hero-description">
-                        Keep your business operations running smoothly with our comprehensive repair services. 
-                        Certified technicians, rapid diagnostics, and guaranteed results.
+                        {% if banners.2 %}{{ banners.2.description }}{% else %}Keep your business operations running smoothly with our comprehensive repair services. 
+                        Certified technicians, rapid diagnostics, and guaranteed results.{% endif %}
                     </p>
                     <div class="hero-actions">
                         <button class="btn-primary">
-                            <a href="{% url 'hardwareRepairs' %}" class="btn-link" style="color: white; text-decoration: none;">
-                                <span>Get Quote</span>
+                            <a href="{% if banners.2 %}{{ banners.2.button_link }}{% else %}{% url 'hardwareRepairs' %}{% endif %}" class="btn-link" style="color: white; text-decoration: none;">
+                                <span>{% if banners.2 %}{{ banners.2.button_text }}{% else %}Get Quote{% endif %}</span>
                             </a>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -92,7 +100,11 @@
         <div class="hero-slide" data-slide="3">
             <div class="hero-background">
                 <div class="gradient-overlay"></div>
+                {% if banners.3 %}
+                <img src="{{ banners.3.background_image.url }}" alt="Background" class="bg-image">
+                {% else %}
                 <img src="{% static 'images/banners/cover.jpg' %}" alt="Background" class="bg-image">
+                {% endif %}
             </div>
             <div class="hero-container">
                 <div class="hero-content">
@@ -102,17 +114,17 @@
                         </svg>
                     </div>
                     <h1 class="hero-title">
-                        Performance Upgrades
-                        <span class="highlight">That Transform</span>
+                        {% if banners.3 %}{{ banners.3.title_main }}{% else %}Performance Upgrades{% endif %}
+                        <span class="highlight">{% if banners.3 %}{{ banners.3.title_highlight }}{% else %}That Transform{% endif %}</span>
                     </h1>
                     <p class="hero-description">
-                        Extend your system's lifespan and boost productivity with custom hardware upgrades. 
-                        Memory, storage, and processor enhancements tailored to your workflow.
+                        {% if banners.3 %}{{ banners.3.description }}{% else %}Extend your system's lifespan and boost productivity with custom hardware upgrades. 
+                        Memory, storage, and processor enhancements tailored to your workflow.{% endif %}
                     </p>
                     <div class="hero-actions">
                         <button class="btn-primary">
-                            <a href="{% url 'hardwareRepairs' %}" class="btn-link" style="color: white; text-decoration: none;">
-                                <span>Upgrade Now</span>
+                            <a href="{% if banners.3 %}{{ banners.3.button_link }}{% else %}{% url 'hardwareRepairs' %}{% endif %}" class="btn-link" style="color: white; text-decoration: none;">
+                                <span>{% if banners.3 %}{{ banners.3.button_text }}{% else %}Upgrade Now{% endif %}</span>
                             </a>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -139,7 +151,11 @@
         <div class="hero-slide" data-slide="4">
             <div class="hero-background">
                 <div class="gradient-overlay"></div>
+                {% if banners.4 %}
+                <img src="{{ banners.4.background_image.url }}" alt="Background" class="bg-image">
+                {% else %}
                 <img src="{% static 'images/banners/banner13.jpeg' %}" alt="Background" class="bg-image">
+                {% endif %}
             </div>
             <div class="hero-container">
                 <div class="hero-content">
@@ -149,17 +165,17 @@
                         </svg>
                     </div>
                     <h1 class="hero-title">
-                        Enterprise-Grade
-                        <span class="highlight">Infrastructure Solutions</span>
+                        {% if banners.4 %}{{ banners.4.title_main }}{% else %}Enterprise-Grade{% endif %}
+                        <span class="highlight">{% if banners.4 %}{{ banners.4.title_highlight }}{% else %}Infrastructure Solutions{% endif %}</span>
                     </h1>
                     <p class="hero-description">
-                        Scalable hardware solutions designed for enterprise environments. 
-                        From server infrastructure to workstation deployment, configured to your specifications.
+                        {% if banners.4 %}{{ banners.4.description }}{% else %}Scalable hardware solutions designed for enterprise environments. 
+                        From server infrastructure to workstation deployment, configured to your specifications.{% endif %}
                     </p>
                     <div class="hero-actions">
                         <button class="btn-primary">
-                            <a href="{% url 'store' %}" class="btn-link" style="color: white; text-decoration: none;">
-                                <span>Get Quote</span>
+                            <a href="{% if banners.4 %}{{ banners.4.button_link }}{% else %}{% url 'store' %}{% endif %}" class="btn-link" style="color: white; text-decoration: none;">
+                                <span>{% if banners.4 %}{{ banners.4.button_text }}{% else %}Get Quote{% endif %}</span>
                             </a>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M5 12h14M12 5l7 7-7 7"/>

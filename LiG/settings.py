@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'checkout',
     'cart',
     'payment',
+    'analytics',
     'accounts',
     'category',
     'orders',
@@ -78,6 +79,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware",
+    'analytics.middleware.VisitorTrackingMiddleware',
 ]
 
 
@@ -115,14 +117,11 @@ AUTH_USER_MODEL = 'accounts.Account'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 
 # Password validation
@@ -192,6 +191,11 @@ MESSAGE_TAGS = {
 
 PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
 PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
+
+# Hubtel Payment Settings
+HUBTEL_CLIENT_ID = config('HUBTEL_CLIENT_ID')
+HUBTEL_CLIENT_SECRET = config('HUBTEL_CLIENT_SECRET')
+HUBTEL_ACCOUNT_NUMBER = config('HUBTEL_ACCOUNT_NUMBER', default='')
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -274,6 +278,25 @@ JAZZMIN_SETTINGS = {
         "admin.LogEntry": "fas fa-file",
     },
     "related_modal_active": False,
+    "custom_css": """
+        .sidebar {
+            overflow-y: auto !important;
+            max-height: calc(100vh - 56px) !important;
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .main-sidebar .sidebar {
+            height: calc(100vh) !important;
+        }
+    """,
 }
 
 
@@ -298,16 +321,22 @@ JAZZMIN_SETTINGS["icons"] = {
     "auth.user": "fas fa-user",
     "auth.Group": "fas fa-users",
     "admin.LogEntry": "fas fa-file",
+    "analytics.Visitor": "fas fa-user",
+    "analytics.PageView": "fas fa-eye",
+    "analytics.DailyStats": "fas fa-chart-bar",
+    "store.Product": "fas fa-box",
+    "store.ComputerProduct": "fas fa-laptop",
+    "store.PeripheralProduct": "fas fa-keyboard",
+    "store.SoftwareProduct": "fas fa-download",
 }
 
-JAZZMIN_SETTINGS = {
-    "custom_links": {
-        "LiG": [
-            {
-                "name": "Product Reports",
-                "url": "admin:product-reports",  # use the name from `urls.py`
-                "icon": "fas fa-chart-line",
-            },
-        ]
-    },
+JAZZMIN_SETTINGS["custom_links"] = {
+    "LiG": [
+        {
+            "name": "Analytics Dashboard",
+            "url": "dashboard:index",
+            "icon": "fas fa-chart-line",
+            "permissions": ["auth.view_user"],
+        },
+    ],
 }

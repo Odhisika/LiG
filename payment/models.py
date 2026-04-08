@@ -5,6 +5,7 @@ import secrets
 import uuid
 from datetime import datetime
 from .paystack import Paystack
+from .hubtel import Hubtel
 
 
 class Payment(models.Model):
@@ -13,6 +14,11 @@ class Payment(models.Model):
         ('successful', 'Successful'),
         ('failed', 'Failed'),
         ('cancelled', 'Cancelled'),
+    ]
+    
+    GATEWAY_CHOICES = [
+        ('paystack', 'Paystack'),
+        ('hubtel', 'Hubtel'),
     ]
     
     user = models.ForeignKey("accounts.Account", on_delete=models.CASCADE)
@@ -25,10 +31,17 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Gateway selection
+    gateway = models.CharField(max_length=20, choices=GATEWAY_CHOICES, default='paystack')
+    
     # Paystack response data
     paystack_reference = models.CharField(max_length=250, blank=True, null=True)
     authorization_url = models.URLField(blank=True, null=True)
     access_code = models.CharField(max_length=250, blank=True, null=True)
+    
+    # Hubtel response data
+    hubtel_token = models.CharField(max_length=250, blank=True, null=True)
+    hubtel_checkout_url = models.URLField(blank=True, null=True)
     
     # Transaction details (populated after verification)
     channel = models.CharField(max_length=50, blank=True, null=True)
@@ -64,25 +77,37 @@ class Payment(models.Model):
         return int(self.amount * 100)
 
     def verify_payment(self):
-        """Verify payment with Paystack and update details."""
+        """Verify payment with Paystack or Hubtel based on gateway selection."""
+        try:
+            if self.gateway == 'hubtel':
+                return self._verify_hubtel_payment()
+            else:
+                return self._verify_paystack_payment()
+        except Exception as e:
+            print(f"Error verifying payment {self.ref}: {str(e)}")
+            import traceback
+            print(f"Full traceback: {traceback.format_exc()}")
+            self.status = 'failed'
+            self.save()
+            return False
+
+    def _verify_paystack_payment(self):
+        """Verify payment with Paystack."""
         try:
             paystack = Paystack()
             status, result = paystack.verify_payment(self.paystack_reference or self.ref)
             
             if status and result:
-                # Check if amount matches
                 paystack_amount = int(result.get('amount', 0))
                 expected_amount = self.amount_in_pesewas()
                 
-                if paystack_amount >= expected_amount:  # Allow for small differences due to fees
+                if paystack_amount >= expected_amount:
                     self.verified = True
                     self.status = 'successful'
                     
-                    # Store transaction details
                     self.channel = result.get('channel')
                     self.currency = result.get('currency')
                     
-                    # Parse transaction date
                     if result.get('transaction_date'):
                         try:
                             self.transaction_date = datetime.fromisoformat(
@@ -91,26 +116,17 @@ class Payment(models.Model):
                         except:
                             pass
                     
-                    # Store authorization details if available
                     auth = result.get('authorization', {})
                     if auth:
                         self.card_type = auth.get('card_type')
                         self.bank = auth.get('bank')
                         self.last4 = auth.get('last4')
                     
-                    # Store fees
                     if result.get('fees'):
-                        self.paystack_fees = result['fees'] / 100  # Convert from pesewas
+                        self.paystack_fees = result['fees'] / 100
                     
                     self.save()
-                    
-                    # Update order status - THIS IS THE CRITICAL FIX
-                    if self.order and not self.order.paid:
-                        self.order.paid = True
-                        self.order.status = "Completed"
-                        self.order.is_ordered = True  # Add this line
-                        self.order.save()
-                    
+                    self._update_order_status()
                     return True
                 else:
                     self.status = 'failed'
@@ -122,13 +138,58 @@ class Payment(models.Model):
                 return False
                 
         except Exception as e:
-            print(f"Error verifying payment {self.ref}: {str(e)}")
-            # Add more detailed error logging
-            import traceback
-            print(f"Full traceback: {traceback.format_exc()}")
+            print(f"Paystack verification error: {str(e)}")
             self.status = 'failed'
             self.save()
             return False
+
+    def _verify_hubtel_payment(self):
+        """Verify payment with Hubtel."""
+        try:
+            hubtel = Hubtel()
+            reference = self.hubtel_token or self.ref
+            status, result = hubtel.verify_transaction(reference)
+            
+            if status and result:
+                self.verified = True
+                self.status = 'successful'
+                
+                self.channel = result.get('channel', 'mobile_money')
+                self.currency = result.get('currency', 'GHS')
+                
+                if result.get('paid_at'):
+                    try:
+                        self.transaction_date = datetime.fromisoformat(
+                            result['paid_at'].replace('Z', '+00:00')
+                        )
+                    except:
+                        pass
+                
+                # Store last 4 digits if available
+                if result.get('last4'):
+                    self.last4 = result.get('last4')
+                
+                self.save()
+                self._update_order_status()
+                return True
+            else:
+                self.status = 'pending' if result and result.get('status') == 'pending' else 'failed'
+                self.save()
+                return False
+                
+        except Exception as e:
+            print(f"Hubtel verification error: {str(e)}")
+            self.status = 'failed'
+            self.save()
+            return False
+
+    def _update_order_status(self):
+        """Update order status after successful payment."""
+        if self.order and not self.order.paid:
+            self.order.paid = True
+            self.order.status = "Completed"
+            self.order.is_ordered = True
+            self.order.save()
 
     def is_successful(self):
         return self.status == 'successful' and self.verified

@@ -3,17 +3,22 @@ from django.urls import reverse
 from django.db.models import Avg, Count
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
+import uuid
 from category.models import Category, ComputerTypes
 from accounts.models import Account
+
+
+def generate_sku():
+    return f"SKU-{uuid.uuid4().hex[:8].upper()}"
 
 
 # Base Product Model
 class Product(models.Model):
     # Basic Information
-    product_name = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=200, unique=True)
-    description = models.TextField(max_length=1000, blank=True)  
-    short_description = models.CharField(max_length=255, blank=True)  
+    product_name = models.CharField(max_length=500)
+    slug = models.SlugField(max_length=500, unique=True)
+    description = models.TextField(blank=True)
+    short_description = models.CharField(max_length=500, blank=True)  
     
     # Pricing and Inventory
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
@@ -23,7 +28,7 @@ class Product(models.Model):
                                    help_text="Internal cost for profit calculations")
     
     # Inventory Management
-    sku = models.CharField(max_length=50, unique=True, help_text="Stock Keeping Unit", default='temp-sku')
+    sku = models.CharField(max_length=50, unique=True, help_text="Stock Keeping Unit", default=generate_sku, editable=False)
     barcode = models.CharField(max_length=50, blank=True, null=True, unique=True)
     stock = models.IntegerField(validators=[MinValueValidator(0)])
     low_stock_threshold = models.IntegerField(default=5, validators=[MinValueValidator(0)])
@@ -35,6 +40,13 @@ class Product(models.Model):
     is_featured = models.BooleanField(default=False)
     requires_shipping = models.BooleanField(default=True)
     is_digital = models.BooleanField(default=False)
+    
+    # Product Condition
+    CONDITION_CHOICES = [
+        ('new', 'Fresh in Box'),
+        ('slightly_used', 'Slightly Used'),
+    ]
+    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='new')
     
     # SEO and Marketing
     meta_title = models.CharField(max_length=60, blank=True)
@@ -88,25 +100,6 @@ class Product(models.Model):
         if self.compare_price and self.compare_price > self.price:
             return round(((self.compare_price - self.price) / self.compare_price) * 100)
         return 0
-    
-    def get_url(self):
-        return reverse('product_detail', args=[self.category.slug, self.slug])
-
-    def __str__(self):
-        return self.product_name
-
-    def is_in_stock(self):
-        if not self.track_inventory:
-            return True
-        return self.stock > 0 or self.allow_backorders
-
-    def is_low_stock(self):
-        return self.track_inventory and self.stock <= self.low_stock_threshold
-
-    def get_discount_percentage(self):
-        if self.compare_price and self.compare_price > self.price:
-            return round(((self.compare_price - self.price) / self.compare_price) * 100)
-        return 0
 
     def average_review(self):
         reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
@@ -116,33 +109,17 @@ class Product(models.Model):
         reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('id'))
         return int(reviews['count']) if reviews['count'] else 0
 
-    # ADD THIS METHOD
     @property
     def primary_image_url(self):
-        """Return the primary image URL for the product"""
-        # First, check if the main images field has an image
         if self.images:
             return self.images.url
-        
-        # Then check gallery images
         first_gallery = self.gallery_images.filter(is_active=True).first()
         if first_gallery:
             return first_gallery.image.url
-        
-        # Return a default image path (make sure this file exists in your static files)
-        return '/static/images/default-product.jpg'  # or use a placeholder service
+        return '/static/images/default-product.jpg'
 
-    # Alternative method name for compatibility
     def get_primary_image_url(self):
         return self.primary_image_url
-
-    def average_review(self):
-        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
-        return round(float(reviews['average']), 1) if reviews['average'] else 0
-
-    def count_review(self):
-        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('id'))
-        return int(reviews['count']) if reviews['count'] else 0
 
 
 # Brand Model (normalized)
@@ -226,7 +203,7 @@ class ComputerProduct(Product):
     touchscreen = models.BooleanField(default=False)
     
     # System
-    computer_type = models.ForeignKey(ComputerTypes, on_delete=models.CASCADE, default=1)
+    computer_type = models.ForeignKey(ComputerTypes, on_delete=models.SET_NULL, blank=True, null=True)
     operating_system = models.CharField(max_length=100, blank=True, default='Windows 10')
     
     # Features
@@ -447,13 +424,38 @@ class ProductTagRelation(models.Model):
         unique_together = ['product', 'tag']
 
 
-# In Product model
+class HomeBanner(models.Model):
+    SLIDE_CHOICES = [
+        (1, 'Slide 1 (AI Performance)'),
+        (2, 'Slide 2 (IT Services)'),
+        (3, 'Slide 3 (Upgrades)'),
+        (4, 'Slide 4 (Enterprise Solutions)'),
+    ]
+    slide_number = models.IntegerField(choices=SLIDE_CHOICES, unique=True, help_text="Which slide this banner represents (1 to 4)")
+    
+    # Text Content
+    title_main = models.CharField(max_length=200, help_text="Main heading text")
+    title_highlight = models.CharField(max_length=200, blank=True, help_text="Highlighted part of heading")
+    description = models.TextField(max_length=500)
+    
+    # Button
+    button_text = models.CharField(max_length=50, default="Explore Solutions")
+    button_link = models.CharField(max_length=200, default="/store/", help_text="Can be relative like /store/ or absolute like https://...")
+    
+    # Background Image
+    background_image = models.ImageField(upload_to='photos/banners/')
+    
+    # Status
+    is_active = models.BooleanField(default=True, help_text="Uncheck to hide this custom banner and show the default one.")
+    
+    updated_at = models.DateTimeField(auto_now=True)
 
-@property
-def primary_image_url(self):
-    if self.images:
-        return self.images.url
-    first_gallery = self.gallery_images.first()
-    if first_gallery:
-        return first_gallery.image.url
-    return 'https://via.placeholder.com/300x300?text=No+Image'
+    class Meta:
+        verbose_name = 'Home Banner'
+        verbose_name_plural = 'Home Banners'
+        ordering = ['slide_number']
+
+    def __str__(self):
+        return f"Banner {self.slide_number}: {self.title_main}"
+
+

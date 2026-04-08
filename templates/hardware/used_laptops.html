@@ -3,55 +3,52 @@
 {% load humanize %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/category_hub.css' %}">
 
-<!-- ========================= SECTION MAIN ========================= -->
-<section class="section-intro padding-y-sm">
-    <div class="container">
-        <div class="intro-banner-wrap">
-            <img src="{% static 'images/banners/banner2.jpg' %}" class="img-fluid rounded">
-        </div>
-    </div> <!-- container //  -->
-</section>
-<!-- ========================= SECTION MAIN END// ========================= -->
-
-<!-- ========================= SECTION  ========================= -->
-<section class="section-name padding-y-sm">
-    <div class="container">
-        <header class="section-heading">
-            <!-- <a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a> -->
-            <h3 class="section-title">USED LAPTOPS</h3>
-        </header><!-- sect-heading -->
-        
-        <div class="row">
-            {% for product in products %}
-                
-                <div class="col-md-3">
-                    <div class="card card-product-grid">
-                        <a href="{{ product.get_url }}" class="img-wrap"> 
-                            <img src="{{ product.images.url }}" class="img-fluid"> 
-                        </a>
-                        <figcaption class="info-wrap">
-                            <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
-                            <div class="price mt-1">GHS {{ product.price|intcomma }}</div> <!-- price-wrap.// -->
-                            <div class="rating-star">
-                                <span>
-                                    <i class="fa fa-star{% if product.averageReview < 0.5 %}-o{% elif product.averageReview >= 0.5 and product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if product.averageReview < 1.5 %}-o{% elif product.averageReview >= 1.5 and product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if product.averageReview < 2.5 %}-o{% elif product.averageReview >= 2.5 and product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if product.averageReview < 3.5 %}-o{% elif product.averageReview >= 3.5 and product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                    <i class="fa fa-star{% if product.averageReview < 4.5 %}-o{% elif product.averageReview >= 4.5 and product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                        </figcaption>
+<!-- Hero Banner Section -->
+<section class="hero-banner">
+    <div class="container-fluid px-0">
+        <div class="banner-container position-relative">
+            <img src="{% static 'images/banners/banner4.jpg' %}" class="hero-image img-fluid w-100" alt="Used Laptops">
+            <div class="banner-overlay">
+                <div class="container">
+                    <div class="banner-content">
+                        <h1 class="banner-title">Quality Used Laptops</h1>
+                        <p class="banner-subtitle">Certified pre-owned devices at unbeatable prices</p>
+                        <a href="{% url 'store' %}" class="btn btn-primary btn-lg">Shop Now</a>
                     </div>
-                </div> <!-- col.// -->
-             
-            {% empty %}
-                <p>No Laptop products available.</p>
-            {% endfor %}
-        </div> <!-- row.// -->
-    </div><!-- container // -->
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
-<!-- ========================= SECTION  END// ========================= -->
 
+<!-- Products Section -->
+<section class="products-section py-5">
+    <div class="container">
+        <!-- Section Header -->
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title mb-1">Used Laptop Computers</h2>
+                <p class="section-subtitle text-muted mb-0">Affordable and reliable options</p>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                {% include 'includes/modern_product_card.html' %}
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-laptop fa-3x text-muted mb-3"></i>
+                <p class="h5 text-muted">No Used Laptops available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script src="{% static 'js/category_hub.js' %}"></script>
 {% endblock %}

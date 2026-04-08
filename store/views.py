@@ -73,10 +73,17 @@ def product_detail(request, category_slug, product_slug):
     # Get reviews
     reviews = ReviewRating.objects.filter(product=product, status=True)
     
+    # Get related products (same category, excluding current product)
+    related_products = Product.objects.filter(
+        category=product.category,
+        is_available=True
+    ).exclude(id=product.id).select_related('category')[:6]
+    
     context = {
         'single_product': product,
         'product_gallery': product.gallery_images.all(),  
         'reviews': reviews,
+        'related_products': related_products,
     }
     
     return render(request, 'store/product_detail.html', context)
