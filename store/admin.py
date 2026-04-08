@@ -82,7 +82,7 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Physical Properties', {
-            'fields': ('weight', 'dimensions'),
+            'fields': ('weight', 'dimensions_length', 'dimensions_width', 'dimensions_height'),
             'classes': ('collapse',)
         }),
         ('Timestamps', {
@@ -95,6 +95,11 @@ class ProductAdmin(admin.ModelAdmin):
         if obj:
             return ('slug', 'created_date', 'modified_date')
         return ('created_date', 'modified_date')
+
+    def get_prepopulated_fields(self, request, obj=None):
+        if obj:
+            return {}
+        return {'slug': ('product_name',)}
 
 
 class ComputerProductAdmin(admin.ModelAdmin):
@@ -133,7 +138,7 @@ class ComputerProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Physical Properties', {
-            'fields': ('weight', 'dimensions'),
+            'fields': ('weight', 'dimensions_length', 'dimensions_width', 'dimensions_height'),
             'classes': ('collapse',)
         }),
         ('Timestamps', {
@@ -146,6 +151,11 @@ class ComputerProductAdmin(admin.ModelAdmin):
         if obj:
             return ('slug', 'created_date', 'modified_date')
         return ('created_date', 'modified_date')
+
+    def get_prepopulated_fields(self, request, obj=None):
+        if obj:
+            return {}
+        return {'slug': ('product_name',)}
 
 
 class SoftwareProductAdmin(admin.ModelAdmin):
@@ -189,6 +199,16 @@ class SoftwareProductAdmin(admin.ModelAdmin):
         })
     )
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('slug', 'created_date', 'modified_date')
+        return ('created_date', 'modified_date')
+
+    def get_prepopulated_fields(self, request, obj=None):
+        if obj:
+            return {}
+        return {'slug': ('product_name',)}
+
 
 class PeripheralProductAdmin(admin.ModelAdmin):
     list_display = ('product_name', 'price', 'stock', 'brand', 'condition', 'is_available')
@@ -226,7 +246,7 @@ class PeripheralProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Physical Properties', {
-            'fields': ('weight', 'dimensions'),
+            'fields': ('weight', 'dimensions_length', 'dimensions_width', 'dimensions_height'),
             'classes': ('collapse',)
         }),
         ('Timestamps', {
@@ -239,6 +259,11 @@ class PeripheralProductAdmin(admin.ModelAdmin):
         if obj:
             return ('slug', 'created_date', 'modified_date')
         return ('created_date', 'modified_date')
+
+    def get_prepopulated_fields(self, request, obj=None):
+        if obj:
+            return {}
+        return {'slug': ('product_name',)}
 
 
 class ReviewRatingAdmin(admin.ModelAdmin):
@@ -261,7 +286,16 @@ class BrandAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'is_active')
     list_editable = ('is_active',)
     search_fields = ('name', 'slug')
-    readonly_fields = ('slug',)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('slug',)
+        return ()
+
+    def get_prepopulated_fields(self, request, obj=None):
+        if obj:
+            return {}
+        return {'slug': ('name',)}
 
 
 class ProductSpecificationAdmin(admin.ModelAdmin):
@@ -282,7 +316,16 @@ class ProductVariantAdmin(admin.ModelAdmin):
 class ProductTagAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     search_fields = ('name', 'slug')
-    readonly_fields = ('slug',)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('slug',)
+        return ()
+
+    def get_prepopulated_fields(self, request, obj=None):
+        if obj:
+            return {}
+        return {'slug': ('name',)}
 
 
 class ProductTagRelationAdmin(admin.ModelAdmin):
