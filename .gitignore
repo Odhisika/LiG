@@ -8,3 +8,5 @@ env.bak/
 venv.bak/
 pythonenv*
 db.sqlite3
+media/
+logs/
