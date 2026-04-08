@@ -114,23 +114,23 @@ AUTH_USER_MODEL = 'accounts.Account'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('DB_NAME'),
-#         'USER': config('DB_USER'),
-#         'PASSWORD': config('DB_PASSWORD'),
-#         'HOST': config('DB_HOST'),
-#         'PORT': config('DB_PORT'),
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -212,14 +212,20 @@ AUTHENTICATION_BACKENDS = [
    
 ]
 
+import os
+
+LOG_DIR = "/var/www/LiG/logs"
+os.makedirs(LOG_DIR, exist_ok=True)
+
 LOGGING = {
+
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/payments.log'),
+            "filename": os.path.join(LOG_DIR, "payments.log"),
         },
         'console': {
             'level': 'DEBUG',
