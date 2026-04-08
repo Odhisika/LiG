@@ -26,128 +26,88 @@ def allproducts(request):
 
 ### Hardware ###
 def desktops(request):
-    try:
-        desktops_category = ComputerTypes.objects.get(slug="desktop")
-        products = ComputerProduct.objects.filter(
-            computer_type=desktops_category, is_available=True
-        ).select_related('category')
-    except ComputerTypes.DoesNotExist:
-        products = ComputerProduct.objects.filter(is_available=True).select_related('category')  
-
+    products = Product.objects.filter(
+        Q(category__slug="desktops") | Q(computerproduct__computer_type__slug="desktop") | Q(computerproduct__computer_type__parent__slug="desktop"),
+        is_available=True
+    ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/desktop.html', context)
 
 def fresh_desktops(request):
-    try:
-        desktops_category = ComputerTypes.objects.get(slug="desktop")
-        products = ComputerProduct.objects.filter(
-            computer_type=desktops_category, condition='new', is_available=True
-        ).select_related('category')
-    except ComputerTypes.DoesNotExist:
-        products = ComputerProduct.objects.filter(condition='new', is_available=True).select_related('category')
-
+    products = Product.objects.filter(
+        Q(category__slug="desktops") | Q(computerproduct__computer_type__slug="desktop") | Q(computerproduct__computer_type__parent__slug="desktop"),
+        condition='new', is_available=True
+    ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/fresh_desktops.html', context)
 
 def used_desktops(request):
-    try:
-        desktops_category = ComputerTypes.objects.get(slug="desktop")
-        products = ComputerProduct.objects.filter(
-            computer_type=desktops_category, condition='slightly_used', is_available=True
-        ).select_related('category')
-    except ComputerTypes.DoesNotExist:
-        products = ComputerProduct.objects.filter(condition='slightly_used', is_available=True).select_related('category')
-
+    products = Product.objects.filter(
+        Q(category__slug="desktops") | Q(computerproduct__computer_type__slug="desktop") | Q(computerproduct__computer_type__parent__slug="desktop"),
+        condition='slightly_used', is_available=True
+    ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/used_desktops.html', context)
 
 def fresh_laptops(request):
-    try:
-        laptop_category = ComputerTypes.objects.get(slug="laptop")
-        subcategories = laptop_category.subcategories.all()
-        products = ComputerProduct.objects.filter(
-            Q(computer_type=laptop_category) | Q(computer_type__in=subcategories),
-            condition='new', is_available=True
-        ).select_related('category')
-    except ComputerTypes.DoesNotExist:
-        products = ComputerProduct.objects.filter(condition='new', is_available=True).select_related('category')
-
+    products = Product.objects.filter(
+        Q(category__slug="laptops") | Q(computerproduct__computer_type__slug="laptop") | Q(computerproduct__computer_type__parent__slug="laptop"),
+        condition='new', is_available=True
+    ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/fresh_laptops.html', context)
 
-
 def used_laptops(request):
-    try:
-        laptop_category = ComputerTypes.objects.get(slug="laptop")
-        subcategories = laptop_category.subcategories.all()
-        products = ComputerProduct.objects.filter(
-            Q(computer_type=laptop_category) | Q(computer_type__in=subcategories),
-            condition='slightly_used', is_available=True
-        ).select_related('category')
-    except ComputerTypes.DoesNotExist:
-        products = ComputerProduct.objects.filter(condition='slightly_used', is_available=True).select_related('category')
-
+    products = Product.objects.filter(
+        Q(category__slug="laptops") | Q(computerproduct__computer_type__slug="laptop") | Q(computerproduct__computer_type__parent__slug="laptop"),
+        condition='slightly_used', is_available=True
+    ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/used_laptops.html', context)
 
-
-
 def laptops(request):
-    try:
-        laptop_category = ComputerTypes.objects.get(slug="laptop")
-        subcategories = laptop_category.subcategories.all()
-        products = ComputerProduct.objects.filter(
-            Q(computer_type=laptop_category) | Q(computer_type__in=subcategories),
-            is_available=True
-        ).select_related('category')
-    except ComputerTypes.DoesNotExist:
-        products = ComputerProduct.objects.filter(is_available=True).select_related('category')
-
+    products = Product.objects.filter(
+        Q(category__slug="laptops") | Q(computerproduct__computer_type__slug="laptop") | Q(computerproduct__computer_type__parent__slug="laptop"),
+        is_available=True
+    ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/laptop.html', context)
 
-
-
-
 def peripherals(request):
-    try:
-        products = PeripheralProduct.objects.filter(is_available=True).select_related('category').order_by('-created_date')
-    except PeripheralProduct.DoesNotExist:
-        products = []
-    
+    products = Product.objects.filter(
+        Q(category__slug="peripherals") | Q(peripheralproduct__isnull=False),
+        is_available=True
+    ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/peripherals.html', context) 
 
 
 ### Software ###
 def operatingSystems(request):
-    try:
-        operatingSystems_category = SoftwareTypes.objects.get(slug="operating-systems")
-        products = SoftwareProduct.objects.filter(is_available=True).select_related('category')
-    except SoftwareTypes.DoesNotExist:
-        products = SoftwareProduct.objects.filter(is_available=True).select_related('category')
-    
+    products = Product.objects.filter(
+        Q(category__slug="software") | Q(softwareproduct__isnull=False),
+        softwareproduct__software_type__icontains="operating",
+        is_available=True
+    ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'software/operatingSystems.html', context)
 
 def applications(request):
-    try:
-        applications_category = SoftwareTypes.objects.get(slug="productivity")
-        products = SoftwareProduct.objects.filter(is_available=True).select_related('category')
-    except SoftwareTypes.DoesNotExist:
-        products = SoftwareProduct.objects.filter(is_available=True).select_related('category')
+    products = Product.objects.filter(
+        Q(category__slug="software") | Q(softwareproduct__isnull=False),
+        is_available=True
+    ).filter(
+        Q(softwareproduct__software_type__icontains="application") | Q(softwareproduct__software_type__icontains="productivity")
+    ).distinct().order_by('-created_date')
     return render(request, 'software/applications.html', {'products': products})
 
 def developmentTools(request):
-    try:
-        developmentTools_category = SoftwareTypes.objects.get(slug="development-tools")
-        products = SoftwareProduct.objects.filter(is_available=True).select_related('category')
-    except SoftwareTypes.DoesNotExist:
-        products = SoftwareProduct.objects.filter(is_available=True).select_related('category')
-    
-    context = {
-        'products': products
-    }
+    products = Product.objects.filter(
+        Q(category__slug="software") | Q(softwareproduct__isnull=False),
+        softwareproduct__software_type__icontains="development",
+        is_available=True
+    ).distinct().order_by('-created_date')
+    context = {'products': products}
     return render(request, 'software/developmentTools.html', context)
 
 ### IT solutions ###
