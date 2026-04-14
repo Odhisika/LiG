@@ -303,6 +303,136 @@ class PeripheralProduct(Product):
         return f"{self.brand.name} {self.product_name}"
 
 
+# Model for Networking Products (Switches, Routers & Modems)
+class NetworkingProduct(Product):
+    DEVICE_TYPES = [
+        ('switch_unmanaged', 'Unmanaged Switch'),
+        ('switch_managed', 'Managed Switch'),
+        ('switch_poe', 'PoE Switch'),
+        ('router', 'Router'),
+        ('modem', 'Modem'),
+        ('modem_router', 'Modem/Router Combo'),
+        ('access_point', 'Access Point'),
+    ]
+
+    WIFI_STANDARDS = [
+        ('none', 'No Wi-Fi / Wired Only'),
+        ('wifi4', 'Wi-Fi 4 (802.11n)'),
+        ('wifi5', 'Wi-Fi 5 (802.11ac)'),
+        ('wifi6', 'Wi-Fi 6 (802.11ax)'),
+        ('wifi6e', 'Wi-Fi 6E'),
+    ]
+
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    model_number = models.CharField(max_length=100, blank=True)
+    device_type = models.CharField(max_length=30, choices=DEVICE_TYPES)
+
+    # Ports & Connectivity
+    total_ports = models.PositiveIntegerField(blank=True, null=True, help_text="Total number of ports")
+    uplink_ports = models.PositiveIntegerField(blank=True, null=True)
+    poe_support = models.BooleanField(default=False, verbose_name="PoE Support")
+    poe_budget_watts = models.PositiveIntegerField(blank=True, null=True, help_text="Total PoE budget in Watts")
+
+    # Speed & Performance
+    switching_capacity = models.CharField(max_length=50, blank=True, help_text="e.g. 16 Gbps")
+    max_speed = models.CharField(max_length=50, blank=True, help_text="e.g. 1 Gbps, 10 Gbps")
+    wifi_standard = models.CharField(max_length=20, choices=WIFI_STANDARDS, default='none')
+    wifi_speed = models.CharField(max_length=50, blank=True, help_text="e.g. AX3000, AC1200")
+    dual_band = models.BooleanField(default=False)
+
+    # WAN / Modem
+    wan_ports = models.PositiveIntegerField(blank=True, null=True)
+    dsl_type = models.CharField(max_length=50, blank=True, help_text="e.g. ADSL2+, VDSL2, Fibre")
+
+    # Management
+    managed = models.BooleanField(default=False)
+    vlan_support = models.BooleanField(default=False)
+    rack_mountable = models.BooleanField(default=False)
+
+    # Warranty
+    warranty_period = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        return f"{self.brand.name} {self.product_name}"
+
+    class Meta:
+        verbose_name = 'Networking Product'
+        verbose_name_plural = 'Networking Products'
+
+
+# Model for Security Cameras & Systems
+class SecurityCameraProduct(Product):
+    CAMERA_TYPES = [
+        ('ip_camera', 'IP / Network Camera'),
+        ('ptz_camera', 'PTZ Camera'),
+        ('dome_camera', 'Dome Camera'),
+        ('bullet_camera', 'Bullet Camera'),
+        ('fisheye_camera', 'Fisheye Camera'),
+        ('doorbell_camera', 'Video Doorbell'),
+        ('nvr', 'NVR (Network Video Recorder)'),
+        ('dvr', 'DVR (Digital Video Recorder)'),
+        ('cctv_kit', 'Complete CCTV Kit'),
+    ]
+
+    RESOLUTION_CHOICES = [
+        ('720p', '720p HD'),
+        ('1080p', '1080p Full HD'),
+        ('2mp', '2MP'),
+        ('4mp', '4MP'),
+        ('5mp', '5MP'),
+        ('4k', '4K Ultra HD'),
+        ('8mp', '8MP'),
+    ]
+
+    STORAGE_TYPES = [
+        ('sd_card', 'SD Card'),
+        ('cloud', 'Cloud Storage'),
+        ('hdd_nvr', 'HDD via NVR/DVR'),
+        ('local_nas', 'NAS'),
+    ]
+
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    model_number = models.CharField(max_length=100, blank=True)
+    camera_type = models.CharField(max_length=30, choices=CAMERA_TYPES)
+    resolution = models.CharField(max_length=20, choices=RESOLUTION_CHOICES, blank=True)
+
+    # Vision
+    night_vision = models.BooleanField(default=False)
+    night_vision_range = models.PositiveIntegerField(blank=True, null=True, help_text="Night vision range in metres")
+    wide_angle = models.CharField(max_length=20, blank=True, help_text="e.g. 120°, 180°")
+
+    # Connectivity
+    connectivity = models.CharField(max_length=50, blank=True, help_text="e.g. Wired PoE, Wi-Fi, 4G")
+    poe_powered = models.BooleanField(default=False, verbose_name="PoE Powered")
+
+    # Storage
+    storage_type = models.CharField(max_length=20, choices=STORAGE_TYPES, blank=True)
+    max_sd_card_gb = models.PositiveIntegerField(blank=True, null=True, help_text="Max SD card size in GB")
+
+    # Kit Details (for NVR/DVR kits)
+    number_of_cameras = models.PositiveIntegerField(blank=True, null=True, help_text="Cameras included in kit")
+    hdd_included_tb = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True,
+                                          help_text="HDD included (TB)")
+    channels = models.PositiveIntegerField(blank=True, null=True, help_text="Number of channels (NVR/DVR)")
+
+    # Smart Features
+    motion_detection = models.BooleanField(default=False)
+    two_way_audio = models.BooleanField(default=False)
+    weatherproof = models.BooleanField(default=False)
+    weatherproof_rating = models.CharField(max_length=20, blank=True, help_text="e.g. IP67")
+    ai_detection = models.BooleanField(default=False, verbose_name="AI/Smart Detection")
+
+    # Warranty
+    warranty_period = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        return f"{self.brand.name} {self.product_name}"
+
+    class Meta:
+        verbose_name = 'Security Camera / System'
+        verbose_name_plural = 'Security Cameras & Systems'
+
+
 # Enhanced Review and Rating System
 class ReviewRating(models.Model):
     RATING_CHOICES = [(i, i) for i in range(1, 6)]

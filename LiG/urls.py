@@ -56,6 +56,9 @@ urlpatterns = [
     path('hardware/used_laptops/', views.used_laptops, name='used_laptops'),
     path('hardware/used_desktops/', views.used_desktops, name='used_desktops'),
     path('hardware/peripherals/', views.peripherals, name='peripherals'),
+    path('hardware/switches/', views.switches, name='switches'),
+    path('hardware/routers-and-modems/', views.routers_modems, name='routers_modems'),
+    path('hardware/security-cameras/', views.security_cameras, name='security_cameras'),
 
     # Navigation software links
     path('software/operatingSystems/', views.operatingSystems, name='operatingSystems'),

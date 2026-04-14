@@ -79,7 +79,31 @@ def peripherals(request):
         is_available=True
     ).distinct().order_by('-created_date')
     context = {'products': products}
-    return render(request, 'hardware/peripherals.html', context) 
+    return render(request, 'hardware/peripherals.html', context)
+
+def switches(request):
+    products = Product.objects.filter(
+        Q(category__slug="switches"),
+        is_available=True
+    ).distinct().order_by('-created_date')
+    context = {'products': products}
+    return render(request, 'hardware/switches.html', context)
+
+def routers_modems(request):
+    products = Product.objects.filter(
+        Q(category__slug="routers-and-modems"),
+        is_available=True
+    ).distinct().order_by('-created_date')
+    context = {'products': products}
+    return render(request, 'hardware/routers_modems.html', context)
+
+def security_cameras(request):
+    products = Product.objects.filter(
+        Q(category__slug="security-cameras"),
+        is_available=True
+    ).distinct().order_by('-created_date')
+    context = {'products': products}
+    return render(request, 'hardware/security_cameras.html', context)
 
 
 ### Software ###

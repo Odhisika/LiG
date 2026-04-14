@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import (
     Product, ComputerProduct, SoftwareProduct, PeripheralProduct,
+    NetworkingProduct, SecurityCameraProduct,
     ReviewRating, ProductGallery, Brand, ProductSpecification,
     ProductVariant, ProductTag, ProductTagRelation, ReviewHelpful,
     HomeBanner
@@ -266,7 +267,159 @@ class PeripheralProductAdmin(admin.ModelAdmin):
         return {'slug': ('product_name',)}
 
 
+class NetworkingProductAdmin(admin.ModelAdmin):
+    list_display = ('product_name', 'device_type', 'brand', 'price', 'stock', 'is_available')
+    list_editable = ('price', 'stock', 'is_available')
+    list_filter = ['device_type', 'brand', 'poe_support', 'managed', 'wifi_standard', 'is_available', 'is_featured']
+    search_fields = ('product_name', 'slug', 'description', 'model_number')
+    ordering = ('-created_date',)
+    readonly_fields = ('created_date', 'modified_date')
+    inlines = [ProductGalleryInline, ProductSpecificationInline, ProductTagRelationInline]
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('product_name', 'slug', 'category', 'brand', 'model_number', 'short_description')
+        }),
+        ('Description', {
+            'fields': ('description',)
+        }),
+        ('Device Classification', {
+            'fields': ('device_type',)
+        }),
+        ('Ports & Connectivity', {
+            'fields': (
+                ('total_ports', 'uplink_ports'),
+                ('poe_support', 'poe_budget_watts'),
+                ('wan_ports', 'dsl_type'),
+            )
+        }),
+        ('Speed & Wi-Fi', {
+            'fields': (
+                ('max_speed', 'switching_capacity'),
+                ('wifi_standard', 'wifi_speed'),
+                'dual_band',
+            )
+        }),
+        ('Management', {
+            'fields': ('managed', 'vlan_support', 'rack_mountable')
+        }),
+        ('Pricing & Inventory', {
+            'fields': (
+                ('price', 'compare_price', 'cost_price'),
+                ('stock', 'low_stock_threshold'),
+                ('track_inventory', 'allow_backorders'),
+            )
+        }),
+        ('Product Status', {
+            'fields': (
+                ('is_available', 'is_featured'),
+                'condition',
+                'warranty_period',
+            )
+        }),
+        ('SEO & Marketing', {
+            'fields': ('meta_title', 'meta_description', 'tags'),
+            'classes': ('collapse',)
+        }),
+        ('Physical Properties', {
+            'fields': ('weight', 'dimensions_length', 'dimensions_width', 'dimensions_height'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_date', 'modified_date'),
+            'classes': ('collapse',)
+        })
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('slug', 'created_date', 'modified_date')
+        return ('created_date', 'modified_date')
+
+    def get_prepopulated_fields(self, request, obj=None):
+        if obj:
+            return {}
+        return {'slug': ('product_name',)}
+
+
+class SecurityCameraProductAdmin(admin.ModelAdmin):
+    list_display = ('product_name', 'camera_type', 'brand', 'resolution', 'price', 'stock', 'is_available')
+    list_editable = ('price', 'stock', 'is_available')
+    list_filter = ['camera_type', 'brand', 'resolution', 'night_vision', 'weatherproof', 'motion_detection', 'is_available']
+    search_fields = ('product_name', 'slug', 'description', 'model_number')
+    ordering = ('-created_date',)
+    readonly_fields = ('created_date', 'modified_date')
+    inlines = [ProductGalleryInline, ProductSpecificationInline, ProductTagRelationInline]
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('product_name', 'slug', 'category', 'brand', 'model_number', 'short_description')
+        }),
+        ('Description', {
+            'fields': ('description',)
+        }),
+        ('Camera Classification', {
+            'fields': ('camera_type', 'resolution')
+        }),
+        ('Vision', {
+            'fields': (
+                ('night_vision', 'night_vision_range'),
+                'wide_angle',
+            )
+        }),
+        ('Connectivity & Power', {
+            'fields': ('connectivity', 'poe_powered')
+        }),
+        ('Storage', {
+            'fields': ('storage_type', 'max_sd_card_gb')
+        }),
+        ('Kit Details (NVR/DVR/Kits)', {
+            'fields': ('number_of_cameras', 'channels', 'hdd_included_tb'),
+            'classes': ('collapse',)
+        }),
+        ('Smart Features', {
+            'fields': ('motion_detection', 'two_way_audio', 'ai_detection', ('weatherproof', 'weatherproof_rating'))
+        }),
+        ('Pricing & Inventory', {
+            'fields': (
+                ('price', 'compare_price', 'cost_price'),
+                ('stock', 'low_stock_threshold'),
+                ('track_inventory', 'allow_backorders'),
+            )
+        }),
+        ('Product Status', {
+            'fields': (
+                ('is_available', 'is_featured'),
+                'condition',
+                'warranty_period',
+            )
+        }),
+        ('SEO & Marketing', {
+            'fields': ('meta_title', 'meta_description', 'tags'),
+            'classes': ('collapse',)
+        }),
+        ('Physical Properties', {
+            'fields': ('weight', 'dimensions_length', 'dimensions_width', 'dimensions_height'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_date', 'modified_date'),
+            'classes': ('collapse',)
+        })
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('slug', 'created_date', 'modified_date')
+        return ('created_date', 'modified_date')
+
+    def get_prepopulated_fields(self, request, obj=None):
+        if obj:
+            return {}
+        return {'slug': ('product_name',)}
+
 class ReviewRatingAdmin(admin.ModelAdmin):
+
     list_display = ('user', 'product', 'subject', 'rating', 'status', 'created_at')
     list_editable = ('status',)
     list_filter = ('status', 'rating', 'created_at')
@@ -344,6 +497,8 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(ComputerProduct, ComputerProductAdmin)
 admin.site.register(SoftwareProduct, SoftwareProductAdmin)
 admin.site.register(PeripheralProduct, PeripheralProductAdmin)
+admin.site.register(NetworkingProduct, NetworkingProductAdmin)
+admin.site.register(SecurityCameraProduct, SecurityCameraProductAdmin)
 admin.site.register(ReviewRating, ReviewRatingAdmin)
 admin.site.register(ProductGallery, ProductGalleryAdmin)
 admin.site.register(Brand, BrandAdmin)
