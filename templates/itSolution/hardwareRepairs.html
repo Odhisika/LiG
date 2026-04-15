@@ -2,86 +2,119 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
 
 <!-- Hero Section -->
-<section class="hero bg-dark text-white py-5">
+<section class="premium-hero">
     <div class="container text-center">
-        <h1 class="fw-bold">Professional IT Hardware Repair Services</h1>
-        <p class="lead">We diagnose, repair, and upgrade IT hardware to keep your business running smoothly.</p>
-        <a href="{% url 'hardwareServices' %}" class="btn btn-primary btn-lg mt-3">Explore Our Services</a>
+        <h1 class="hero-title">IT Hardware Repair Services</h1>
+        <p class="hero-subtitle">Fast, reliable, and secure diagnostic and repair services for your enterprise hardware and personal computing devices.</p>
+        <div class="mt-4">
+            <a href="{% url 'hardwareServices' %}" class="btn-premium">Explore Options</a>
+        </div>
     </div>
 </section>
 
 <!-- Why Choose Us -->
-<section class="container py-5">
-    <h2 class="text-center mb-4">Why Choose Our IT Hardware Repair Services?</h2>
-    <p class="text-center">We offer reliable and efficient hardware repair services with expert technicians and the latest tools.</p>
-    
-    <div class="row text-center mt-4">
-        <div class="col-md-4">
-            <i class="fas fa-tools fa-3x text-primary"></i>
-            <h4 class="mt-3">Expert Technicians</h4>
-            <p>Certified professionals with years of experience in hardware troubleshooting.</p>
+<section class="premium-bg-white py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">Why Trust Us With Your Hardware?</h2>
+            <p class="premium-section-subtitle">We combine deep technical expertise with state-of-the-art diagnostic tools to extend the lifespan of your critical IT infrastructure.</p>
         </div>
-        <div class="col-md-4">
-            <i class="fas fa-shield-alt fa-3x text-primary"></i>
-            <h4 class="mt-3">Secure & Reliable</h4>
-            <p>We ensure data safety and perform repairs using high-quality components.</p>
-        </div>
-        <div class="col-md-4">
-            <i class="fas fa-clock fa-3x text-primary"></i>
-            <h4 class="mt-3">Fast Turnaround</h4>
-            <p>Quick diagnostics and repairs to minimize downtime for businesses and individuals.</p>
+        
+        <div class="row g-4 text-center mt-2">
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-blue">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h4>Expert Technicians</h4>
+                    <p>Our certified professionals possess years of hands-on experience in complex motherboard and component-level troubleshooting.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-green">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Secure & Reliable</h4>
+                    <p>We guarantee stringent data privacy protocols and source only premium, manufacturer-approved replacement parts.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-red">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h4>Lightning Fast Turnaround</h4>
+                    <p>We understand that time is money. Our rapid diagnostics ensure your business gets back online as soon as possible.</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Our Services -->
-<section id="services" class="bg-light py-5">
-    <div class="container">
-        <h2 class="text-center mb-4">Our Hardware Repair Services</h2>
+<section class="premium-bg-light py-5">
+    <div class="container pb-5">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">Hardware Solutions</h2>
+        </div>
         
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-laptop fa-3x text-primary"></i>
-                    <h4 class="mt-3">Laptop & Desktop Repair</h4>
-                    <p>Fixing screen issues, battery replacements, motherboard repairs, and more.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-blue">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <h4>Laptop & Desktop Repair</h4>
+                    <p>Comprehensive fixes including screen replacements, battery swaps, liquid damage repair, and total logic board restoration.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-server fa-3x text-primary"></i>
-                    <h4 class="mt-3">Server Maintenance</h4>
-                    <p>Ensuring business servers run efficiently with component repairs and upgrades.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-purple">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h4>Server Maintenance</h4>
+                    <p>Keeping your data center online with rack component diagnostics, redundant power supply replacements, and cooling fixes.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-network-wired fa-3x text-primary"></i>
-                    <h4 class="mt-3">Networking Equipment Repair</h4>
-                    <p>Diagnosing and fixing routers, switches, firewalls, and connectivity issues.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-teal">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h4>Network Equipment</h4>
+                    <p>Swift repairs for core networking hardware including high-capacity routers, managed switches, and enterprise firewalls.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-print fa-3x text-primary"></i>
-                    <h4 class="mt-3">Printer & Peripheral Repair</h4>
-                    <p>Repairing office equipment like printers, scanners, and external drives.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-yellow">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <h4>Peripherals & Printers</h4>
+                    <p>Restoring heavy-duty office equipment, laser network printers, high-resolution scanners, and crucial external drives.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-hdd fa-3x text-primary"></i>
-                    <h4 class="mt-3">Data Recovery</h4>
-                    <p>Recovering lost data from damaged storage devices and hard drives.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-red">
+                        <i class="fas fa-hdd"></i>
+                    </div>
+                    <h4>Data Recovery Services</h4>
+                    <p>Advanced recovery techniques to securely extract lost data from physically damaged or corrupted storage mediums.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-memory fa-3x text-primary"></i>
-                    <h4 class="mt-3">Hardware Upgrades</h4>
-                    <p>Boosting performance with SSD upgrades, RAM expansion, and new GPUs.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-green">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <h4>Hardware Upgrades</h4>
+                    <p>Breathe new life into aging systems with high-speed SSD migrations, specialized RAM expansions, and thermal optimization.</p>
                 </div>
             </div>
         </div>

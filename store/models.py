@@ -4,7 +4,7 @@ from django.db.models import Avg, Count
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
 import uuid
-from category.models import Category, ComputerTypes
+from category.models import Category, ComputerTypes, SoftwareTypes
 from accounts.models import Account
 
 
@@ -76,6 +76,8 @@ class Product(models.Model):
     
     class Meta:
         ordering = ['-created_date']
+        verbose_name = 'Base Product (do not use directly)'
+        verbose_name_plural = 'Base Products (do not use directly)'
         indexes = [
             models.Index(fields=['sku']),
             models.Index(fields=['is_available', 'stock']),
@@ -130,10 +132,17 @@ class Brand(models.Model):
     description = models.TextField(blank=True)
     website = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
-    
+
+    # Product group flags — control which admin forms show this brand
+    for_computers   = models.BooleanField(default=False, verbose_name='Computers / Laptops / Desktops')
+    for_networking  = models.BooleanField(default=False, verbose_name='Networking (Switches, Routers, APs)')
+    for_security    = models.BooleanField(default=False, verbose_name='Security / CCTV Cameras')
+    for_peripherals = models.BooleanField(default=False, verbose_name='Peripherals & Accessories')
+    for_software    = models.BooleanField(default=False, verbose_name='Software')
+
     def __str__(self):
         return self.name
-    
+
     class Meta:
         ordering = ['name']
 
@@ -223,6 +232,10 @@ class ComputerProduct(Product):
     def __str__(self):
         return f"{self.brand.name} {self.product_name}"
 
+    class Meta:
+        verbose_name = '💻 Computer Product'
+        verbose_name_plural = '💻 Computer Products'
+
 
 # Model for Software
 class SoftwareProduct(Product):
@@ -243,7 +256,14 @@ class SoftwareProduct(Product):
         ('cross_platform', 'Cross Platform'),
     ]
     
-    software_type = models.CharField(max_length=100)
+    software_category = models.ForeignKey(
+        SoftwareTypes,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Software Type',
+        help_text='Select the category this software belongs to (e.g. Antivirus, Office Suite).'
+    )
     version = models.CharField(max_length=50)
     license_type = models.CharField(max_length=30, choices=LICENSE_TYPES)
     platforms = models.CharField(max_length=200, help_text="Comma-separated platform list", default='web')
@@ -264,7 +284,12 @@ class SoftwareProduct(Product):
     publisher = models.CharField(max_length=100, blank=True)
     
     def __str__(self):
-        return f"{self.software_type} - {self.product_name} ({self.version})"
+        category_name = self.software_category.software_type if self.software_category else 'Software'
+        return f"{category_name} - {self.product_name} ({self.version})"
+
+    class Meta:
+        verbose_name = '💾 Software Product'
+        verbose_name_plural = '💾 Software Products'
 
 
 # Model for Peripherals
@@ -301,6 +326,10 @@ class PeripheralProduct(Product):
     
     def __str__(self):
         return f"{self.brand.name} {self.product_name}"
+
+    class Meta:
+        verbose_name = '🔌 Peripheral Product'
+        verbose_name_plural = '🔌 Peripheral Products'
 
 
 # Model for Networking Products (Switches, Routers & Modems)
@@ -356,8 +385,8 @@ class NetworkingProduct(Product):
         return f"{self.brand.name} {self.product_name}"
 
     class Meta:
-        verbose_name = 'Networking Product'
-        verbose_name_plural = 'Networking Products'
+        verbose_name = '🌐 Networking Product'
+        verbose_name_plural = '🌐 Networking Products'
 
 
 # Model for Security Cameras & Systems
@@ -429,8 +458,8 @@ class SecurityCameraProduct(Product):
         return f"{self.brand.name} {self.product_name}"
 
     class Meta:
-        verbose_name = 'Security Camera / System'
-        verbose_name_plural = 'Security Cameras & Systems'
+        verbose_name = '📷 Security Camera / CCTV'
+        verbose_name_plural = '📷 Security Cameras & CCTV'
 
 
 # Enhanced Review and Rating System

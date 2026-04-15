@@ -2,86 +2,119 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
 
 <!-- Hero Section -->
-<section class="hero bg-primary text-white py-5">
+<section class="premium-hero">
     <div class="container text-center">
-        <h1 class="fw-bold">Professional Networking Solutions</h1>
-        <p class="lead">Reliable, secure, and high-speed networking for homes and businesses.</p>
-        <a href="{% url 'networkingServices' %}" class="btn btn-light btn-lg mt-3">Explore Our Services</a>
+        <h1 class="hero-title">Enterprise Networking Solutions</h1>
+        <p class="hero-subtitle">Architecting lightning-fast, ultra-secure, and dynamically scalable network infrastructures for modern homes and businesses.</p>
+        <div class="mt-4">
+            <a href="{% url 'networkingServices' %}" class="btn-premium">Explore Capabilities</a>
+        </div>
     </div>
 </section>
 
 <!-- Why Choose Us -->
-<section class="container py-5">
-    <h2 class="text-center mb-4">Why Choose Our Networking Services?</h2>
-    <p class="text-center">We provide expert networking installation and support for businesses, homes, and enterprises.</p>
-    
-    <div class="row text-center mt-4">
-        <div class="col-md-4">
-            <i class="fas fa-network-wired fa-3x text-primary"></i>
-            <h4 class="mt-3">Seamless Connectivity</h4>
-            <p>Fast and stable network setups for businesses and homes.</p>
+<section class="premium-bg-white py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">The Foundation of Your Connectivity</h2>
+            <p class="premium-section-subtitle">We deploy certified engineers to build unified network architectures that eliminate bottlenecks and protect your critical data.</p>
         </div>
-        <div class="col-md-4">
-            <i class="fas fa-shield-alt fa-3x text-primary"></i>
-            <h4 class="mt-3">Advanced Security</h4>
-            <p>Protect your network with firewalls, VPNs, and encryption.</p>
-        </div>
-        <div class="col-md-4">
-            <i class="fas fa-tools fa-3x text-primary"></i>
-            <h4 class="mt-3">24/7 Support</h4>
-            <p>Reliable maintenance and troubleshooting for minimal downtime.</p>
+        
+        <div class="row g-4 text-center mt-2">
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-blue">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h4>Seamless Connectivity</h4>
+                    <p>We eliminate dead zones and ensure zero-packet-loss environments to keep your digital operations moving smoothly.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-red">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Advanced Security</h4>
+                    <p>Military-grade network protection with integrated firewalls, deep-packet inspection, and secure enterprise VPNs.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-teal">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h4>24/7 Managed Support</h4>
+                    <p>Continuous network health monitoring and proactive troubleshooting to prevent downtime before it occurs.</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Our Services -->
-<section id="services" class="bg-light py-5">
-    <div class="container">
-        <h2 class="text-center mb-4">Our Networking Services</h2>
+<section class="premium-bg-light py-5">
+    <div class="container pb-5">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">Network Architecture Offerings</h2>
+        </div>
         
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-home fa-3x text-primary"></i>
-                    <h4 class="mt-3">Home & Office Networking</h4>
-                    <p>Complete Wi-Fi and Ethernet network installations.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-blue">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h4>Home & Office Networking</h4>
+                    <p>Complete dual-band Wi-Fi mapping and high-throughput Gigabit Ethernet installations tailored to your floorplan.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-server fa-3x text-primary"></i>
-                    <h4 class="mt-3">Server Installation & Management</h4>
-                    <p>Reliable server solutions for businesses of all sizes.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-purple">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h4>Server & Rack Management</h4>
+                    <p>End-to-end design, installation, and optimization of physical server racks for maximum airflow and reliability.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-user-shield fa-3x text-primary"></i>
-                    <h4 class="mt-3">Network Security</h4>
-                    <p>Protect your data with firewalls, VPNs, and intrusion prevention.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-red">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h4>Enterprise Threat Protection</h4>
+                    <p>Fortify perimeter security with state-of-the-art intrusion detection, prevention systems, and strict access controls.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-sitemap fa-3x text-primary"></i>
-                    <h4 class="mt-3">Structured Cabling</h4>
-                    <p>Organized and high-speed cabling solutions for businesses.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-teal">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h4>Structured Ethernet Cabling</h4>
+                    <p>Flawlessly organized Cat6/Cat6a cabling solutions designed to support multi-gigabit throughput demands.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-exchange-alt fa-3x text-primary"></i>
-                    <h4 class="mt-3">Router & Switch Configuration</h4>
-                    <p>Optimize network traffic with expert router and switch setups.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-yellow">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h4>Core Routing & Switching</h4>
+                    <p>Strategic deployment of Layer 2/3 managed switches and enterprise routers to perfectly balance your network loads.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-laptop-house fa-3x text-primary"></i>
-                    <h4 class="mt-3">Remote Network Solutions</h4>
-                    <p>Work from anywhere with secure and reliable remote networking.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-green">
+                        <i class="fas fa-laptop-house"></i>
+                    </div>
+                    <h4>Remote Network Tunnels</h4>
+                    <p>Secure SD-WAN and highly encrypted remote access architectures empowering your workforce to operate from anywhere.</p>
                 </div>
             </div>
         </div>

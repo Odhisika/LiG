@@ -2,92 +2,129 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
 
 <!-- Hero Section -->
-<section class="hero bg-dark text-white py-5">
+<section class="premium-hero">
     <div class="container text-center">
-        <h1 class="fw-bold">Professional CCTV Installation Services</h1>
-        <p class="lead">Secure your home and business with high-quality surveillance solutions.</p>
-        <a href="{% url 'cctvServices'%}" class="btn btn-primary btn-lg mt-3">Explore Our Services</a>
+        <h1 class="hero-title">Professional CCTV Installation</h1>
+        <p class="hero-subtitle">Secure your home and business with high-definition, enterprise-grade surveillance solutions designed for absolute peace of mind.</p>
+        <div class="mt-4">
+            <a href="{% url 'cctvServices'%}" class="btn-premium">Explore Services</a>
+        </div>
     </div>
 </section>
 
 <!-- Why Choose Us -->
-<section class="container py-5">
-    <h2 class="text-center mb-4">Why Choose Our CCTV Installation Services?</h2>
-    <p class="text-center">We provide expert installation with high-definition cameras, remote monitoring, and reliable security solutions.</p>
-    
-    <div class="row text-center mt-4">
-        <div class="col-md-4">
-            <i class="fas fa-user-shield fa-3x text-primary"></i>
-            <h4 class="mt-3">Enhanced Security</h4>
-            <p>Protect your property with 24/7 surveillance and real-time alerts.</p>
+<section class="premium-bg-white py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">Why Choose Our CCTV Services?</h2>
+            <p class="premium-section-subtitle">We provide expert installation with high-definition cameras, remote monitoring, and ultra-reliable security architectures.</p>
         </div>
-        <div class="col-md-4">
-            <i class="fas fa-cogs fa-3x text-primary"></i>
-            <h4 class="mt-3">Expert Installation</h4>
-            <p>Our team installs and configures cameras for optimal coverage.</p>
-        </div>
-        <div class="col-md-4">
-            <i class="fas fa-mobile-alt fa-3x text-primary"></i>
-            <h4 class="mt-3">Remote Monitoring</h4>
-            <p>Access live footage from anywhere using your smartphone or PC.</p>
+        
+        <div class="row g-4 text-center mt-2">
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-blue">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h4>Enhanced Security</h4>
+                    <p>Protect your property with 24/7 surveillance, crystal clear recording, and real-time smart alerts.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-purple">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h4>Expert Installation</h4>
+                    <p>Our certified team installs and fine-tunes your cameras for optimal coverage and zero blind spots.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-teal">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4>Remote Monitoring</h4>
+                    <p>Access your live footage seamlessly from anywhere in the world using your smartphone or desktop.</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Our Services -->
-<section id="services" class="bg-light py-5">
-    <div class="container">
-        <h2 class="text-center mb-4">Our CCTV Installation Services</h2>
+<section class="premium-bg-light py-5">
+    <div class="container pb-5">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">Our Solutions</h2>
+        </div>
         
         <div class="row g-4">
+            <!-- Service 1 -->
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-home fa-3x text-primary"></i>
-                    <h4 class="mt-3">Home Security Cameras</h4>
-                    <p>Indoor and outdoor surveillance to protect your home and family.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-blue">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h4>Home Security Cameras</h4>
+                    <p>Sleek indoor and outdoor surveillance designed to protect your home and family without compromising aesthetics.</p>
                 </div>
             </div>
+            <!-- Service 2 -->
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-building fa-3x text-primary"></i>
-                    <h4 class="mt-3">Business Surveillance</h4>
-                    <p>Advanced security solutions for offices and commercial spaces.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-red">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h4>Business Surveillance</h4>
+                    <p>Scalable, advanced security setups for offices, warehouses, and commercial spaces with multi-site management.</p>
                 </div>
             </div>
+            <!-- Service 3 -->
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-wifi fa-3x text-primary"></i>
-                    <h4 class="mt-3">Wireless CCTV Installation</h4>
-                    <p>No messy wiring, easy setup, and seamless remote access.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-green">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <h4>Wireless Installation</h4>
+                    <p>Zero messy wiring. Enjoy clean, high-speed wireless setups with encrypted video transmission.</p>
                 </div>
             </div>
+            <!-- Service 4 -->
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-eye fa-3x text-primary"></i>
-                    <h4 class="mt-3">Night Vision Cameras</h4>
-                    <p>Crystal-clear images even in complete darkness.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-yellow">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h4>Night Vision Tech</h4>
+                    <p>Capture crystal-clear, high-definition imagery even in complete darkness using advanced infrared.</p>
                 </div>
             </div>
+            <!-- Service 5 -->
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-bell fa-3x text-primary"></i>
-                    <h4 class="mt-3">Motion Detection & Smart Alerts</h4>
-                    <p>AI-powered cameras for instant notifications on suspicious activity.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-teal">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h4>AI Motion Detection</h4>
+                    <p>Smart cameras equipped with AI to instantly notify you of genuine threats (people/vehicles) vs pets.</p>
                 </div>
             </div>
+            <!-- Service 6 -->
             <div class="col-md-4">
-                <div class="card text-center p-4">
-                    <i class="fas fa-tools fa-3x text-primary"></i>
-                    <h4 class="mt-3">Maintenance & Upgrades</h4>
-                    <p>Regular servicing and upgrading of CCTV systems for optimal performance.</p>
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-purple">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h4>Pro Maintenance</h4>
+                    <p>Regular servicing, firmware updates, and rapid response support to keep your systems at 100%.</p>
                 </div>
             </div>
-
         </div>
     </div>
-     
 </section>
 
 {% endblock %}
