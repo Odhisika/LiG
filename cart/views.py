@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from store.models import Product, ComputerProduct, SoftwareProduct, PeripheralProduct
+from store.models import Product, ComputerProduct, SoftwareProduct, PeripheralProduct, NetworkingProduct, SecurityCameraProduct
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
@@ -53,7 +53,7 @@ def add_cart(request, product_id):
 
     # Try to get the product from any subclass
     product = None
-    for model in [ComputerProduct, SoftwareProduct, PeripheralProduct]:
+    for model in [ComputerProduct, SoftwareProduct, PeripheralProduct, NetworkingProduct, SecurityCameraProduct]:
         try:
             product = model.objects.get(id=product_id)
             break
