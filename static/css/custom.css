@@ -59,3 +59,51 @@ ul.thumb li img{
   height: 80px;
   border: 1px solid grey;
 }
+
+/* Royal Blue Theme Variables */
+:root {
+    --royal-blue: #002366;
+    --royal-blue-light: #004e92;
+    --royal-blue-gradient: linear-gradient(135deg, #002366 0%, #004e92 100%);
+    --royal-blue-hover: linear-gradient(135deg, #001a4d 0%, #003d73 100%);
+    --amazon-black: #0F1111;
+    --amazon-gray: #565959;
+}
+
+/* Standardized Royal Blue Buttons */
+.btn-primary {
+    background: var(--royal-blue-gradient) !important;
+    border: none !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 2px 5px rgba(0, 35, 102, 0.2) !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    background: var(--royal-blue-hover) !important;
+    box-shadow: 0 5px 15px rgba(0, 35, 102, 0.3) !important;
+    color: white !important;
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-outline-primary {
+    color: var(--royal-blue) !important;
+    border-color: var(--royal-blue) !important;
+    background-color: transparent !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--royal-blue-gradient) !important;
+    color: white !important;
+    border-color: transparent !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 35, 102, 0.2) !important;
+}
