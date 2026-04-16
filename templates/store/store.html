@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
+{% load custom_filters %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -196,10 +197,15 @@
                             </li>
                         {% endif %}
 
-                        {% for i in products.paginator.page_range %}
+                        {% get_elided_page_range products.paginator products.number as page_range %}
+                        {% for i in page_range %}
                             {% if products.number == i %}
                                 <li class="page-item active">
                                     <span class="page-link">{{ i }}</span>
+                                </li>
+                            {% elif i == products.paginator.ELLIPSIS %}
+                                <li class="page-item disabled" style="display: flex; align-items: center; justify-content: center; padding: 0 0.5rem; color: #64748b;">
+                                    <span style="letter-spacing: 2px;">...</span>
                                 </li>
                             {% else %}
                                 <li class="page-item">
