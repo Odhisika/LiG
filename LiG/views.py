@@ -16,7 +16,7 @@ def home(request):
 
 
 def allproducts(request):
-    products = Product.objects.filter(is_available=True).select_related('category').order_by('-created_date')
+    products = Product.objects.filter(is_available=True).select_related('category').order_by('?')
     context = {'products': products}
     return render(request, 'hardware/allproducts.html', context)
 
@@ -39,9 +39,12 @@ def laptops(request):
 def fresh_laptops(request):
     """Fresh/new laptops only."""
     products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='fresh-laptop') | Q(computer_type__slug='laptop'),
-        condition='new',
+        Q(computer_type__slug='laptop') | Q(computer_type__parent__slug='laptop'),
         is_available=True
+    ).filter(
+        Q(condition='new') | Q(computer_type__slug='fresh-laptop')
+    ).exclude(
+        computer_type__slug='slightly-used-laptop'
     ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/fresh_laptops.html', context)
@@ -50,9 +53,12 @@ def fresh_laptops(request):
 def used_laptops(request):
     """Slightly used laptops."""
     products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='slightly-used-laptop') | Q(computer_type__parent__slug='laptop'),
-        condition='slightly_used',
+        Q(computer_type__slug='laptop') | Q(computer_type__parent__slug='laptop'),
         is_available=True
+    ).filter(
+        Q(condition='slightly_used') | Q(computer_type__slug='slightly-used-laptop')
+    ).exclude(
+        computer_type__slug='fresh-laptop'
     ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/used_laptops.html', context)
@@ -71,9 +77,12 @@ def desktops(request):
 def fresh_desktops(request):
     """Fresh/new desktops only."""
     products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='fresh-desktop') | Q(computer_type__slug='desktop'),
-        condition='new',
+        Q(computer_type__slug='desktop') | Q(computer_type__parent__slug='desktop'),
         is_available=True
+    ).filter(
+        Q(condition='new') | Q(computer_type__slug='fresh-desktop')
+    ).exclude(
+        computer_type__slug='slightly-used-desktop'
     ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/fresh_desktops.html', context)
@@ -82,9 +91,12 @@ def fresh_desktops(request):
 def used_desktops(request):
     """Slightly used desktops."""
     products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='slightly-used-desktop') | Q(computer_type__parent__slug='desktop'),
-        condition='slightly_used',
+        Q(computer_type__slug='desktop') | Q(computer_type__parent__slug='desktop'),
         is_available=True
+    ).filter(
+        Q(condition='slightly_used') | Q(computer_type__slug='slightly-used-desktop')
+    ).exclude(
+        computer_type__slug='fresh-desktop'
     ).distinct().order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/used_desktops.html', context)
