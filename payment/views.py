@@ -118,9 +118,13 @@ def _initialize_hubtel_payment(request, order, payment):
 
         # returnUrl  → user is redirected here after completing payment (GET)
         # callbackUrl → Hubtel POSTs the final result here server-to-server (POST)
-        return_url      = request.build_absolute_uri(reverse('verify_payment'))
-        webhook_url     = request.build_absolute_uri(reverse('hubtel_webhook'))
-        cancellation_url = request.build_absolute_uri(reverse('verify_payment'))
+        #
+        # IMPORTANT: Hubtel does NOT always append query params to returnUrl.
+        # We bake our own reference into the URL so it's always present.
+        base_verify_url  = request.build_absolute_uri(reverse('verify_payment'))
+        return_url       = f"{base_verify_url}?clientReference={payment.ref}"
+        cancellation_url = f"{base_verify_url}?clientReference={payment.ref}&cancelled=1"
+        webhook_url      = request.build_absolute_uri(reverse('hubtel_webhook'))
 
         description   = f"Order {order.order_number} - LiG Store"
         customer_name = f"{order.first_name} {order.last_name}".strip() or "Customer"
@@ -175,6 +179,7 @@ def verify_payment(request):
         request.GET.get("transactionId") or
         request.GET.get("TransactionId")
     )
+    cancelled = request.GET.get("cancelled")
 
     if not reference:
         messages.error(request, "No payment reference provided.")
@@ -190,6 +195,12 @@ def verify_payment(request):
         if not payment:
             messages.error(request, "Payment record not found.")
             return redirect('cart')
+
+        # Customer cancelled on Hubtel's page
+        if cancelled:
+            messages.warning(request, "Payment was cancelled. You can try again.")
+            return redirect('order_complete', order_number=payment.order.order_number)
+
 
         # Already verified by webhook before browser landed here
         if payment.is_successful():
