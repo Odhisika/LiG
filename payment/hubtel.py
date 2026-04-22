@@ -128,16 +128,27 @@ class Hubtel:
             if status_ok and result.get("data"):
                 data = result["data"]
                 checkout_url = data.get("checkoutUrl") or data.get("CheckoutUrl", "")
-                token = data.get("clientReference") or reference
+
+                # Extract Hubtel's own transaction/checkout ID — needed for status checks
+                hubtel_id = (
+                    data.get("checkoutId") or
+                    data.get("CheckoutId") or
+                    data.get("transactionId") or
+                    data.get("TransactionId") or
+                    data.get("salesId") or
+                    data.get("SalesId") or
+                    data.get("clientReference") or
+                    reference
+                )
 
                 if not checkout_url:
                     logger.error(f"Hubtel returned no checkoutUrl: {result}")
                     return False, {"message": "No checkout URL returned by Hubtel."}
 
-                logger.info(f"Hubtel checkout URL: {checkout_url}")
+                logger.info(f"Hubtel checkout URL: {checkout_url} | hubtel_id: {hubtel_id}")
                 return True, {
                     "checkout_url": checkout_url,
-                    "token": token,
+                    "token": hubtel_id,
                     "reference": reference,
                 }
             else:

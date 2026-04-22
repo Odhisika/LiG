@@ -149,8 +149,18 @@ class Payment(models.Model):
         log = logging.getLogger(__name__)
         try:
             hubtel = Hubtel()
-            reference = self.hubtel_token or self.ref
+
+            # clientReference is always our own PAY_xxx ref
+            reference = self.ref
+
+            # transaction_id is Hubtel's own checkout/sales ID stored in hubtel_token
+            # Use it automatically if caller didn't pass one
+            if not transaction_id and self.hubtel_token and not self.hubtel_token.startswith('PAY_'):
+                transaction_id = self.hubtel_token
+                log.info(f"Using stored hubtel_token as transaction_id: {transaction_id}")
+
             status, result = hubtel.verify_transaction(reference, transaction_id)
+
 
             if status and result:
                 # Hubtel confirmed payment SUCCESS

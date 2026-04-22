@@ -312,22 +312,30 @@ def paystack_webhook(request):
 
 
 def payment_status(request, payment_id):
-    """Check payment status (AJAX endpoint)"""
+    """AJAX polling endpoint — check payment status and try to verify if pending."""
     try:
         payment = get_object_or_404(Payment, id=payment_id)
-        
-        # Verify payment if still pending
-        if payment.status == 'pending':
-            payment.verify_payment()
-        
+
+        if payment.status == 'pending' and payment.gateway == 'hubtel':
+            # Pass stored hubtel_token as transaction_id so the API call is valid
+            txn_id = payment.hubtel_token or None
+            # Only call the API if we have a real Hubtel ID (not our own PAY_xxx ref)
+            if txn_id and not txn_id.startswith('PAY_'):
+                payment.verify_payment(txn_id)
+            else:
+                # Try using clientReference-only lookup
+                payment.verify_payment(None)
+
         return JsonResponse({
             'status': payment.status,
             'verified': payment.verified,
-            'success': payment.is_successful()
+            'success': payment.is_successful(),
+            'ref': payment.ref,
         })
-        
+
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f"payment_status error: {str(e)}")
+        return JsonResponse({'error': str(e), 'status': 'pending', 'verified': False, 'success': False})
 
 
 def payment_detail(request, payment_id):

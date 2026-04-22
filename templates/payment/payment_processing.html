@@ -149,52 +149,74 @@
         </p>
 
         <div class="countdown" id="countdown-text">Checking status in <span id="counter">5</span>s…</div>
+
+        <!-- Manual escape hatch — shown after 30s -->
+        <div id="manual-check" style="display:none; margin-top:1.5rem;">
+            <hr style="border-color:rgba(255,255,255,0.1);">
+            <p class="text-white-50 small">Taking longer than expected?</p>
+            <a href="/payment/verify/?clientReference={{ payment.ref }}"
+               class="btn btn-outline-light btn-sm px-4">
+                <i class="fas fa-sync-alt me-1"></i> Check Payment Status Now
+            </a>
+        </div>
     </div>
 
     <script>
     (function () {
-        const paymentRef  = "{{ payment.ref }}";
-        const pollUrl     = "/payment/status/{{ payment.id }}/";
-        const successBase = "/payment/verify/?clientReference=" + encodeURIComponent(paymentRef) + "&_polled=1";
-        const MAX_POLLS   = 24;   // 24 × 5s = 2 minutes max
-        let pollCount     = 0;
-        let countdownVal  = 5;
-        const counterEl   = document.getElementById("counter");
+        const paymentRef   = "{{ payment.ref }}";
+        const pollUrl      = "/payment/status/{{ payment.id }}/";
+        const verifyUrl    = "/payment/verify/?clientReference=" + encodeURIComponent(paymentRef);
+        const POLL_SEC     = 3;    // poll every 3 seconds
+        const SHOW_BTN_SEC = 30;   // show manual button after 30 seconds
+        const MAX_SEC      = 90;   // auto-redirect after 90 seconds
+        let elapsed    = 0;
+        let countdownVal = POLL_SEC;
+        const counterEl  = document.getElementById("counter");
+        const manualEl   = document.getElementById("manual-check");
 
-        // Countdown display
+        function goVerify() {
+            window.location.href = verifyUrl;
+        }
+
+        function poll() {
+            fetch(pollUrl, { credentials: "same-origin" })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success || data.status === "successful") {
+                        // Payment confirmed — go show success page
+                        goVerify();
+                    } else if (data.status === "failed") {
+                        goVerify();
+                    }
+                })
+                .catch(() => { /* network hiccup — keep polling */ });
+        }
+
         const ticker = setInterval(() => {
+            elapsed++;
             countdownVal--;
             counterEl.textContent = countdownVal;
+
+            // Show manual button after 30s
+            if (elapsed >= SHOW_BTN_SEC && manualEl.style.display === "none") {
+                manualEl.style.display = "block";
+            }
+
+            // Auto-redirect after 90s regardless
+            if (elapsed >= MAX_SEC) {
+                clearInterval(ticker);
+                goVerify();
+                return;
+            }
+
             if (countdownVal <= 0) {
-                countdownVal = 5;
+                countdownVal = POLL_SEC;
                 poll();
             }
         }, 1000);
 
-        function poll() {
-            pollCount++;
-            fetch(pollUrl, { credentials: "same-origin" })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.status === "successful" && data.verified) {
-                        clearInterval(ticker);
-                        // Redirect to verify_payment which will now show the success page
-                        window.location.href = "/payment/verify/?clientReference=" + encodeURIComponent(paymentRef);
-                    } else if (data.status === "failed") {
-                        clearInterval(ticker);
-                        window.location.href = "/payment/verify/?clientReference=" + encodeURIComponent(paymentRef);
-                    } else if (pollCount >= MAX_POLLS) {
-                        // 2 minutes passed — redirect anyway to show current state
-                        clearInterval(ticker);
-                        window.location.href = "/payment/verify/?clientReference=" + encodeURIComponent(paymentRef) + "&timeout=1";
-                    }
-                })
-                .catch(() => {
-                    // Network error — just keep polling
-                });
-        }
-
-        // First poll after 5 seconds (handled by ticker)
+        // First poll immediately on page load
+        poll();
     })();
     </script>
 </body>
