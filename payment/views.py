@@ -121,10 +121,12 @@ def _initialize_hubtel_payment(request, order, payment):
         #
         # IMPORTANT: Hubtel does NOT always append query params to returnUrl.
         # We bake our own reference into the URL so it's always present.
-        base_verify_url  = request.build_absolute_uri(reverse('verify_payment'))
+        # Force HTTPS because if Nginx proxy is misconfigured, it returns http:// 
+        # and Hubtel webhook POSTs will fail due to 301 redirect turning them into GETs.
+        base_verify_url  = request.build_absolute_uri(reverse('verify_payment')).replace('http://', 'https://')
         return_url       = f"{base_verify_url}?clientReference={payment.ref}"
         cancellation_url = f"{base_verify_url}?clientReference={payment.ref}&cancelled=1"
-        webhook_url      = request.build_absolute_uri(reverse('hubtel_webhook'))
+        webhook_url      = request.build_absolute_uri(reverse('hubtel_webhook')).replace('http://', 'https://')
 
         description   = f"Order {order.order_number} - LiG Store"
         customer_name = f"{order.first_name} {order.last_name}".strip() or "Customer"
@@ -376,7 +378,8 @@ def hubtel_webhook(request):
         # Extract key fields — Hubtel uses various casing
         status = (
             payload.get('Status') or payload.get('status') or
-            payload.get('ResponseDescription') or ''
+            payload.get('TransactionStatus') or payload.get('transactionStatus') or
+            payload.get('ResponseCode') or payload.get('ResponseDescription') or ''
         ).lower()
 
         reference = (
