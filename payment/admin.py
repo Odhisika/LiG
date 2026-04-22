@@ -99,7 +99,7 @@ class BasePaymentAdmin(admin.ModelAdmin):
     actions = [mark_as_verified, reverify_via_api, mark_as_failed]
     readonly_fields = [
         "ref", "created_at", "updated_at",
-        "status_badge", "gateway_badge",
+        "status_badge", "gateway_badge", "order_link", "is_verified",
     ]
 
     # ------------------------------------------------------------------
