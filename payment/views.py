@@ -115,40 +115,45 @@ def _initialize_hubtel_payment(request, order, payment):
     """Initialize Hubtel payment"""
     try:
         hubtel = Hubtel()
-        callback_url = request.build_absolute_uri(reverse('verify_payment'))
-        
-        description = f"Order {order.order_number} - LiG Store"
+
+        # returnUrl  → user is redirected here after completing payment (GET)
+        # callbackUrl → Hubtel POSTs the final result here server-to-server (POST)
+        return_url      = request.build_absolute_uri(reverse('verify_payment'))
+        webhook_url     = request.build_absolute_uri(reverse('hubtel_webhook'))
+        cancellation_url = request.build_absolute_uri(reverse('verify_payment'))
+
+        description   = f"Order {order.order_number} - LiG Store"
         customer_name = f"{order.first_name} {order.last_name}".strip() or "Customer"
-        
+
         success, result = hubtel.initialize_transaction(
             amount=float(payment.amount),
             description=description,
             customer_email=payment.email,
             customer_name=customer_name,
             reference=payment.ref,
-            callback_url=callback_url,
-            mobile_money=True
+            callback_url=webhook_url,       # server-to-server POST
+            return_url=return_url,          # browser redirect after payment
+            cancellation_url=cancellation_url,
         )
-        
+
         if success:
-            payment.hubtel_token = result.get('token')
+            payment.hubtel_token        = result.get('token')
             payment.hubtel_checkout_url = result.get('checkout_url')
-            payment.authorization_url = result.get('checkout_url')
+            payment.authorization_url   = result.get('checkout_url')
             payment.save()
-            
             return redirect(payment.authorization_url)
         else:
             messages.error(
-                request, 
+                request,
                 f"Hubtel payment failed: {result.get('message', 'Unknown error')}"
             )
             payment.status = 'failed'
             payment.save()
             return redirect('order_complete', order_number=order.order_number)
-            
+
     except HubtelException as e:
         logger.error(f"Hubtel initialization error: {str(e)}")
-        messages.error(request, "Hubtel authentication error. Please try Paystack instead.")
+        messages.error(request, "Hubtel authentication error. Please try again.")
         payment.status = 'failed'
         payment.save()
         return redirect('cart')
@@ -308,28 +313,72 @@ def payment_detail(request, payment_id):
 @csrf_exempt
 @require_http_methods(["POST"])
 def hubtel_webhook(request):
-    """Handle Hubtel webhook notifications"""
+    """
+    Hubtel server-to-server callback (callbackUrl).
+    Hubtel POSTs the payment result here after the customer completes payment.
+    This is the authoritative source — verify and mark payment immediately.
+    """
     try:
-        data = json.loads(request.body)
-        logger.info(f"Hubtel webhook received: {data}")
-        
-        # Hubtel sends transaction status updates
-        status = data.get('status') or data.get('Status')
-        reference = data.get('clientReference') or data.get('ClientReference') or data.get('reference')
-        transaction_id = data.get('transactionId') or data.get('TransactionId')
-        
-        if reference and status:
-            payment = Payment.objects.filter(ref=reference).first()
-            
-            if payment:
-                if status.lower() in ['completed', 'success', 'approved', 'successfull']:
-                    payment.verify_payment(transaction_id)
-                elif status.lower() in ['failed', 'cancelled']:
-                    payment.status = 'failed'
-                    payment.save()
-        
+        raw_body = request.body.decode('utf-8')
+        logger.info(f"Hubtel webhook RAW body: {raw_body[:1000]}")
+
+        data = json.loads(raw_body)
+        logger.info(f"Hubtel webhook parsed: {data}")
+
+        # Hubtel may nest data inside a 'Data' or 'data' key
+        payload = data.get('Data') or data.get('data') or data
+
+        # Extract key fields — Hubtel uses various casing
+        status = (
+            payload.get('Status') or payload.get('status') or
+            payload.get('ResponseDescription') or ''
+        ).lower()
+
+        reference = (
+            payload.get('ClientReference') or payload.get('clientReference') or
+            payload.get('ClientRef') or payload.get('reference') or ''
+        )
+
+        transaction_id = (
+            payload.get('TransactionId') or payload.get('transactionId') or
+            payload.get('CheckoutId') or payload.get('checkoutId') or
+            payload.get('PosTransactionId') or ''
+        )
+
+        logger.info(
+            f"Hubtel webhook → status='{status}' ref='{reference}' txn_id='{transaction_id}'"
+        )
+
+        if not reference:
+            logger.warning("Hubtel webhook: no clientReference found in payload.")
+            return HttpResponse("OK", status=200)  # still return 200 so Hubtel doesn't retry
+
+        payment = Payment.objects.filter(
+            models.Q(ref=reference) |
+            models.Q(hubtel_token=reference)
+        ).first()
+
+        if not payment:
+            logger.warning(f"Hubtel webhook: no payment found for ref='{reference}'")
+            return HttpResponse("OK", status=200)
+
+        if payment.verified:
+            logger.info(f"Hubtel webhook: payment {reference} already verified — skipping.")
+            return HttpResponse("OK", status=200)
+
+        if status in ('success', 'successfull', 'completed', 'approved'):
+            logger.info(f"Hubtel webhook: triggering verification for {reference}")
+            payment.verify_payment(transaction_id or None)
+        elif status in ('failed', 'cancelled', 'rejected'):
+            payment.status = 'failed'
+            payment.save()
+            logger.info(f"Hubtel webhook: payment {reference} marked as failed.")
+
         return HttpResponse("OK", status=200)
-        
+
+    except json.JSONDecodeError:
+        logger.error(f"Hubtel webhook: invalid JSON body — {request.body[:200]}")
+        return HttpResponse("OK", status=200)  # return 200 anyway
     except Exception as e:
         logger.error(f"Hubtel webhook error: {str(e)}")
-        return HttpResponse("Error", status=500)
+        return HttpResponse("OK", status=200)

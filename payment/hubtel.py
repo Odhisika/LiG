@@ -58,11 +58,22 @@ class Hubtel:
         customer_name,
         reference,
         callback_url=None,
+        return_url=None,
         cancellation_url=None,
         **kwargs,
     ):
         """
         Initiate a Hubtel Online Checkout payment.
+
+        Args:
+            amount (float)          : Amount in GHS
+            description (str)       : Short description
+            customer_email (str)    : Customer email
+            customer_name (str)     : Customer full name
+            reference (str)         : Your unique ref (clientReference)
+            callback_url (str)      : Hubtel POSTs the result here (server-to-server)
+            return_url (str)        : Browser redirect after payment
+            cancellation_url (str)  : Browser redirect on cancel
 
         Returns:
             tuple: (success: bool, data: dict)
@@ -74,8 +85,8 @@ class Hubtel:
             "description": description,
             "clientReference": reference,
             "callbackUrl": callback_url or "",
-            "returnUrl": callback_url or "",
-            "cancellationUrl": cancellation_url or callback_url or "",
+            "returnUrl": return_url or callback_url or "",
+            "cancellationUrl": cancellation_url or return_url or callback_url or "",
             "totalAmount": float(amount),
             "customerName": customer_name,
             "customerEmail": customer_email,
@@ -176,12 +187,18 @@ class Hubtel:
             tuple: (success: bool, data: dict | None)
         """
         if transaction_id:
-            url = f"{self.STATUS_BASE_URL}/{transaction_id}/status"
+            url    = f"{self.STATUS_BASE_URL}/{transaction_id}/status"
             params = {"clientReference": reference}
         else:
-            # Fallback: query by clientReference only (no TransactionId yet known)
-            url = f"{self.STATUS_BASE_URL}/0/status"
+            # No TransactionId yet — query by clientReference only.
+            # Some Hubtel environments support this; log clearly if it fails.
+            url    = f"{self.STATUS_BASE_URL}/0/status"
             params = {"clientReference": reference}
+            logger.warning(
+                f"Hubtel verify: no TransactionId for ref={reference}. "
+                "Attempting clientReference-only lookup. "
+                "Ensure hubtel_webhook is properly receiving Hubtel POSTs."
+            )
 
         logger.info(f"Hubtel verify → {url} | params={params}")
 
