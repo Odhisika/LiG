@@ -216,13 +216,13 @@ def verify_payment(request):
             return render(request, "payment/payment_success.html",
                           {"payment": payment, "order": payment.order, "success": True})
 
-        # Hubtel redirect with no TransactionId → webhook will confirm; show processing page
+        # Hubtel redirect with no TransactionId → webhook will confirm
         if payment.gateway == 'hubtel' and not transaction_id:
             logger.info(
-                f"Hubtel returnUrl for {reference} has no TransactionId — showing processing page."
+                f"Hubtel returnUrl for {reference} has no TransactionId — redirecting to home page."
             )
-            return render(request, "payment/payment_processing.html",
-                          {"payment": payment, "order": payment.order})
+            messages.info(request, "Your payment is being processed. We will notify you once it's confirmed.")
+            return redirect('home')
 
         # Normal verification (Paystack, or Hubtel with a TransactionId)
         try:
@@ -230,8 +230,8 @@ def verify_payment(request):
         except Exception as verify_error:
             logger.error(f"Error in payment.verify_payment(): {str(verify_error)}")
             if payment.gateway == 'hubtel':
-                return render(request, "payment/payment_processing.html",
-                              {"payment": payment, "order": payment.order})
+                messages.info(request, "Your payment is being processed. We will notify you once it's confirmed.")
+                return redirect('home')
             messages.error(request, "Payment verification failed. Please contact support.")
             return redirect('cart')
 
@@ -246,10 +246,10 @@ def verify_payment(request):
             return render(request, "payment/payment_success.html",
                           {"payment": payment, "order": payment.order, "success": True})
 
-        # Not confirmed yet (pending) — show processing page for Hubtel
+        # Not confirmed yet (pending) — redirect to home
         if payment.status == 'pending' and payment.gateway == 'hubtel':
-            return render(request, "payment/payment_processing.html",
-                          {"payment": payment, "order": payment.order})
+            messages.info(request, "Your payment is being processed. We will notify you once it's confirmed.")
+            return redirect('home')
 
         # Explicitly failed
         messages.error(request, "Payment was not successful. Please contact support if you were charged.")
