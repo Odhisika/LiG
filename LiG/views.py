@@ -6,10 +6,12 @@ from django.http import HttpResponse
 from research.form import ProjectBookingForm
 from django.db.models import Q
 from category.models import ResearchTypes, ComputerTypes, SoftwareTypes
+from accounts.models import NewsletterSubscriber
+from django.contrib import messages
 
 
 def home(request):
-    products = Product.objects.filter(is_available=True).select_related('category').order_by('-created_date')[:12]
+    products = Product.objects.filter(is_available=True).select_related('category').order_by('?')[:12]
     active_banners = {banner.slide_number: banner for banner in HomeBanner.objects.filter(is_active=True)}
     context = {'products': products, 'banners': active_banners}
     return render(request, 'home.html', context)
@@ -19,6 +21,19 @@ def allproducts(request):
     products = Product.objects.filter(is_available=True).select_related('category').order_by('?')
     context = {'products': products}
     return render(request, 'hardware/allproducts.html', context)
+
+
+def subscribe_newsletter(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        if email:
+            if NewsletterSubscriber.objects.filter(email=email).exists():
+                messages.info(request, 'You are already subscribed to our newsletter.')
+            else:
+                NewsletterSubscriber.objects.create(email=email)
+                messages.success(request, 'Thank you for subscribing to our newsletter!')
+        return redirect(request.META.get('HTTP_REFERER', 'home'))
+    return redirect('home')
 
 
 # ─────────────────────────────────────────────────────────────────────────────

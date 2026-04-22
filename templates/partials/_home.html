@@ -237,6 +237,7 @@
             </div>
         </div>
     </div>
+    {% if not user.is_authenticated %}
     <div class="hero-actions d-flex justify-content-center align-items-center" >
         <button class="btn btn-vero">
             <a href="{% url 'register' %}" class="btn-link text-white text-decoration-none d-flex align-items-center">
@@ -246,7 +247,8 @@
                 </svg>
             </a>
         </button>
-    </div>    
+    </div>
+    {% endif %}
 </div>
 
 <style>

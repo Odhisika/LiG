@@ -83,3 +83,12 @@ class UserProfile(models.Model):
 
     def full_address(self):
         return f'{self.address_line_1} {self.address_line_2}'.strip()
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(max_length=100, unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.email
+

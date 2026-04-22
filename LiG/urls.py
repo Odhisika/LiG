@@ -92,6 +92,7 @@ urlpatterns = [
 
     #allproducts#
     path('hardware/allproducts/', views.allproducts, name='allproducts'),
+    path('subscribe/', views.subscribe_newsletter, name='subscribe_newsletter'),
 
 
 ] 
