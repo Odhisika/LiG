@@ -154,7 +154,7 @@
         <div id="manual-check" style="display:none; margin-top:1.5rem;">
             <hr style="border-color:rgba(255,255,255,0.1);">
             <p class="text-white-50 small">Taking longer than expected?</p>
-            <a href="/payment/verify/?clientReference={{ payment.ref }}"
+            <a href="{% url 'verify_payment' %}?clientReference={{ payment.ref }}"
                class="btn btn-outline-light btn-sm px-4">
                 <i class="fas fa-sync-alt me-1"></i> Check Payment Status Now
             </a>
@@ -164,8 +164,8 @@
     <script>
     (function () {
         const paymentRef   = "{{ payment.ref }}";
-        const pollUrl      = "/payment/status/{{ payment.id }}/";
-        const verifyUrl    = "/payment/verify/?clientReference=" + encodeURIComponent(paymentRef);
+        const pollUrl      = "{% url 'payment_status' payment.id %}";
+        const verifyUrl    = "{% url 'verify_payment' %}?clientReference=" + encodeURIComponent(paymentRef);
         const POLL_SEC     = 3;    // poll every 3 seconds
         const SHOW_BTN_SEC = 30;   // show manual button after 30 seconds
         const MAX_SEC      = 90;   // auto-redirect after 90 seconds
