@@ -16,11 +16,14 @@ class HubtelException(Exception):
 class Hubtel:
     """
     Hubtel Online Checkout integration.
-    Uses Basic Auth (ClientID:ClientSecret) directly — no OAuth token needed.
-    Endpoint: https://payproxyapi.hubtel.com/items/initiate
+
+    Initiation endpoint : https://payproxyapi.hubtel.com/items/initiate
+    Status check endpoint: https://api-txnstatus.hubtel.com/transactions/{TransactionId}/status
+                           ?clientReference={clientReference}
     """
 
-    BASE_URL = "https://payproxyapi.hubtel.com"
+    INITIATE_URL = "https://payproxyapi.hubtel.com/items/initiate"
+    STATUS_BASE_URL = "https://api-txnstatus.hubtel.com/transactions"
 
     def __init__(self):
         self.client_id = getattr(settings, 'HUBTEL_CLIENT_ID', '')
@@ -28,8 +31,13 @@ class Hubtel:
         self.merchant_account = getattr(settings, 'HUBTEL_MERCHANT_ACCOUNT_NUMBER', '')
 
         if not self.client_id or not self.client_secret:
-            raise HubtelException("Hubtel credentials (HUBTEL_CLIENT_ID / HUBTEL_CLIENT_SECRET) are not configured.")
+            raise HubtelException(
+                "Hubtel credentials (HUBTEL_CLIENT_ID / HUBTEL_CLIENT_SECRET) are not configured."
+            )
 
+    # ------------------------------------------------------------------
+    # Auth
+    # ------------------------------------------------------------------
     def _get_auth_header(self):
         """Generate Basic Auth header: base64(clientId:clientSecret)"""
         credentials = f"{self.client_id}:{self.client_secret}"
@@ -39,6 +47,9 @@ class Hubtel:
             "Content-Type": "application/json",
         }
 
+    # ------------------------------------------------------------------
+    # Initiate checkout
+    # ------------------------------------------------------------------
     def initialize_transaction(
         self,
         amount,
@@ -53,19 +64,10 @@ class Hubtel:
         """
         Initiate a Hubtel Online Checkout payment.
 
-        Args:
-            amount (float): Amount in GHS (e.g. 10.00)
-            description (str): Short description of the purchase
-            customer_email (str): Customer email address
-            customer_name (str): Customer full name
-            reference (str): Your unique invoice / order ID
-            callback_url (str): URL Hubtel will POST the result to
-            cancellation_url (str): URL to redirect when customer cancels
-
         Returns:
             tuple: (success: bool, data: dict)
         """
-        url = f"{self.BASE_URL}/items/initiate"
+        url = self.INITIATE_URL
 
         payload = {
             "merchantAccountNumber": self.merchant_account,
@@ -77,10 +79,10 @@ class Hubtel:
             "totalAmount": float(amount),
             "customerName": customer_name,
             "customerEmail": customer_email,
-            "customerMsisdn": "",           # Optional phone — leave blank unless you have it
+            "customerMsisdn": "",
         }
 
-        logger.info(f"Hubtel initiate request → {url} | ref={reference} | amount={amount}")
+        logger.info(f"Hubtel initiate → {url} | ref={reference} | amount={amount}")
 
         try:
             response = requests.post(
@@ -90,26 +92,22 @@ class Hubtel:
                 timeout=30,
             )
 
-            # Log raw response for easier debugging
-            logger.info(f"Hubtel response [{response.status_code}]: {response.text[:500]}")
+            logger.info(f"Hubtel initiate response [{response.status_code}]: {response.text[:500]}")
 
-            # Handle authentication failure (empty body)
             if response.status_code == 401:
-                logger.error("Hubtel 401 Unauthorized — check HUBTEL_CLIENT_ID and HUBTEL_CLIENT_SECRET in your Hubtel merchant dashboard.")
-                return False, {"message": "Hubtel authentication failed (401). Your API keys are invalid or not activated for Online Checkout."}
+                logger.error("Hubtel 401 — check API credentials in dashboard.")
+                return False, {"message": "Hubtel authentication failed (401). API keys invalid."}
 
             if response.status_code == 403:
-                logger.error("Hubtel 403 Forbidden — your account may not be enabled for Online Checkout.")
-                return False, {"message": "Hubtel rejected the request (403). Contact Hubtel support to enable Online Checkout on your account."}
+                logger.error("Hubtel 403 — account not enabled for Online Checkout.")
+                return False, {"message": "Hubtel rejected request (403). Contact Hubtel support."}
 
             if not response.text.strip():
-                logger.error(f"Hubtel returned empty body with status {response.status_code}")
-                return False, {"message": f"Hubtel returned an empty response (HTTP {response.status_code})."}
+                logger.error(f"Hubtel returned empty body [{response.status_code}]")
+                return False, {"message": f"Hubtel returned empty response (HTTP {response.status_code})."}
 
             result = response.json()
 
-            # Hubtel returns status 200 with a "ResponseCode" field
-            # Success codes: "0000" or status "Success"
             status_ok = (
                 result.get("status", "").lower() in ("success", "successfull")
                 or str(result.get("ResponseCode", "")) == "0000"
@@ -157,60 +155,98 @@ class Hubtel:
             logger.error(f"Unexpected Hubtel error: {str(e)}")
             return False, {"message": "An unexpected error occurred with Hubtel."}
 
-    def verify_transaction(self, reference):
+    # ------------------------------------------------------------------
+    # Verify transaction via api-txnstatus.hubtel.com
+    # ------------------------------------------------------------------
+    def verify_transaction(self, reference, transaction_id=None):
         """
-        Check the status of a Hubtel transaction by clientReference.
+        Check the status of a Hubtel transaction.
+
+        Uses:
+          GET https://api-txnstatus.hubtel.com/transactions/{transaction_id}/status
+              ?clientReference={reference}
+
+        If no transaction_id is provided, falls back to clientReference-only lookup.
 
         Args:
-            reference (str): The clientReference used when initiating
+            reference (str)      : The clientReference (our internal ref / PAY_xxx)
+            transaction_id (str) : Hubtel's TransactionId received in the callback
 
         Returns:
-            tuple: (success: bool, data: dict or None)
+            tuple: (success: bool, data: dict | None)
         """
-        url = f"{self.BASE_URL}/items/status/{reference}"
+        if transaction_id:
+            url = f"{self.STATUS_BASE_URL}/{transaction_id}/status"
+            params = {"clientReference": reference}
+        else:
+            # Fallback: query by clientReference only (no TransactionId yet known)
+            url = f"{self.STATUS_BASE_URL}/0/status"
+            params = {"clientReference": reference}
 
-        logger.info(f"Hubtel verify → {url}")
+        logger.info(f"Hubtel verify → {url} | params={params}")
 
         try:
             response = requests.get(
                 url,
                 headers=self._get_auth_header(),
+                params=params,
                 timeout=30,
             )
 
-            logger.info(f"Hubtel verify response [{response.status_code}]: {response.text[:500]}")
+            logger.info(f"Hubtel verify response [{response.status_code}]: {response.text[:600]}")
+
+            if response.status_code == 401:
+                logger.error("Hubtel status check: 401 Unauthorized")
+                return False, {"message": "Hubtel authentication failed on status check."}
+
+            if not response.text.strip():
+                logger.error(f"Hubtel status: empty body [{response.status_code}]")
+                return False, None
 
             result = response.json()
 
-            if result.get("status", "").lower() in ("success", "successfull") or response.status_code == 200:
-                data = result.get("data", {})
-                tx_status = (
-                    data.get("status", "")
-                    or data.get("TransactionStatus", "")
-                ).lower()
+            # Hubtel status API wraps data inside a "data" key
+            data = result.get("data") or result
 
-                if tx_status in ("success", "completed", "approved", "successfull"):
-                    return True, {
-                        "status": "success",
-                        "amount": float(data.get("amount", data.get("Amount", 0))),
-                        "channel": data.get("paymentType", "mobile_money"),
-                        "customer_name": data.get("customerName", ""),
-                        "customer_email": data.get("customerEmail", ""),
-                        "transaction_id": data.get("transactionId", reference),
-                        "reference": reference,
-                        "currency": "GHS",
-                        "paid_at": data.get("paidAt", ""),
-                    }
-                elif tx_status in ("pending", "initiated", "processing"):
-                    return False, {"status": "pending", "message": "Payment is still pending."}
-                else:
-                    return False, {"status": tx_status, "message": f"Payment {tx_status}."}
+            tx_status = (
+                data.get("status")
+                or data.get("Status")
+                or data.get("TransactionStatus")
+                or ""
+            ).lower()
+
+            logger.info(f"Hubtel tx status for ref={reference}: '{tx_status}'")
+
+            if tx_status in ("success", "completed", "approved", "successfull"):
+                return True, {
+                    "status": "success",
+                    "amount": float(
+                        data.get("amount") or data.get("Amount") or 0
+                    ),
+                    "channel": data.get("paymentType") or data.get("channel") or "mobile_money",
+                    "customer_name": data.get("customerName") or data.get("CustomerName") or "",
+                    "customer_email": data.get("customerEmail") or data.get("CustomerEmail") or "",
+                    "transaction_id": (
+                        data.get("transactionId")
+                        or data.get("TransactionId")
+                        or transaction_id
+                        or reference
+                    ),
+                    "reference": reference,
+                    "currency": "GHS",
+                    "paid_at": data.get("paidAt") or data.get("PaidAt") or "",
+                }
+            elif tx_status in ("pending", "initiated", "processing"):
+                return False, {"status": "pending", "message": "Payment is still pending."}
             else:
-                return False, result
+                return False, {
+                    "status": tx_status or "unknown",
+                    "message": f"Payment status: {tx_status or 'unknown'}.",
+                }
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"Hubtel verify request failed for {reference}: {str(e)}")
+            logger.error(f"Hubtel verify request failed for ref={reference}: {str(e)}")
             return False, None
         except Exception as e:
-            logger.error(f"Unexpected error verifying Hubtel payment {reference}: {str(e)}")
+            logger.error(f"Unexpected error verifying Hubtel payment ref={reference}: {str(e)}")
             return False, None

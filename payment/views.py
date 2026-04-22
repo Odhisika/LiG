@@ -161,7 +161,15 @@ def _initialize_hubtel_payment(request, order, payment):
 
 
 def verify_payment(request):
-    reference = request.GET.get("reference")
+    reference = (
+        request.GET.get("reference") or 
+        request.GET.get("clientReference") or 
+        request.GET.get("ClientReference")
+    )
+    transaction_id = (
+        request.GET.get("transactionId") or 
+        request.GET.get("TransactionId")
+    )
     
     if not reference:
         messages.error(request, "No payment reference provided.")
@@ -181,7 +189,7 @@ def verify_payment(request):
         
         # Verify the payment
         try:
-            verified = payment.verify_payment()
+            verified = payment.verify_payment(transaction_id)
         except Exception as verify_error:
             print(f"Error in payment.verify_payment(): {str(verify_error)}")
             messages.error(request, "Payment verification failed.")
@@ -306,16 +314,17 @@ def hubtel_webhook(request):
         logger.info(f"Hubtel webhook received: {data}")
         
         # Hubtel sends transaction status updates
-        status = data.get('status')
-        reference = data.get('reference')
+        status = data.get('status') or data.get('Status')
+        reference = data.get('clientReference') or data.get('ClientReference') or data.get('reference')
+        transaction_id = data.get('transactionId') or data.get('TransactionId')
         
         if reference and status:
             payment = Payment.objects.filter(ref=reference).first()
             
             if payment:
-                if status in ['completed', 'success', 'approved']:
-                    payment.verify_payment()
-                elif status in ['failed', 'cancelled']:
+                if status.lower() in ['completed', 'success', 'approved', 'successfull']:
+                    payment.verify_payment(transaction_id)
+                elif status.lower() in ['failed', 'cancelled']:
                     payment.status = 'failed'
                     payment.save()
         

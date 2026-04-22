@@ -76,11 +76,11 @@ class Payment(models.Model):
         """Return amount in pesewas (Paystack expects amount in kobo/pesewas)."""
         return int(self.amount * 100)
 
-    def verify_payment(self):
+    def verify_payment(self, transaction_id=None):
         """Verify payment with Paystack or Hubtel based on gateway selection."""
         try:
             if self.gateway == 'hubtel':
-                return self._verify_hubtel_payment()
+                return self._verify_hubtel_payment(transaction_id)
             else:
                 return self._verify_paystack_payment()
         except Exception as e:
@@ -143,12 +143,12 @@ class Payment(models.Model):
             self.save()
             return False
 
-    def _verify_hubtel_payment(self):
+    def _verify_hubtel_payment(self, transaction_id=None):
         """Verify payment with Hubtel."""
         try:
             hubtel = Hubtel()
             reference = self.hubtel_token or self.ref
-            status, result = hubtel.verify_transaction(reference)
+            status, result = hubtel.verify_transaction(reference, transaction_id)
             
             if status and result:
                 self.verified = True
