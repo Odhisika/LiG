@@ -145,41 +145,61 @@ class Payment(models.Model):
 
     def _verify_hubtel_payment(self, transaction_id=None):
         """Verify payment with Hubtel."""
+        import logging
+        log = logging.getLogger(__name__)
         try:
             hubtel = Hubtel()
             reference = self.hubtel_token or self.ref
             status, result = hubtel.verify_transaction(reference, transaction_id)
-            
+
             if status and result:
+                # Hubtel confirmed payment SUCCESS
                 self.verified = True
                 self.status = 'successful'
-                
-                self.channel = result.get('channel', 'mobile_money')
+
+                self.channel  = result.get('channel', 'mobile_money')
                 self.currency = result.get('currency', 'GHS')
-                
+
                 if result.get('paid_at'):
                     try:
                         self.transaction_date = datetime.fromisoformat(
                             result['paid_at'].replace('Z', '+00:00')
                         )
-                    except:
+                    except Exception:
                         pass
-                
-                # Store last 4 digits if available
+
                 if result.get('last4'):
                     self.last4 = result.get('last4')
-                
+
                 self.save()
                 self._update_order_status()
+                log.info(f"Hubtel payment {self.ref} verified successfully.")
                 return True
+
             else:
-                self.status = 'pending' if result and result.get('status') == 'pending' else 'failed'
-                self.save()
+                # result is None (API error/network issue) OR Hubtel returned a non-success status
+                result_status = (result or {}).get('status', '') if result else ''
+
+                if result_status in ('failed', 'cancelled', 'rejected'):
+                    # Hubtel explicitly says payment failed
+                    self.status = 'failed'
+                    self.save()
+                    log.warning(f"Hubtel payment {self.ref} explicitly failed: {result}")
+                else:
+                    # API error, timeout, pending, or unknown — keep as pending
+                    # DO NOT mark as failed; let the webhook confirm later
+                    self.status = 'pending'
+                    self.save()
+                    log.warning(
+                        f"Hubtel payment {self.ref} not yet confirmed. "
+                        f"result_status='{result_status}'. Keeping as pending."
+                    )
                 return False
-                
+
         except Exception as e:
-            print(f"Hubtel verification error: {str(e)}")
-            self.status = 'failed'
+            # Network error, timeout, etc. — never mark as failed here
+            log.error(f"Hubtel verification exception for {self.ref}: {str(e)}")
+            self.status = 'pending'   # keep pending; webhook will confirm
             self.save()
             return False
 

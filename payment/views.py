@@ -167,73 +167,99 @@ def _initialize_hubtel_payment(request, order, payment):
 
 def verify_payment(request):
     reference = (
-        request.GET.get("reference") or 
-        request.GET.get("clientReference") or 
+        request.GET.get("reference") or
+        request.GET.get("clientReference") or
         request.GET.get("ClientReference")
     )
     transaction_id = (
-        request.GET.get("transactionId") or 
+        request.GET.get("transactionId") or
         request.GET.get("TransactionId")
     )
-    
+
     if not reference:
         messages.error(request, "No payment reference provided.")
         return redirect('cart')
-    
+
     try:
-        # Find payment by reference
         payment = Payment.objects.filter(
-            models.Q(ref=reference) | 
+            models.Q(ref=reference) |
             models.Q(paystack_reference=reference) |
             models.Q(hubtel_token=reference)
         ).first()
-        
+
         if not payment:
             messages.error(request, "Payment record not found.")
             return redirect('cart')
-        
-        # Verify the payment
+
+        # Already verified by webhook before browser landed here
+        if payment.is_successful():
+            _clear_cart(request)
+            gateway_name = "Hubtel" if payment.gateway == 'hubtel' else "Paystack"
+            messages.success(
+                request,
+                f"Payment successful via {gateway_name}! "
+                f"Order {payment.order.order_number} has been confirmed."
+            )
+            return render(request, "payment/payment_success.html",
+                          {"payment": payment, "order": payment.order, "success": True})
+
+        # Hubtel redirect with no TransactionId → webhook will confirm; show processing page
+        if payment.gateway == 'hubtel' and not transaction_id:
+            logger.info(
+                f"Hubtel returnUrl for {reference} has no TransactionId — showing processing page."
+            )
+            return render(request, "payment/payment_processing.html",
+                          {"payment": payment, "order": payment.order})
+
+        # Normal verification (Paystack, or Hubtel with a TransactionId)
         try:
             verified = payment.verify_payment(transaction_id)
         except Exception as verify_error:
-            print(f"Error in payment.verify_payment(): {str(verify_error)}")
-            messages.error(request, "Payment verification failed.")
+            logger.error(f"Error in payment.verify_payment(): {str(verify_error)}")
+            if payment.gateway == 'hubtel':
+                return render(request, "payment/payment_processing.html",
+                              {"payment": payment, "order": payment.order})
+            messages.error(request, "Payment verification failed. Please contact support.")
             return redirect('cart')
-        
+
         if verified and payment.is_successful():
-            # Clear cart
-            if request.user.is_authenticated:
-                CartItem.objects.filter(user=request.user, is_active=True).delete()
-            else:
-                try:
-                    cart = Cart.objects.get(cart_id=_cart_id(request))
-                    CartItem.objects.filter(cart=cart, is_active=True).delete()
-                    cart.delete()
-                except Cart.DoesNotExist:
-                    pass
-            
-            context = {
-                "payment": payment,
-                "order": payment.order,
-                "success": True
-            }
-            
+            _clear_cart(request)
             gateway_name = "Hubtel" if payment.gateway == 'hubtel' else "Paystack"
-            messages.success(request, f"Payment successful via {gateway_name}! Order {payment.order.order_number} has been confirmed.")
-            return render(request, "payment/payment_success.html", context)
-        else:
-            messages.error(request, "Payment verification failed. Please contact support if you were charged.")
-            context = {
-                "payment": payment,
-                "order": payment.order,
-                "success": False
-            }
-            return render(request, "payment/payment_failed.html", context)
-            
+            messages.success(
+                request,
+                f"Payment successful via {gateway_name}! "
+                f"Order {payment.order.order_number} has been confirmed."
+            )
+            return render(request, "payment/payment_success.html",
+                          {"payment": payment, "order": payment.order, "success": True})
+
+        # Not confirmed yet (pending) — show processing page for Hubtel
+        if payment.status == 'pending' and payment.gateway == 'hubtel':
+            return render(request, "payment/payment_processing.html",
+                          {"payment": payment, "order": payment.order})
+
+        # Explicitly failed
+        messages.error(request, "Payment was not successful. Please contact support if you were charged.")
+        return render(request, "payment/payment_failed.html",
+                      {"payment": payment, "order": payment.order, "success": False})
+
     except Exception as e:
         logger.error(f"Error verifying payment {reference}: {str(e)}")
         messages.error(request, "An error occurred while verifying your payment.")
         return redirect('cart')
+
+
+def _clear_cart(request):
+    """Remove all cart items after a successful payment."""
+    if request.user.is_authenticated:
+        CartItem.objects.filter(user=request.user, is_active=True).delete()
+    else:
+        try:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            CartItem.objects.filter(cart=cart, is_active=True).delete()
+            cart.delete()
+        except Cart.DoesNotExist:
+            pass
 
 
 @csrf_exempt
