@@ -10,3 +10,5 @@ pythonenv*
 db.sqlite3
 media/
 logs/
+__pycache__/
+*.py[cod]
