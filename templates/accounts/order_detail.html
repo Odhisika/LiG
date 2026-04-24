@@ -267,7 +267,7 @@
         const payBtn = document.getElementById('pay-btn');
         payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Processing...';
         payBtn.disabled = true;
-        window.location.href = `/payments/initialize/${orderId}/`;
+        window.location.href = `/payments/initialize/${orderId}/hubtel/`;
     }
 
     function checkPaymentStatus(paymentId) {

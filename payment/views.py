@@ -1,7 +1,7 @@
 # payment/views.py - Enhanced debugging version with Hubtel support
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, QueryDict
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -21,7 +21,24 @@ from cart.models import Cart, CartItem
 logger = logging.getLogger(__name__)
 
 
-def initialize_payment(request, order_id, gateway='paystack'):
+def _build_callback_url(request, route_name):
+    """
+    Build an external callback URL.
+
+    Keep localhost on HTTP for Django's dev server. For non-local hosts,
+    prefer HTTPS so Hubtel callbacks do not get downgraded through redirects.
+    """
+    url = request.build_absolute_uri(reverse(route_name))
+    host = request.get_host().split(':', 1)[0].lower()
+    is_localhost = host in {'localhost', '127.0.0.1', '0.0.0.0'}
+
+    if is_localhost or request.is_secure():
+        return url
+
+    return url.replace('http://', 'https://', 1)
+
+
+def initialize_payment(request, order_id, gateway='hubtel'):
     """Initialize payment for an order with selected gateway"""
     try:
         order = get_object_or_404(Order, id=order_id)
@@ -121,12 +138,12 @@ def _initialize_hubtel_payment(request, order, payment):
         #
         # IMPORTANT: Hubtel does NOT always append query params to returnUrl.
         # We bake our own reference into the URL so it's always present.
-        # Force HTTPS because if Nginx proxy is misconfigured, it returns http:// 
-        # and Hubtel webhook POSTs will fail due to 301 redirect turning them into GETs.
-        base_verify_url  = request.build_absolute_uri(reverse('verify_payment')).replace('http://', 'https://')
+        # Keep localhost on HTTP because Django's dev server does not support HTTPS.
+        # For non-local hosts, prefer HTTPS to avoid callback redirects.
+        base_verify_url  = _build_callback_url(request, 'verify_payment')
         return_url       = f"{base_verify_url}?clientReference={payment.ref}"
         cancellation_url = f"{base_verify_url}?clientReference={payment.ref}&cancelled=1"
-        webhook_url      = request.build_absolute_uri(reverse('hubtel_webhook')).replace('http://', 'https://')
+        webhook_url      = _build_callback_url(request, 'hubtel_webhook')
 
         description   = f"Order {order.order_number} - LiG Store"
         customer_name = f"{order.first_name} {order.last_name}".strip() or "Customer"
@@ -179,7 +196,12 @@ def verify_payment(request):
     )
     transaction_id = (
         request.GET.get("transactionId") or
-        request.GET.get("TransactionId")
+        request.GET.get("TransactionId") or
+        request.GET.get("checkoutId") or
+        request.GET.get("CheckoutId") or
+        request.GET.get("checkoutid") or
+        request.GET.get("salesId") or
+        request.GET.get("SalesId")
     )
     cancelled = request.GET.get("cancelled")
 
@@ -215,6 +237,16 @@ def verify_payment(request):
             )
             return render(request, "payment/payment_success.html",
                           {"payment": payment, "order": payment.order, "success": True})
+
+        # Hubtel may omit the transaction/check-out id on return.
+        # Fall back to the stored Hubtel checkout id when we have one.
+        if (
+            payment.gateway == 'hubtel' and
+            not transaction_id and
+            payment.hubtel_token and
+            not payment.hubtel_token.startswith('PAY_')
+        ):
+            transaction_id = payment.hubtel_token
 
         # Hubtel redirect with no TransactionId → webhook will confirm
         if payment.gateway == 'hubtel' and not transaction_id:
@@ -369,7 +401,12 @@ def hubtel_webhook(request):
         raw_body = request.body.decode('utf-8')
         logger.info(f"Hubtel webhook RAW body: {raw_body[:1000]}")
 
-        data = json.loads(raw_body)
+        content_type = request.headers.get('Content-Type', '')
+        if 'application/json' in content_type:
+            data = json.loads(raw_body)
+        else:
+            data = QueryDict(raw_body).dict()
+
         logger.info(f"Hubtel webhook parsed: {data}")
 
         # Hubtel may nest data inside a 'Data' or 'data' key
@@ -414,7 +451,7 @@ def hubtel_webhook(request):
             logger.info(f"Hubtel webhook: payment {reference} already verified — skipping.")
             return HttpResponse("OK", status=200)
 
-        if status in ('success', 'successfull', 'completed', 'approved'):
+        if status in ('success', 'successfull', 'completed', 'approved', '0000'):
             logger.info(f"Hubtel webhook: triggering verification for {reference}")
             payment.verify_payment(transaction_id or None)
         elif status in ('failed', 'cancelled', 'rejected'):

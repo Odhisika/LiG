@@ -18,12 +18,13 @@ class Hubtel:
     Hubtel Online Checkout integration.
 
     Initiation endpoint : https://payproxyapi.hubtel.com/items/initiate
-    Status check endpoint: https://api-txnstatus.hubtel.com/transactions/{TransactionId}/status
+    Status check endpoint: https://rmsc.hubtel.com/v1/merchantaccount/merchants/
+                           {merchantAccountNumber}/transactions/status
                            ?clientReference={clientReference}
     """
 
     INITIATE_URL = "https://payproxyapi.hubtel.com/items/initiate"
-    STATUS_BASE_URL = "https://api-txnstatus.hubtel.com/transactions"
+    STATUS_BASE_URL = "https://rmsc.hubtel.com/v1/merchantaccount/merchants"
 
     def __init__(self):
         self.client_id = getattr(settings, 'HUBTEL_CLIENT_ID', '')
@@ -178,37 +179,41 @@ class Hubtel:
             return False, {"message": "An unexpected error occurred with Hubtel."}
 
     # ------------------------------------------------------------------
-    # Verify transaction via api-txnstatus.hubtel.com
+    # Verify transaction via Hubtel merchant status endpoint
     # ------------------------------------------------------------------
     def verify_transaction(self, reference, transaction_id=None):
         """
         Check the status of a Hubtel transaction.
 
         Uses:
-          GET https://api-txnstatus.hubtel.com/transactions/{transaction_id}/status
+          GET https://rmsc.hubtel.com/v1/merchantaccount/merchants/{merchantAccountNumber}/transactions/status
               ?clientReference={reference}
-
-        If no transaction_id is provided, falls back to clientReference-only lookup.
 
         Args:
             reference (str)      : The clientReference (our internal ref / PAY_xxx)
-            transaction_id (str) : Hubtel's TransactionId received in the callback
+            transaction_id (str) : Optional Hubtel transaction id, logged for traceability
 
         Returns:
             tuple: (success: bool, data: dict | None)
         """
+        if not self.merchant_account:
+            logger.error("Hubtel status check: HUBTEL_MERCHANT_ACCOUNT_NUMBER is not configured.")
+            return False, {
+                "status": "configuration_error",
+                "message": "Hubtel merchant account number is not configured.",
+            }
+
+        url = f"{self.STATUS_BASE_URL}/{self.merchant_account}/transactions/status"
+        params = {"clientReference": reference}
+
         if transaction_id:
-            url    = f"{self.STATUS_BASE_URL}/{transaction_id}/status"
-            params = {"clientReference": reference}
+            logger.info(
+                f"Hubtel verify: using merchant status endpoint for ref={reference} "
+                f"with transaction_id={transaction_id} logged for traceability."
+            )
         else:
-            # No TransactionId yet — query by clientReference only.
-            # Some Hubtel environments support this; log clearly if it fails.
-            url    = f"{self.STATUS_BASE_URL}/0/status"
-            params = {"clientReference": reference}
-            logger.warning(
-                f"Hubtel verify: no TransactionId for ref={reference}. "
-                "Attempting clientReference-only lookup. "
-                "Ensure hubtel_webhook is properly receiving Hubtel POSTs."
+            logger.info(
+                f"Hubtel verify: using merchant status endpoint for ref={reference}."
             )
 
         logger.info(f"Hubtel verify → {url} | params={params}")
@@ -227,18 +232,46 @@ class Hubtel:
                 logger.error("Hubtel status check: 401 Unauthorized")
                 return False, {"message": "Hubtel authentication failed on status check."}
 
+            if response.status_code == 403:
+                logger.error(
+                    "Hubtel status check: 403 Forbidden. "
+                    "The transaction status endpoint rejected the request."
+                )
+                return False, {
+                    "status": "forbidden",
+                    "message": (
+                        "Hubtel status endpoint rejected the request (403). "
+                        "This usually points to endpoint access restrictions, "
+                        "account permissions, or IP allowlisting on Hubtel's side."
+                    ),
+                    "raw_response": response.text[:600],
+                }
+
             if not response.text.strip():
                 logger.error(f"Hubtel status: empty body [{response.status_code}]")
                 return False, None
 
-            result = response.json()
+            try:
+                result = response.json()
+            except ValueError:
+                logger.error(
+                    f"Hubtel status returned non-JSON body [{response.status_code}]: "
+                    f"{response.text[:600]}"
+                )
+                return False, {
+                    "status": "invalid_response",
+                    "message": f"Hubtel returned a non-JSON status response (HTTP {response.status_code}).",
+                    "raw_response": response.text[:600],
+                }
 
-            # Hubtel status API wraps data inside a "data" key
-            data = result.get("data") or result
+            data = result.get("Data") or result.get("data") or result
+            if isinstance(data, list):
+                data = data[0] if data else {}
 
             tx_status = (
                 data.get("status")
                 or data.get("Status")
+                or data.get("InvoiceStatus")
                 or data.get("TransactionStatus")
                 or ""
             ).lower()
@@ -249,20 +282,30 @@ class Hubtel:
                 return True, {
                     "status": "success",
                     "amount": float(
-                        data.get("amount") or data.get("Amount") or 0
+                        data.get("TransactionAmount")
+                        or data.get("amount")
+                        or data.get("Amount")
+                        or 0
                     ),
-                    "channel": data.get("paymentType") or data.get("channel") or "mobile_money",
+                    "channel": (
+                        data.get("PaymentMethod")
+                        or data.get("paymentType")
+                        or data.get("channel")
+                        or "mobile_money"
+                    ),
                     "customer_name": data.get("customerName") or data.get("CustomerName") or "",
-                    "customer_email": data.get("customerEmail") or data.get("CustomerEmail") or "",
+                    "customer_email": data.get("CustomerEmail") or data.get("customerEmail") or "",
                     "transaction_id": (
-                        data.get("transactionId")
+                        data.get("CheckoutId")
+                        or data.get("InvoiceToken")
+                        or data.get("transactionId")
                         or data.get("TransactionId")
                         or transaction_id
                         or reference
                     ),
                     "reference": reference,
-                    "currency": "GHS",
-                    "paid_at": data.get("paidAt") or data.get("PaidAt") or "",
+                    "currency": data.get("CurrencyCode") or data.get("currency") or "GHS",
+                    "paid_at": data.get("StartDate") or data.get("paidAt") or data.get("PaidAt") or "",
                 }
             elif tx_status in ("pending", "initiated", "processing"):
                 return False, {"status": "pending", "message": "Payment is still pending."}
