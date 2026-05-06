@@ -8,7 +8,8 @@
 <meta http-equiv="cache-control" content="max-age=604800" />
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<title>LiG | LuckyTech Innovations Ground </title>
+<title>{% block title %}LiG | LuckyTech Innovations Ground{% endblock %}</title>
+{% block meta %}{% endblock %}
 
 <link href="{% static 'images/favicon.ico' %}" rel="shortcut icon" type="image/x-icon">
 
@@ -80,7 +81,6 @@ $(document).ready(function() {
 
 <!-- footer -->
 {% include 'includes/footer.html' %}
-
 
 
 

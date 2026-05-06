@@ -4,13 +4,14 @@
 {% load custom_filters %}
 
 {% block meta %}
-<title>{{ single_product.product_name }} | LiG - {{ single_product.price|floatformat:0 }} GHS</title>
 <meta name="description" content="{{ single_product.short_description|default:single_product.description|truncatewords:25 }}">
 <meta name="keywords" content="{{ single_product.tags }}">
 <meta property="og:type" content="product">
 <meta property="og:title" content="{{ single_product.product_name }} | LiG">
 <meta property="og:description" content="{{ single_product.short_description|default:single_product.description|truncatewords:25 }}">
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}">
+<meta property="og:image:secure_url" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}">
+<meta property="og:image:alt" content="{{ single_product.product_name }}">
 <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url }}">
 <meta property="og:site_name" content="LiG Store">
 <meta property="product:price:amount" content="{{ single_product.price }}">
@@ -24,9 +25,10 @@
 <meta name="twitter:title" content="{{ single_product.product_name }} | LiG">
 <meta name="twitter:description" content="{{ single_product.short_description|default:single_product.description|truncatewords:25 }}">
 <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}">
+<meta name="twitter:image:alt" content="{{ single_product.product_name }}">
 {% endblock %}
 
-{% block title %}{{ single_product.product_name }} | LiG{% endblock %}
+{% block title %}{{ single_product.product_name }} | LiG - {{ single_product.price|floatformat:0 }} GHS{% endblock %}
 
 
 
@@ -604,17 +606,24 @@ async function shareProduct() {
         url: productUrl,
     };
     
-    // Try to share with files (image) if supported
+    // Try to attach the product image on browsers that support file sharing.
     try {
-        if (navigator.canShare && navigator.canShare({ files: [new File([], '')] })) {
-            // Image sharing is supported
+        if (navigator.canShare) {
             const imgResponse = await fetch(productImage);
+            if (!imgResponse.ok) {
+                throw new Error(`Image fetch failed with status ${imgResponse.status}`);
+            }
             const imgBlob = await imgResponse.blob();
-            const imgFile = new File([imgBlob], 'product.jpg', { type: imgBlob.type });
-            shareData.files = [imgFile];
+            const extension = (imgBlob.type && imgBlob.type.split('/')[1]) || 'jpg';
+            const safeName = productName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'product';
+            const imgFile = new File([imgBlob], `${safeName}.${extension}`, { type: imgBlob.type || 'image/jpeg' });
+
+            if (navigator.canShare({ files: [imgFile] })) {
+                shareData.files = [imgFile];
+            }
         }
     } catch (err) {
-        console.log('File sharing not supported, sharing URL only');
+        console.log('Image file sharing not available, sharing URL preview only.', err);
     }
     
     try {

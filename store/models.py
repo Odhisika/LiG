@@ -342,6 +342,7 @@ class NetworkingProduct(Product):
         ('modem', 'Modem'),
         ('modem_router', 'Modem/Router Combo'),
         ('access_point', 'Access Point'),
+        ('ups', 'UPS (Uninterruptible Power Supply)'),
     ]
 
     WIFI_STANDARDS = [

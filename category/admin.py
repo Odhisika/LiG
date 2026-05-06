@@ -63,7 +63,10 @@ class SoftwareTypesAdmin(admin.ModelAdmin):
             'description': (
                 'Create a software category here first, then assign it to a '
                 '<b>Software Product</b> during upload. '
-                'Examples: Antivirus, Office Suite, Design & Creative, Security Software.'
+                'Examples:<br>'
+                '→ <b>Office Suite</b> → Software → Applications → Office Suite<br>'
+                '→ <b>Antivirus &amp; Security</b> → Software → Security &amp; Utilities → Antivirus &amp; Security<br>'
+                '→ <b>Database Software</b> → Software → Development → Database Software'
             )
         }),
         ('Display Settings', {

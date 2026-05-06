@@ -51,19 +51,40 @@ urlpatterns = [
     # Navigation hardware links
     path('hardware/desktops/', views.desktops, name='desktops'),
     path('hardware/laptops/', views.laptops, name='laptops'),
+    path('hardware/computers/', views.computers_all, name='computers_all'),
+    path('hardware/all-in-one/', views.all_in_one_computers, name='all_in_one_computers'),
     path('hardware/fresh_laptops/', views.fresh_laptops, name='fresh_laptops'),
     path('hardware/fresh_desktops/', views.fresh_desktops, name='fresh_desktops'),
     path('hardware/used_laptops/', views.used_laptops, name='used_laptops'),
     path('hardware/used_desktops/', views.used_desktops, name='used_desktops'),
     path('hardware/peripherals/', views.peripherals, name='peripherals'),
+    path('hardware/networking/', views.networking_all, name='networking_all'),
     path('hardware/switches/', views.switches, name='switches'),
     path('hardware/routers-and-modems/', views.routers_modems, name='routers_modems'),
+    path('hardware/access-points/', views.access_points, name='access_points'),
+    path('hardware/ups/', views.ups, name='ups'),
     path('hardware/security-cameras/', views.security_cameras, name='security_cameras'),
+    path('hardware/ip-cameras/', views.ip_cameras, name='ip_cameras'),
+    path('hardware/cctv-kits/', views.cctv_kits, name='cctv_kits'),
+    path('hardware/nvr-dvr/', views.nvr_dvr, name='nvr_dvr'),
 
     # Navigation software links
+    path('software/all/', views.software_all, name='software_all'),
     path('software/operatingSystems/', views.operatingSystems, name='operatingSystems'),
     path('software/applications/', views.applications, name='applications'),
+    path('software/office-suite/', views.office_suite, name='office_suite'),
+    path('software/design-creative/', views.design_creative, name='design_creative'),
+    path('software/accounting-finance/', views.accounting_finance, name='accounting_finance'),
+    path('software/video-editing/', views.video_editing, name='video_editing'),
+    path('software/point-of-sale/', views.point_of_sale, name='point_of_sale'),
+    path('software/security-utilities/', views.security_utilities, name='security_utilities'),
+    path('software/antivirus-security/', views.antivirus_security, name='antivirus_security'),
+    path('software/remote-desktop-vpn/', views.remote_desktop_vpn, name='remote_desktop_vpn'),
+    path('software/backup-recovery/', views.backup_recovery, name='backup_recovery'),
+    path('software/network-management/', views.network_management, name='network_management'),
     path('software/developmentTools/', views.developmentTools, name='developmentTools'),
+    path('software/development-only/', views.development_tools_only, name='development_tools_only'),
+    path('software/database-software/', views.database_software, name='database_software'),
 
     # Navigation IT solutions links
     path('itSolutions/CCTVInstallation/', views.cctv, name='CCTVInstallation'),
@@ -100,4 +121,3 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     
-

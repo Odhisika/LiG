@@ -48,10 +48,13 @@ class ProductTagRelationInline(admin.TabularInline):
 # ─────────────────────────────────────────────────────────────────────────────
 
 class ProductAdminMixin:
+    extra_readonly_fields = ()
+
     def get_readonly_fields(self, request, obj=None):
+        fields = list(self.extra_readonly_fields) + ['created_date', 'modified_date']
         if obj:
-            return ('slug', 'created_date', 'modified_date')
-        return ('created_date', 'modified_date')
+            return ('slug', *fields)
+        return tuple(fields)
 
     def get_prepopulated_fields(self, request, obj=None):
         if obj:
@@ -70,6 +73,7 @@ class ProductAdminMixin:
 
 @admin.register(ComputerProduct)
 class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
+    extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'get_computer_type', 'condition', 'brand',
         'processor_model', 'ram_size', 'storage_capacity', 'price', 'stock', 'is_available'
@@ -84,6 +88,35 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     def get_computer_type(self, obj):
         return obj.computer_type if obj.computer_type else '—'
     get_computer_type.short_description = 'Type'
+
+    def storefront_destination(self, obj):
+        if not obj or not obj.computer_type:
+            return 'Select the computer type and condition, then save to confirm the exact storefront path.'
+
+        slug = obj.computer_type.slug
+        parent_slug = obj.computer_type.parent.slug if obj.computer_type.parent else None
+        is_new = obj.condition == 'new' or slug in {'fresh-laptop', 'fresh-desktop'}
+        is_used = obj.condition == 'slightly_used' or slug in {'slightly-used-laptop', 'slightly-used-desktop'}
+
+        if slug in {'all-in-one', 'all-in-one-desktop'}:
+            return 'Hardware → Computers → All-in-One'
+
+        if slug == 'laptop' or parent_slug == 'laptop':
+            if is_new:
+                return 'Hardware → Computers → Laptops → Fresh in Box'
+            if is_used:
+                return 'Hardware → Computers → Laptops → Slightly Used'
+            return 'Hardware → Computers → Laptops'
+
+        if slug == 'desktop' or parent_slug == 'desktop':
+            if is_new:
+                return 'Hardware → Computers → Desktops → Fresh in Box'
+            if is_used:
+                return 'Hardware → Computers → Desktops → Slightly Used'
+            return 'Hardware → Computers → Desktops'
+
+        return 'Hardware → Computers → All Computers'
+    storefront_destination.short_description = 'Storefront Destination'
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'brand':
@@ -103,16 +136,17 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             'description': mark_safe(
                 'ℹ️ <b>Category</b>: Select the general category (e.g. "Computers"). '
                 '<b>Computer Type</b> below determines which sub-page this product appears on '
-                '(e.g. Laptops, Desktops, Slightly Used Laptops).'
+                '(e.g. Laptops, Desktops, All-in-One, Slightly Used Laptops).'
             )
         }),
         ('🖥️ Computer Classification — REQUIRED FOR CORRECT PAGE ROUTING', {
-            'fields': (('computer_type', 'condition'),),
+            'fields': (('computer_type', 'condition'), 'storefront_destination'),
             'description': mark_safe(
                 '⚠️ <b>IMPORTANT</b>: Select the Computer Type to determine which page this product appears on.<br>'
-                '→ <b>Laptop</b> types appear on the Laptops page.<br>'
-                '→ <b>Desktop</b> types appear on the Desktops page.<br>'
-                '→ <b>Slightly Used</b> sub-types appear under the used section.'
+                '→ <b>Laptop</b> types appear on the All Computers and Laptops pages.<br>'
+                '→ <b>Desktop</b> types appear on the All Computers and Desktops pages.<br>'
+                '→ <b>Fresh / Slightly Used</b> sub-types appear on their matching condition pages.<br>'
+                '→ <b>All-in-One Desktop</b> appears on the All-in-One page.'
             )
         }),
         ('📄 Description', {
@@ -209,6 +243,7 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
 
 @admin.register(SoftwareProduct)
 class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
+    extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'software_category', 'license_type',
         'version', 'platforms', 'price', 'stock', 'is_available'
@@ -226,6 +261,28 @@ class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             kwargs['queryset'] = Category.objects.filter(slug='software')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def storefront_destination(self, obj):
+        if not obj or not obj.software_category:
+            return 'Select the software type, then save to confirm the exact storefront path.'
+
+        slug = obj.software_category.slug
+        destinations = {
+            'operating-system': 'Software → Operating Systems',
+            'office-suite': 'Software → Applications → Office Suite',
+            'design-creative': 'Software → Applications → Design & Creative',
+            'accounting-finance': 'Software → Applications → Accounting & Finance',
+            'video-editing': 'Software → Applications → Video Editing',
+            'point-of-sale-pos': 'Software → Applications → Point of Sale',
+            'antivirus-security': 'Software → Security & Utilities → Antivirus & Security',
+            'remote-desktop-vpn': 'Software → Security & Utilities → Remote Desktop & VPN',
+            'backup-recovery': 'Software → Security & Utilities → Backup & Recovery',
+            'network-management': 'Software → Security & Utilities → Network Management',
+            'development-tools': 'Software → Development → Development Tools',
+            'database-software': 'Software → Development → Database Software',
+        }
+        return destinations.get(slug, f'Software → {obj.software_category.software_type}')
+    storefront_destination.short_description = 'Storefront Destination'
+
     fieldsets = (
         ('📝 Basic Information', {
             'fields': (
@@ -236,10 +293,13 @@ class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             'description': mark_safe('ℹ️ <b>Category</b>: Select the general "Software" category.')
         }),
         ('💾 Software Classification — REQUIRED FOR CORRECT PAGE ROUTING', {
-            'fields': (('software_category',),),
+            'fields': (('software_category',), 'storefront_destination'),
             'description': mark_safe(
                 '⚠️ <b>IMPORTANT</b>: Select the <b>Software Type</b> to route this product '
-                'to the correct software sub-page (e.g. Antivirus, Office Suite).<br>'
+                'to the correct software sub-page.<br>'
+                '→ <b>Office Suite / Design / Accounting / Video / POS</b> appear under <b>Software → Applications</b>.<br>'
+                '→ <b>Antivirus / VPN / Backup / Network Management</b> appear under <b>Software → Security &amp; Utilities</b>.<br>'
+                '→ <b>Development Tools / Database Software</b> appear under <b>Software → Development</b>.<br>'
                 'If the type does not exist yet, go to <b>Catalogue → Software Types</b> first.'
             )
         }),
@@ -306,6 +366,7 @@ class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
 
 @admin.register(PeripheralProduct)
 class PeripheralProductAdmin(ProductAdminMixin, admin.ModelAdmin):
+    extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'brand', 'connectivity', 'condition',
         'price', 'stock', 'is_available'
@@ -325,16 +386,22 @@ class PeripheralProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             kwargs['queryset'] = Category.objects.filter(slug='peripherals')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def storefront_destination(self, obj):
+        return 'Hardware → Accessories'
+    storefront_destination.short_description = 'Storefront Destination'
+
     fieldsets = (
         ('📝 Basic Information', {
             'fields': (
                 ('product_name', 'slug'),
                 ('category', 'brand', 'model_number'),
                 'short_description',
+                'storefront_destination',
             ),
             'description': (
                 'ℹ️ Peripherals include Mice, Keyboards, Monitors, Headsets, Webcams, '
-                'External Drives, Docking Stations, and any PC accessory.'
+                'External Drives, Docking Stations, and any PC accessory. '
+                'These products appear on the Accessories page.'
             )
         }),
         ('📄 Description', {
@@ -405,6 +472,7 @@ class PeripheralProductAdmin(ProductAdminMixin, admin.ModelAdmin):
 
 @admin.register(NetworkingProduct)
 class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
+    extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'device_type', 'brand', 'max_speed',
         'poe_support', 'wifi_standard', 'price', 'stock', 'is_available'
@@ -424,6 +492,23 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             kwargs['queryset'] = Category.objects.filter(slug='networking')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def storefront_destination(self, obj):
+        if not obj:
+            return 'Select the device type, then save to confirm the exact storefront path.'
+
+        destinations = {
+            'switch_unmanaged': 'Hardware → Networking → Switches',
+            'switch_managed': 'Hardware → Networking → Switches',
+            'switch_poe': 'Hardware → Networking → Switches',
+            'router': 'Hardware → Networking → Routers & Modems',
+            'modem': 'Hardware → Networking → Routers & Modems',
+            'modem_router': 'Hardware → Networking → Routers & Modems',
+            'access_point': 'Hardware → Networking → Access Points',
+            'ups': 'Hardware → UPS',
+        }
+        return destinations.get(obj.device_type, 'Hardware → Networking')
+    storefront_destination.short_description = 'Storefront Destination'
+
     fieldsets = (
         ('📝 Basic Information', {
             'fields': (
@@ -431,15 +516,16 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 ('category', 'brand', 'model_number'),
                 'short_description',
             ),
-            'description': 'ℹ️ Networking products include Switches, Routers, Modems, and Access Points.'
+            'description': 'ℹ️ Networking products include Switches, Routers, Modems, Access Points, and UPS units.'
         }),
         ('🌐 Device Classification — REQUIRED', {
-            'fields': (('device_type', 'condition'),),
+            'fields': (('device_type', 'condition'), 'storefront_destination'),
             'description': mark_safe(
                 '⚠️ <b>IMPORTANT</b>: Select the correct device type.<br>'
-                '→ <b>Switches</b> (managed/unmanaged/PoE) appear on the Switches section.<br>'
-                '→ <b>Routers / Modems</b> appear on the Routers section.<br>'
-                '→ <b>Access Points</b> appear in the Wi-Fi section.'
+                '→ <b>Switches</b> (managed/unmanaged/PoE) appear on the Switches page.<br>'
+                '→ <b>Routers / Modems</b> appear on the Routers &amp; Modems page.<br>'
+                '→ <b>Access Points</b> appear on the Access Points page.<br>'
+                '→ <b>UPS</b> appears on the UPS page.'
             )
         }),
         ('📄 Description', {
@@ -519,6 +605,7 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
 
 @admin.register(SecurityCameraProduct)
 class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):
+    extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'camera_type', 'brand', 'resolution',
         'night_vision', 'weatherproof', 'price', 'stock', 'is_available'
@@ -541,6 +628,17 @@ class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             kwargs['queryset'] = Category.objects.filter(slug='security-cctv')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def storefront_destination(self, obj):
+        if not obj:
+            return 'Select the camera type, then save to confirm the exact storefront path.'
+
+        if obj.camera_type == 'cctv_kit':
+            return 'Hardware → Security Cameras → CCTV Kits'
+        if obj.camera_type in {'nvr', 'dvr'}:
+            return 'Hardware → Security Cameras → NVR / DVR'
+        return 'Hardware → Security Cameras → IP Cameras'
+    storefront_destination.short_description = 'Storefront Destination'
+
     fieldsets = (
         ('📝 Basic Information', {
             'fields': (
@@ -553,11 +651,12 @@ class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             )
         }),
         ('📷 Camera Classification — REQUIRED', {
-            'fields': (('camera_type', 'resolution', 'condition'),),
+            'fields': (('camera_type', 'resolution', 'condition'), 'storefront_destination'),
             'description': mark_safe(
                 '⚠️ <b>IMPORTANT</b>: Select the camera type to route to the correct CCTV section.<br>'
-                '→ <b>Complete CCTV Kits</b> → Kits section.<br>'
-                '→ <b>NVR/DVR</b> → Recorders section.'
+                '→ <b>IP / PTZ / Dome / Bullet / Fisheye / Doorbell Cameras</b> → IP Cameras page.<br>'
+                '→ <b>Complete CCTV Kits</b> → CCTV Kits page.<br>'
+                '→ <b>NVR / DVR</b> → NVR / DVR page.'
             )
         }),
         ('📄 Description', {
@@ -654,7 +753,8 @@ class BrandAdmin(admin.ModelAdmin):
             'fields': ('for_computers', 'for_networking', 'for_security', 'for_peripherals', 'for_software'),
             'description': mark_safe(
                 '⚠️ Tick the sections this brand belongs to. '
-                'The brand will only appear in the brand dropdown for the ticked product types.'
+                'The brand will only appear in the brand dropdown for the ticked product types. '
+                'Networking brands also cover UPS products.'
             )
         }),
     )

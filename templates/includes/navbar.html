@@ -585,8 +585,15 @@
 
         /* Sub-submenu */
         .mobile-sub-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
             background: #ffffff;
             border-left: 3px solid var(--primary-color);
+        }
+
+        .mobile-nav-item.active > .mobile-sub-submenu {
+            max-height: 720px;
         }
 
         .mobile-sub-submenu .mobile-submenu-item {
@@ -596,6 +603,28 @@
 
         .mobile-sub-submenu .mobile-submenu-item:hover {
             padding-left: 78px;
+        }
+
+        .mobile-sub-submenu .mobile-submenu-item::before {
+            left: 54px;
+        }
+
+        .mobile-sub-submenu .mobile-sub-submenu {
+            background: #f8fafc;
+            border-left-color: #cbd5e1;
+        }
+
+        .mobile-sub-submenu .mobile-sub-submenu .mobile-submenu-item {
+            padding-left: 88px;
+            font-size: 12px;
+        }
+
+        .mobile-sub-submenu .mobile-sub-submenu .mobile-submenu-item:hover {
+            padding-left: 96px;
+        }
+
+        .mobile-sub-submenu .mobile-sub-submenu .mobile-submenu-item::before {
+            left: 72px;
         }
 
         /* Mobile Nav Footer */
@@ -905,6 +934,143 @@
         .profile-dropdown-menu .dropdown-item.text-danger:hover {
             background: #fff5f5;
         }
+        /* Mega Menu Styles */
+        .mega-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 900px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            display: none;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            z-index: 2000;
+            overflow: hidden;
+        }
+
+        .nav-item:hover .mega-menu {
+            display: flex;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .mega-menu-sidebar {
+            width: 250px;
+            background: #fcfcfc;
+            border-right: 1px solid var(--border-color);
+            padding: 15px 0;
+            flex-shrink: 0;
+        }
+
+        .mega-sidebar-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 25px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .mega-sidebar-item:hover, .mega-sidebar-item.active {
+            background: white;
+            color: var(--primary-color);
+            padding-left: 30px;
+        }
+
+        .mega-sidebar-item i {
+            font-size: 10px;
+            opacity: 0.5;
+        }
+
+        .mega-menu-content {
+            flex-grow: 1;
+            padding: 30px;
+            background: white;
+            min-height: 400px;
+        }
+
+        .mega-content-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .mega-content-pane.active {
+            display: block;
+        }
+
+        .mega-category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .mega-group-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+        }
+
+        .mega-links-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mega-links-list li {
+            margin-bottom: 10px;
+        }
+
+        .mega-links-list a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+
+        .mega-links-list a:hover {
+            color: var(--primary-color);
+        }
+
+        .browse-all-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            margin-bottom: 25px;
+            transition: gap 0.2s ease;
+        }
+
+        .browse-all-btn:hover {
+            gap: 12px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(5px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @media (max-width: 1024px) {
+            .mega-menu {
+                width: 750px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1030,32 +1196,151 @@
         <!-- Updated Desktop Navigation Menu -->
     <nav class="bottom-nav" id="bottom-nav">
         <ul class="nav-menu">
-        <!-- Hardware -->
+        <!-- Hardware Mega Menu -->
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{% url 'allproducts' %}" class="nav-link">
                 Hardware <i class="fa fa-chevron-down dropdown-icon"></i>
             </a>
-            <div class="dropdown-menu">
-                <a href="{% url 'allproducts' %}" class="dropdown-item">All Products</a>
-                <div class="dropdown-item has-submenu">
-                    <a href="{% url 'laptops' %}" class="submenu-link">Laptops <i class="fa fa-chevron-right"></i></a>
-                    <div class="sub-dropdown-menu">
-                        <a href="{% url 'fresh_laptops' %}" class="dropdown-item">Fresh in Box</a>
-                        <a href="{% url 'used_laptops' %}" class="dropdown-item">Slightly Used</a>
-                    </div>
-                </div>
-                <div class="dropdown-item has-submenu">
-                    <a href="{% url 'desktops' %}" class="submenu-link">Desktops <i class="fa fa-chevron-right"></i></a>
+            <div class="mega-menu">
+                <!-- Sidebar -->
+                <div class="mega-menu-sidebar">
+                    <a href="{% url 'allproducts' %}" class="mega-sidebar-item" onmouseover="showMegaPane('all-products')">
+                        All Products
                     </a>
-                    <div class="sub-dropdown-menu">
-                        <a href="{% url 'fresh_desktops' %}" class="dropdown-item">Fresh in Box</a>
-                        <a href="{% url 'used_desktops' %}" class="dropdown-item">Slightly Used</a>
+                    <div class="mega-sidebar-item active" onmouseover="showMegaPane('computers')">
+                        Computers <i class="fa fa-chevron-right"></i>
+                    </div>
+                    <div class="mega-sidebar-item" onmouseover="showMegaPane('networking')">
+                        Networking <i class="fa fa-chevron-right"></i>
+                    </div>
+                    <a href="{% url 'peripherals' %}" class="mega-sidebar-item" onmouseover="showMegaPane('accessories')">
+                        Accessories
+                    </a>
+                    <a href="{% url 'ups' %}" class="mega-sidebar-item" onmouseover="showMegaPane('ups')">
+                        UPS
+                    </a>
+                    <div class="mega-sidebar-item" onmouseover="showMegaPane('security')">
+                        Security Cameras <i class="fa fa-chevron-right"></i>
                     </div>
                 </div>
-                <a href="{% url 'peripherals' %}" class="dropdown-item">Accessories</a>
-                <a href="{% url 'switches' %}" class="dropdown-item">Switches</a>
-                <a href="{% url 'routers_modems' %}" class="dropdown-item">Routers &amp; Modems</a>
-                <a href="{% url 'security_cameras' %}" class="dropdown-item">Security Cameras &amp; Systems</a>
+
+                <!-- Content Area -->
+                <div class="mega-menu-content">
+                    <!-- All Products Pane -->
+                    <div class="mega-content-pane" id="pane-all-products">
+                        <a href="{% url 'allproducts' %}" class="browse-all-btn">Browse All Hardware <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Featured Categories</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'laptops' %}">Laptops</a></li>
+                                    <li><a href="{% url 'desktops' %}">Desktops</a></li>
+                                    <li><a href="{% url 'switches' %}">Networking Switches</a></li>
+                                    <li><a href="{% url 'security_cameras' %}">Security Systems</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Computers Pane -->
+                    <div class="mega-content-pane active" id="pane-computers">
+                        <a href="{% url 'computers_all' %}" class="browse-all-btn">Browse All Computers <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Laptops</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'fresh_laptops' %}">Fresh in Box</a></li>
+                                    <li><a href="{% url 'used_laptops' %}">Slightly Used</a></li>
+                                    <li><a href="{% url 'laptops' %}">View All Laptops</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="mega-group-title">Desktops</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'fresh_desktops' %}">Fresh in Box</a></li>
+                                    <li><a href="{% url 'used_desktops' %}">Slightly Used</a></li>
+                                    <li><a href="{% url 'all_in_one_computers' %}">All-in-One Computers</a></li>
+                                    <li><a href="{% url 'desktops' %}">View All Desktops</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Networking Pane -->
+                    <div class="mega-content-pane" id="pane-networking">
+                        <a href="{% url 'networking_all' %}" class="browse-all-btn">Browse All Networking <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Core Networking</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'switches' %}">Switches</a></li>
+                                    <li><a href="{% url 'routers_modems' %}">Routers &amp; Modems</a></li>
+                                    <li><a href="{% url 'access_points' %}">Access Points</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="mega-group-title">Solutions</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'networkingSolutions' %}">Enterprise Solutions</a></li>
+                                    <li><a href="{% url 'networkingServices' %}">Professional Services</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accessories Pane -->
+                    <div class="mega-content-pane" id="pane-accessories">
+                        <a href="{% url 'peripherals' %}" class="browse-all-btn">Browse All Accessories <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Peripherals</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'peripherals' %}">Mice &amp; Keyboards</a></li>
+                                    <li><a href="{% url 'peripherals' %}">Monitors &amp; Displays</a></li>
+                                    <li><a href="{% url 'peripherals' %}">Storage &amp; Hard Drives</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPS Pane -->
+                    <div class="mega-content-pane" id="pane-ups">
+                        <a href="{% url 'ups' %}" class="browse-all-btn">Browse All UPS Units <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Power Protection</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'ups' %}">Home &amp; Office UPS</a></li>
+                                    <li><a href="{% url 'ups' %}">Server Room UPS</a></li>
+                                    <li><a href="{% url 'ups' %}">Battery Backups</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Pane -->
+                    <div class="mega-content-pane" id="pane-security">
+                        <a href="{% url 'security_cameras' %}" class="browse-all-btn">Browse All Security <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Cameras</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'ip_cameras' %}">IP Cameras</a></li>
+                                    <li><a href="{% url 'security_cameras' %}">Dome &amp; Bullet Cameras</a></li>
+                                    <li><a href="{% url 'security_cameras' %}">PTZ Cameras</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="mega-group-title">Recording &amp; Kits</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'cctv_kits' %}">CCTV Kits</a></li>
+                                    <li><a href="{% url 'nvr_dvr' %}">NVR &amp; DVR</a></li>
+                                    <li><a href="{% url 'CCTVInstallation' %}">Installation Services</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </li>
         
@@ -1065,9 +1350,37 @@
                 Software <i class="fa fa-chevron-down dropdown-icon"></i>
             </a>
             <div class="dropdown-menu">
+                <a href="{% url 'software_all' %}" class="dropdown-item">All Software</a>
                 <a href="{% url 'operatingSystems' %}" class="dropdown-item">Operating Systems</a>
-                <a href="{% url 'applications' %}" class="dropdown-item">Applications</a>
-                <a href="{% url 'developmentTools' %}" class="dropdown-item">Development Tools</a>
+                <div class="dropdown-item has-submenu">
+                    <a href="{% url 'applications' %}" class="submenu-link">Applications</a>
+                    <div class="sub-dropdown-menu">
+                        <a href="{% url 'applications' %}" class="dropdown-item">All Applications</a>
+                        <a href="{% url 'office_suite' %}" class="dropdown-item">Office Suite</a>
+                        <a href="{% url 'design_creative' %}" class="dropdown-item">Design &amp; Creative</a>
+                        <a href="{% url 'accounting_finance' %}" class="dropdown-item">Accounting &amp; Finance</a>
+                        <a href="{% url 'video_editing' %}" class="dropdown-item">Video Editing</a>
+                        <a href="{% url 'point_of_sale' %}" class="dropdown-item">Point of Sale</a>
+                    </div>
+                </div>
+                <div class="dropdown-item has-submenu">
+                    <a href="{% url 'security_utilities' %}" class="submenu-link">Security &amp; Utilities</a>
+                    <div class="sub-dropdown-menu">
+                        <a href="{% url 'security_utilities' %}" class="dropdown-item">All Security &amp; Utilities</a>
+                        <a href="{% url 'antivirus_security' %}" class="dropdown-item">Antivirus &amp; Security</a>
+                        <a href="{% url 'remote_desktop_vpn' %}" class="dropdown-item">Remote Desktop &amp; VPN</a>
+                        <a href="{% url 'backup_recovery' %}" class="dropdown-item">Backup &amp; Recovery</a>
+                        <a href="{% url 'network_management' %}" class="dropdown-item">Network Management</a>
+                    </div>
+                </div>
+                <div class="dropdown-item has-submenu">
+                    <a href="{% url 'developmentTools' %}" class="submenu-link">Development</a>
+                    <div class="sub-dropdown-menu">
+                        <a href="{% url 'developmentTools' %}" class="dropdown-item">All Development</a>
+                        <a href="{% url 'development_tools_only' %}" class="dropdown-item">Development Tools</a>
+                        <a href="{% url 'database_software' %}" class="dropdown-item">Database Software</a>
+                    </div>
+                </div>
             </div>
         </li>
 
@@ -1137,38 +1450,69 @@
             </a>
             <div class="mobile-submenu">
                 <a href="{% url 'allproducts' %}" class="mobile-submenu-item">All Products</a>
-                
+
                 <div class="mobile-nav-item">
                     <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
-                        Laptops
+                        Computers
                         <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
                     </a>
                     <div class="mobile-sub-submenu">
-                        <a href="{% url 'fresh_laptops' %}" class="mobile-submenu-item">Fresh in Box</a>
-                        <a href="{% url 'used_laptops' %}" class="mobile-submenu-item">Slightly Used</a>
-                        <!-- <a href="{% url 'fresh_desktops' %}" class="mobile-submenu-item">Gaming Laptops</a>
-                        <a href="{% url 'fresh_desktops' %}" class="mobile-submenu-item">Business Laptops</a> -->
+                        <a href="{% url 'computers_all' %}" class="mobile-submenu-item">All Computers</a>
+
+                        <div class="mobile-nav-item">
+                            <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
+                                Laptops
+                                <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
+                            </a>
+                            <div class="mobile-sub-submenu">
+                                <a href="{% url 'fresh_laptops' %}" class="mobile-submenu-item">Fresh in Box</a>
+                                <a href="{% url 'used_laptops' %}" class="mobile-submenu-item">Slightly Used</a>
+                            </div>
+                        </div>
+
+                        <div class="mobile-nav-item">
+                            <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
+                                Desktops
+                                <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
+                            </a>
+                            <div class="mobile-sub-submenu">
+                                <a href="{% url 'fresh_desktops' %}" class="mobile-submenu-item">Fresh in Box</a>
+                                <a href="{% url 'used_desktops' %}" class="mobile-submenu-item">Slightly Used</a>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'all_in_one_computers' %}" class="mobile-submenu-item">All-in-One</a>
                     </div>
                 </div>
 
                 <div class="mobile-nav-item">
                     <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
-                        Desktops
+                        Networking
                         <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
                     </a>
                     <div class="mobile-sub-submenu">
-                        <a href="{% url 'used_desktops' %}" class="mobile-submenu-item">Fresh in Box</a>
-                        <a href="{% url 'used_desktops' %}" class="mobile-submenu-item">Slightly Used</a>
-                        <!-- <a href="#gaming-desktops" class="mobile-submenu-item">Gaming PCs</a>
-                        <a href="#workstations" class="mobile-submenu-item">Workstations</a> -->
+                        <a href="{% url 'networking_all' %}" class="mobile-submenu-item">All Networking</a>
+                        <a href="{% url 'switches' %}" class="mobile-submenu-item">Switches</a>
+                        <a href="{% url 'routers_modems' %}" class="mobile-submenu-item">Routers &amp; Modems</a>
+                        <a href="{% url 'access_points' %}" class="mobile-submenu-item">Access Points</a>
                     </div>
                 </div>
 
-                <a href="{% url 'peripherals' %}" class="mobile-submenu-item">Accessories &amp; Peripherals</a>
-                <a href="{% url 'switches' %}" class="mobile-submenu-item">Switches</a>
-                <a href="{% url 'routers_modems' %}" class="mobile-submenu-item">Routers &amp; Modems</a>
-                <a href="{% url 'security_cameras' %}" class="mobile-submenu-item">Security Cameras &amp; Systems</a>
-                <!-- <a href="#components" class="mobile-submenu-item">Computer Components</a> -->
+                <a href="{% url 'peripherals' %}" class="mobile-submenu-item">Accessories</a>
+                <a href="{% url 'ups' %}" class="mobile-submenu-item">UPS</a>
+
+                <div class="mobile-nav-item">
+                    <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
+                        Security Cameras
+                        <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
+                    </a>
+                    <div class="mobile-sub-submenu">
+                        <a href="{% url 'security_cameras' %}" class="mobile-submenu-item">All Security Cameras</a>
+                        <a href="{% url 'ip_cameras' %}" class="mobile-submenu-item">IP Cameras</a>
+                        <a href="{% url 'cctv_kits' %}" class="mobile-submenu-item">CCTV Kits</a>
+                        <a href="{% url 'nvr_dvr' %}" class="mobile-submenu-item">NVR / DVR</a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1182,9 +1526,49 @@
                 <i class="fa fa-chevron-right chevron"></i>
             </a>
             <div class="mobile-submenu">
+                <a href="{% url 'software_all' %}" class="mobile-submenu-item">All Software</a>
                 <a href="{% url 'operatingSystems' %}" class="mobile-submenu-item">Operating Systems</a>
-                <a href="{% url 'developmentTools' %}" class="mobile-submenu-item">Development Tools</a>
-                <a href="{% url 'applications' %}" class="mobile-submenu-item">Business Applications</a>
+
+                <div class="mobile-nav-item">
+                    <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
+                        Applications
+                        <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
+                    </a>
+                    <div class="mobile-sub-submenu">
+                        <a href="{% url 'applications' %}" class="mobile-submenu-item">All Applications</a>
+                        <a href="{% url 'office_suite' %}" class="mobile-submenu-item">Office Suite</a>
+                        <a href="{% url 'design_creative' %}" class="mobile-submenu-item">Design &amp; Creative</a>
+                        <a href="{% url 'accounting_finance' %}" class="mobile-submenu-item">Accounting &amp; Finance</a>
+                        <a href="{% url 'video_editing' %}" class="mobile-submenu-item">Video Editing</a>
+                        <a href="{% url 'point_of_sale' %}" class="mobile-submenu-item">Point of Sale</a>
+                    </div>
+                </div>
+
+                <div class="mobile-nav-item">
+                    <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
+                        Security &amp; Utilities
+                        <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
+                    </a>
+                    <div class="mobile-sub-submenu">
+                        <a href="{% url 'security_utilities' %}" class="mobile-submenu-item">All Security &amp; Utilities</a>
+                        <a href="{% url 'antivirus_security' %}" class="mobile-submenu-item">Antivirus &amp; Security</a>
+                        <a href="{% url 'remote_desktop_vpn' %}" class="mobile-submenu-item">Remote Desktop &amp; VPN</a>
+                        <a href="{% url 'backup_recovery' %}" class="mobile-submenu-item">Backup &amp; Recovery</a>
+                        <a href="{% url 'network_management' %}" class="mobile-submenu-item">Network Management</a>
+                    </div>
+                </div>
+
+                <div class="mobile-nav-item">
+                    <a href="#" class="mobile-submenu-item" onclick="toggleMobileSubSubmenu(event, this)">
+                        Development
+                        <i class="fa fa-chevron-right chevron" style="float: right; font-size: 10px;"></i>
+                    </a>
+                    <div class="mobile-sub-submenu">
+                        <a href="{% url 'developmentTools' %}" class="mobile-submenu-item">All Development</a>
+                        <a href="{% url 'development_tools_only' %}" class="mobile-submenu-item">Development Tools</a>
+                        <a href="{% url 'database_software' %}" class="mobile-submenu-item">Database Software</a>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -1578,4 +1962,22 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+        function showMegaPane(paneId) {
+            // Remove active class from all panes and sidebar items
+            document.querySelectorAll('.mega-content-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            document.querySelectorAll('.mega-sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Add active class to target pane and corresponding sidebar item
+            const targetPane = document.getElementById('pane-' + paneId);
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
+
+            // Find and highlight sidebar item (complex because some are links)
+            event.currentTarget.classList.add('active');
+        }
     </script>

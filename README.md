@@ -1,6 +1,5 @@
 Django E-commerce app
 
-```markdown
 # Django eCommerce App
 
 Welcome to the **Django eCommerce App**, a scalable and customizable online store built with Django. This project provides a strong foundation for developers to create robust e-commerce platforms. 
@@ -74,3 +73,36 @@ Whether you're developing a niche marketplace or a full-fledged online store, th
 -`EMAIL_HOST_USER='yourmail@gmail.com'`
 -`EMAIL_HOST_PASSWORD='your password'`
 -`EMAIL_USE_TLS=True`
+
+## Docker
+
+This repository now includes a local Docker setup for the Django app.
+
+Full setup and deployment instructions are in [docs/SETUP_AND_DEPLOYMENT.md](docs/SETUP_AND_DEPLOYMENT.md).
+
+### Start the app
+
+```bash
+docker compose up --build
+```
+
+The container will:
+
+- install Python dependencies
+- load settings from the existing `.env`
+- run `python manage.py migrate`
+- run `python manage.py collectstatic --noinput`
+- start Django on `0.0.0.0:8000`
+
+Open `http://localhost:8000` after the container is up.
+
+If port `8000` is already in use on the host, start it on another port:
+
+```bash
+HOST_PORT=8001 docker compose up --build
+```
+
+### Notes
+
+- The compose setup bind-mounts the project into `/app`, so code changes on the host are reflected in the container.
+- The project continues to use SQLite by default unless `USE_POSTGRES=True` and the related database variables are added to `.env`.

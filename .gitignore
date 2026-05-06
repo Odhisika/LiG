@@ -1,5 +1,6 @@
 # Environments
 .env
+.env.production
 .venv
 env/
 venv/
@@ -10,5 +11,6 @@ pythonenv*
 db.sqlite3
 media/
 logs/
+staticfiles/
 __pycache__/
 *.py[cod]

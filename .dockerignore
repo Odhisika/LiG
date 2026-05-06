@@ -1,0 +1,16 @@
+.git
+.gitignore
+.codex
+.agents
+.env
+.venv
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*.sqlite3
+media/
+logs/
+staticfiles/
+
