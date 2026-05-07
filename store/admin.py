@@ -643,7 +643,8 @@ class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 'short_description',
                 'storefront_destination',
             ),
-            'description': 'ℹ️ UPS products: Standby, Line Interactive, and Online Double Conversion units.'
+            'description': mark_safe('ℹ️ UPS products: Standby, Line Interactive, and Online Double Conversion units.<br>'
+                                     '⚠️ <b>Note:</b> If you add a new Brand, ensure you tick the <b>"For UPS"</b> checkbox in the brand settings, otherwise it will not appear here.')
         }),
         ('📄 Description', {
             'fields': ('description',)

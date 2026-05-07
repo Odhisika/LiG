@@ -409,7 +409,7 @@ class UPSProduct(Product):
         ('rack_tower', 'Rack / Tower Convertible'),
     ]
 
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, help_text="Note: Only brands marked as 'For UPS' will appear here.")
     model_number = models.CharField(max_length=100, blank=True)
 
     # Power Ratings
