@@ -112,13 +112,19 @@
                 <div class="product-info">
                     <!-- Product Title and Brand -->
                     <div class="product-header mb-3">
-                        {% if single_product.computerproduct.brand or single_product.peripheralproduct.brand %}
+                        {% if single_product.computerproduct.brand or single_product.peripheralproduct.brand or single_product.upsproduct.brand or single_product.networkingproduct.brand or single_product.securitycameraproduct.brand %}
                         <div class="brand-name mb-1">
                             <a href="#" class="text-decoration-none fw-bold" style="color: var(--royal-blue); font-size: 0.9rem;">
                                 {% if single_product.computerproduct %}
                                     Visit the {{ single_product.computerproduct.brand.name }} Store
                                 {% elif single_product.peripheralproduct %}
                                     Visit the {{ single_product.peripheralproduct.brand.name }} Store
+                                {% elif single_product.upsproduct %}
+                                    Visit the {{ single_product.upsproduct.brand.name }} Store
+                                {% elif single_product.networkingproduct %}
+                                    Visit the {{ single_product.networkingproduct.brand.name }} Store
+                                {% elif single_product.securitycameraproduct %}
+                                    Visit the {{ single_product.securitycameraproduct.brand.name }} Store
                                 {% endif %}
                             </a>
                         </div>
@@ -134,6 +140,12 @@
                             <span class="text-muted small">Model: <span class="fw-semibold text-dark">{{ single_product.computerproduct.model_number }}</span></span>
                             {% elif single_product.peripheralproduct.model_number %}
                             <span class="text-muted small">Model: <span class="fw-semibold text-dark">{{ single_product.peripheralproduct.model_number }}</span></span>
+                            {% elif single_product.upsproduct.model_number %}
+                            <span class="text-muted small">Model: <span class="fw-semibold text-dark">{{ single_product.upsproduct.model_number }}</span></span>
+                            {% elif single_product.networkingproduct.model_number %}
+                            <span class="text-muted small">Model: <span class="fw-semibold text-dark">{{ single_product.networkingproduct.model_number }}</span></span>
+                            {% elif single_product.securitycameraproduct.model_number %}
+                            <span class="text-muted small">Model: <span class="fw-semibold text-dark">{{ single_product.securitycameraproduct.model_number }}</span></span>
                             {% endif %}
                         </div>
                     </div>
@@ -180,36 +192,76 @@
                     </div>
                     
                     <!-- Key Features (About this item) -->
-                    {% if single_product.computerproduct %}
+                    {% if single_product.computerproduct or single_product.upsproduct or single_product.networkingproduct or single_product.securitycameraproduct %}
                     <div class="key-highlights mb-4">
                         <h6 class="fw-bold mb-3" style="color: #0F1111;">About this item</h6>
                         <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                            {% if single_product.computerproduct.processor_model %}
-                            <li class="d-flex align-items-start gap-2">
-                                <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
-                                <span class="text-dark small"><span class="fw-bold text-muted">Processor:</span> {{ single_product.computerproduct.processor_model }}</span>
-                            </li>
-                            {% endif %}
-                            
-                            {% if single_product.computerproduct.ram_size %}
-                            <li class="d-flex align-items-start gap-2">
-                                <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
-                                <span class="text-dark small"><span class="fw-bold text-muted">RAM:</span> {{ single_product.computerproduct.ram_size }}GB DDR4 Memory</span>
-                            </li>
-                            {% endif %}
-                            
-                            {% if single_product.computerproduct.storage_capacity %}
-                            <li class="d-flex align-items-start gap-2">
-                                <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
-                                <span class="text-dark small"><span class="fw-bold text-muted">Storage:</span> {{ single_product.computerproduct.storage_capacity }}GB {{ single_product.computerproduct.get_storage_type_display }}</span>
-                            </li>
-                            {% endif %}
-                            
-                            {% if single_product.computerproduct.screen_size %}
-                            <li class="d-flex align-items-start gap-2">
-                                <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
-                                <span class="text-dark small"><span class="fw-bold text-muted">Display:</span> {{ single_product.computerproduct.screen_size }} inch Full HD Display</span>
-                            </li>
+                            {% if single_product.computerproduct %}
+                                {% if single_product.computerproduct.processor_model %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Processor:</span> {{ single_product.computerproduct.processor_model }}</span>
+                                </li>
+                                {% endif %}
+                                {% if single_product.computerproduct.ram_size %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">RAM:</span> {{ single_product.computerproduct.ram_size }}GB DDR4 Memory</span>
+                                </li>
+                                {% endif %}
+                                {% if single_product.computerproduct.storage_capacity %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Storage:</span> {{ single_product.computerproduct.storage_capacity }}GB {{ single_product.computerproduct.get_storage_type_display }}</span>
+                                </li>
+                                {% endif %}
+                            {% elif single_product.upsproduct %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Capacity:</span> {{ single_product.upsproduct.capacity_va }}VA / {{ single_product.upsproduct.capacity_watts }}W</span>
+                                </li>
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Type:</span> {{ single_product.upsproduct.get_ups_type_display }}</span>
+                                </li>
+                                {% if single_product.upsproduct.num_outlets %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Outlets:</span> {{ single_product.upsproduct.num_outlets }} Outlets ({{ single_product.upsproduct.num_battery_backup_outlets }} Battery Backup)</span>
+                                </li>
+                                {% endif %}
+                            {% elif single_product.networkingproduct %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Device Type:</span> {{ single_product.networkingproduct.get_device_type_display }}</span>
+                                </li>
+                                {% if single_product.networkingproduct.total_ports %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Ports:</span> {{ single_product.networkingproduct.total_ports }} Ports</span>
+                                </li>
+                                {% endif %}
+                                {% if single_product.networkingproduct.max_speed %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Speed:</span> {{ single_product.networkingproduct.max_speed }}</span>
+                                </li>
+                                {% endif %}
+                            {% elif single_product.securitycameraproduct %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Resolution:</span> {{ single_product.securitycameraproduct.get_resolution_display }}</span>
+                                </li>
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Type:</span> {{ single_product.securitycameraproduct.get_camera_type_display }}</span>
+                                </li>
+                                {% if single_product.securitycameraproduct.night_vision %}
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-circle mt-2" style="font-size: 0.4rem; color: #565959;"></i>
+                                    <span class="text-dark small"><span class="fw-bold text-muted">Features:</span> Night Vision, Weatherproof</span>
+                                </li>
+                                {% endif %}
                             {% endif %}
                         </ul>
                     </div>
@@ -482,27 +534,85 @@
                                     <!-- Continue with other sections... -->
                                 </div>
                             </div>
-                            {% elif single_product.softwareproduct %}
-                            <!-- Software Specifications -->
+                            {% elif single_product.upsproduct %}
+                            <!-- UPS Specifications -->
+                            <div class="specifications-grid">
+                                <div class="row g-4">
+                                    <div class="col-lg-6">
+                                        <div class="spec-section">
+                                            <h6 class="spec-section-title bg-light p-2 rounded-2 mb-3">
+                                                <i class="fas fa-bolt me-2"></i>Power Capacity
+                                            </h6>
+                                            <div class="spec-table">
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">Capacity (VA):</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.upsproduct.capacity_va }}VA</span>
+                                                </div>
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">Capacity (Watts):</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.upsproduct.capacity_watts }}W</span>
+                                                </div>
+                                                <div class="spec-row d-flex justify-content-between py-2">
+                                                    <span class="spec-label">UPS Type:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.upsproduct.get_ups_type_display }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="spec-section">
+                                            <h6 class="spec-section-title bg-light p-2 rounded-2 mb-3">
+                                                <i class="fas fa-battery-full me-2"></i>Battery & Outlets
+                                            </h6>
+                                            <div class="spec-table">
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">Total Outlets:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.upsproduct.num_outlets }}</span>
+                                                </div>
+                                                <div class="spec-row d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="spec-label">Battery Type:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.upsproduct.battery_type }}</span>
+                                                </div>
+                                                <div class="spec-row d-flex justify-content-between py-2">
+                                                    <span class="spec-label">Waveform Type:</span>
+                                                    <span class="spec-value fw-semibold">{{ single_product.upsproduct.get_output_type_display }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% elif single_product.networkingproduct %}
+                            <!-- Networking Specifications -->
                             <div class="spec-table">
                                 <div class="spec-row d-flex justify-content-between py-3 border-bottom">
-                                    <span class="spec-label">Version:</span>
-                                    <span class="spec-value fw-semibold">{{ single_product.softwareproduct.version }}</span>
+                                    <span class="spec-label">Device Type:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.networkingproduct.get_device_type_display }}</span>
                                 </div>
                                 <div class="spec-row d-flex justify-content-between py-3 border-bottom">
-                                    <span class="spec-label">License Type:</span>
-                                    <span class="spec-value fw-semibold">{{ single_product.softwareproduct.get_license_type_display }}</span>
+                                    <span class="spec-label">Total Ports:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.networkingproduct.total_ports|default:"N/A" }}</span>
                                 </div>
-                                <div class="spec-row d-flex justify-content-between py-3 border-bottom">
-                                    <span class="spec-label">Platforms:</span>
-                                    <span class="spec-value fw-semibold">{{ single_product.softwareproduct.platforms }}</span>
-                                </div>
-                                {% if single_product.softwareproduct.developer %}
                                 <div class="spec-row d-flex justify-content-between py-3">
-                                    <span class="spec-label">Developer:</span>
-                                    <span class="spec-value fw-semibold">{{ single_product.softwareproduct.developer }}</span>
+                                    <span class="spec-label">Max Speed:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.networkingproduct.max_speed|default:"N/A" }}</span>
                                 </div>
-                                {% endif %}
+                            </div>
+                            {% elif single_product.securitycameraproduct %}
+                            <!-- Security Camera Specifications -->
+                            <div class="spec-table">
+                                <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+                                    <span class="spec-label">Camera Type:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.securitycameraproduct.get_camera_type_display }}</span>
+                                </div>
+                                <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+                                    <span class="spec-label">Resolution:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.securitycameraproduct.get_resolution_display }}</span>
+                                </div>
+                                <div class="spec-row d-flex justify-content-between py-3">
+                                    <span class="spec-label">Connectivity:</span>
+                                    <span class="spec-value fw-semibold">{{ single_product.securitycameraproduct.connectivity }}</span>
+                                </div>
                             </div>
                             {% endif %}
                         </div>

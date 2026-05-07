@@ -139,6 +139,7 @@ class Brand(models.Model):
     for_security    = models.BooleanField(default=False, verbose_name='Security / CCTV Cameras')
     for_peripherals = models.BooleanField(default=False, verbose_name='Peripherals & Accessories')
     for_software    = models.BooleanField(default=False, verbose_name='Software')
+    for_ups         = models.BooleanField(default=False, verbose_name='UPS (Uninterruptible Power Supplies)')
 
     def __str__(self):
         return self.name
@@ -342,7 +343,6 @@ class NetworkingProduct(Product):
         ('modem', 'Modem'),
         ('modem_router', 'Modem/Router Combo'),
         ('access_point', 'Access Point'),
-        ('ups', 'UPS (Uninterruptible Power Supply)'),
     ]
 
     WIFI_STANDARDS = [
@@ -388,6 +388,70 @@ class NetworkingProduct(Product):
     class Meta:
         verbose_name = '🌐 Networking Product'
         verbose_name_plural = '🌐 Networking Products'
+
+
+# Model for UPS Products
+class UPSProduct(Product):
+    UPS_TYPES = [
+        ('standby', 'Standby (Offline)'),
+        ('line_interactive', 'Line Interactive'),
+        ('online_double', 'Online Double Conversion'),
+    ]
+
+    OUTPUT_TYPES = [
+        ('simulated_sine', 'Simulated Sine Wave'),
+        ('pure_sine', 'Pure Sine Wave'),
+    ]
+
+    FORM_FACTORS = [
+        ('tower', 'Tower'),
+        ('rack', 'Rack Mount'),
+        ('rack_tower', 'Rack / Tower Convertible'),
+    ]
+
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    model_number = models.CharField(max_length=100, blank=True)
+
+    # Power Ratings
+    capacity_va = models.PositiveIntegerField(help_text="Capacity in VA (Volt-Amperes)")
+    capacity_watts = models.PositiveIntegerField(blank=True, null=True, help_text="Capacity in Watts")
+
+    # UPS Classification
+    ups_type = models.CharField(max_length=30, choices=UPS_TYPES, default='line_interactive')
+    output_type = models.CharField(max_length=20, choices=OUTPUT_TYPES, default='simulated_sine')
+    form_factor = models.CharField(max_length=20, choices=FORM_FACTORS, default='tower')
+
+    # Battery
+    battery_type = models.CharField(max_length=50, blank=True, help_text="e.g. Sealed Lead Acid, Lithium-ion")
+    number_of_batteries = models.PositiveIntegerField(blank=True, null=True)
+    replaceable_battery = models.BooleanField(default=True)
+    runtime_half_load = models.CharField(max_length=50, blank=True, help_text="Runtime at 50% load, e.g. 15 min")
+    runtime_full_load = models.CharField(max_length=50, blank=True, help_text="Runtime at 100% load, e.g. 5 min")
+
+    # Connectivity & Outlets
+    num_outlets = models.PositiveIntegerField(blank=True, null=True, help_text="Total number of outlets")
+    num_battery_backup_outlets = models.PositiveIntegerField(blank=True, null=True, help_text="Outlets with battery backup")
+    num_surge_only_outlets = models.PositiveIntegerField(blank=True, null=True, help_text="Surge-only outlets")
+    usb_port = models.BooleanField(default=False, verbose_name="USB Monitoring Port")
+    network_manageable = models.BooleanField(default=False, help_text="SNMP / network management card")
+
+    # Protection
+    surge_protection_joules = models.PositiveIntegerField(blank=True, null=True, help_text="Surge protection rating in Joules")
+    avr = models.BooleanField(default=False, verbose_name="Automatic Voltage Regulation (AVR)")
+
+    # Display & Alerts
+    lcd_display = models.BooleanField(default=False)
+    audible_alarm = models.BooleanField(default=True)
+
+    # Warranty
+    warranty_period = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        return f"{self.brand.name} {self.product_name}"
+
+    class Meta:
+        verbose_name = '🔋 UPS Product'
+        verbose_name_plural = '🔋 UPS Products'
 
 
 # Model for Security Cameras & Systems

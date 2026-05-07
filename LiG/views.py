@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from store.models import Product, Category, ReviewRating, ComputerProduct, SoftwareProduct, PeripheralProduct, NetworkingProduct, SecurityCameraProduct, HomeBanner
+from store.models import Product, Category, ReviewRating, ComputerProduct, SoftwareProduct, PeripheralProduct, NetworkingProduct, UPSProduct, SecurityCameraProduct, HomeBanner
 from research.models import BlogModel
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -150,11 +150,9 @@ def all_in_one_computers(request):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def networking_all(request):
-    """All networking products except UPS units, which have their own page."""
+    """All networking products (Switches, Routers, Modems, Access Points)."""
     products = NetworkingProduct.objects.filter(
         is_available=True
-    ).exclude(
-        device_type='ups'
     ).order_by('-created_date')
     context = {'products': products}
     return render(request, 'hardware/networking.html', context)
@@ -190,9 +188,8 @@ def access_points(request):
 
 
 def ups(request):
-    """UPS units stored in the networking catalogue."""
-    products = NetworkingProduct.objects.filter(
-        device_type='ups',
+    """UPS units — standalone product type."""
+    products = UPSProduct.objects.filter(
         is_available=True
     ).order_by('-created_date')
     context = {'products': products}

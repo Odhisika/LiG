@@ -63,7 +63,10 @@ def product_detail(request, category_slug, product_slug):
         Product.objects.select_related(
             'computerproduct',
             'softwareproduct',
-            'peripheralproduct'
+            'peripheralproduct',
+            'upsproduct',
+            'networkingproduct',
+            'securitycameraproduct'
         ).prefetch_related('gallery_images'),
         category__slug=category_slug,
         slug=product_slug,

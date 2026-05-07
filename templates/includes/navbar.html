@@ -1344,41 +1344,120 @@
             </div>
         </li>
         
-        <!-- Software -->
+        <!-- Software Mega Menu -->
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{% url 'software_all' %}" class="nav-link">
                 Software <i class="fa fa-chevron-down dropdown-icon"></i>
             </a>
-            <div class="dropdown-menu">
-                <a href="{% url 'software_all' %}" class="dropdown-item">All Software</a>
-                <a href="{% url 'operatingSystems' %}" class="dropdown-item">Operating Systems</a>
-                <div class="dropdown-item has-submenu">
-                    <a href="{% url 'applications' %}" class="submenu-link">Applications</a>
-                    <div class="sub-dropdown-menu">
-                        <a href="{% url 'applications' %}" class="dropdown-item">All Applications</a>
-                        <a href="{% url 'office_suite' %}" class="dropdown-item">Office Suite</a>
-                        <a href="{% url 'design_creative' %}" class="dropdown-item">Design &amp; Creative</a>
-                        <a href="{% url 'accounting_finance' %}" class="dropdown-item">Accounting &amp; Finance</a>
-                        <a href="{% url 'video_editing' %}" class="dropdown-item">Video Editing</a>
-                        <a href="{% url 'point_of_sale' %}" class="dropdown-item">Point of Sale</a>
+            <div class="mega-menu">
+                <!-- Sidebar -->
+                <div class="mega-menu-sidebar">
+                    <a href="{% url 'software_all' %}" class="mega-sidebar-item" onmouseover="showMegaPane('software-all')">
+                        All Software
+                    </a>
+                    <a href="{% url 'operatingSystems' %}" class="mega-sidebar-item" onmouseover="showMegaPane('os')">
+                        Operating Systems
+                    </a>
+                    <div class="mega-sidebar-item active" onmouseover="showMegaPane('applications')">
+                        Applications <i class="fa fa-chevron-right"></i>
+                    </div>
+                    <div class="mega-sidebar-item" onmouseover="showMegaPane('software-security')">
+                        Security &amp; Utilities <i class="fa fa-chevron-right"></i>
+                    </div>
+                    <div class="mega-sidebar-item" onmouseover="showMegaPane('development')">
+                        Development <i class="fa fa-chevron-right"></i>
                     </div>
                 </div>
-                <div class="dropdown-item has-submenu">
-                    <a href="{% url 'security_utilities' %}" class="submenu-link">Security &amp; Utilities</a>
-                    <div class="sub-dropdown-menu">
-                        <a href="{% url 'security_utilities' %}" class="dropdown-item">All Security &amp; Utilities</a>
-                        <a href="{% url 'antivirus_security' %}" class="dropdown-item">Antivirus &amp; Security</a>
-                        <a href="{% url 'remote_desktop_vpn' %}" class="dropdown-item">Remote Desktop &amp; VPN</a>
-                        <a href="{% url 'backup_recovery' %}" class="dropdown-item">Backup &amp; Recovery</a>
-                        <a href="{% url 'network_management' %}" class="dropdown-item">Network Management</a>
+
+                <!-- Content Area -->
+                <div class="mega-menu-content">
+                    <!-- All Software Pane -->
+                    <div class="mega-content-pane" id="pane-software-all">
+                        <a href="{% url 'software_all' %}" class="browse-all-btn">Browse All Software <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Featured Software</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'office_suite' %}">Microsoft Office</a></li>
+                                    <li><a href="{% url 'antivirus_security' %}">Antivirus &amp; Security</a></li>
+                                    <li><a href="{% url 'operatingSystems' %}">Windows OS</a></li>
+                                    <li><a href="{% url 'design_creative' %}">Design Tools</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="dropdown-item has-submenu">
-                    <a href="{% url 'developmentTools' %}" class="submenu-link">Development</a>
-                    <div class="sub-dropdown-menu">
-                        <a href="{% url 'developmentTools' %}" class="dropdown-item">All Development</a>
-                        <a href="{% url 'development_tools_only' %}" class="dropdown-item">Development Tools</a>
-                        <a href="{% url 'database_software' %}" class="dropdown-item">Database Software</a>
+
+                    <!-- OS Pane -->
+                    <div class="mega-content-pane" id="pane-os">
+                        <a href="{% url 'operatingSystems' %}" class="browse-all-btn">Browse Operating Systems <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Platforms</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'operatingSystems' %}">Windows 11</a></li>
+                                    <li><a href="{% url 'operatingSystems' %}">Windows 10</a></li>
+                                    <li><a href="{% url 'operatingSystems' %}">Windows Server</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Applications Pane -->
+                    <div class="mega-content-pane active" id="pane-applications">
+                        <a href="{% url 'applications' %}" class="browse-all-btn">Browse All Applications <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Business &amp; Productivity</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'office_suite' %}">Office Suite</a></li>
+                                    <li><a href="{% url 'accounting_finance' %}">Accounting &amp; Finance</a></li>
+                                    <li><a href="{% url 'point_of_sale' %}">Point of Sale (POS)</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="mega-group-title">Creative Tools</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'design_creative' %}">Design &amp; Creative</a></li>
+                                    <li><a href="{% url 'video_editing' %}">Video Editing</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security & Utilities Pane -->
+                    <div class="mega-content-pane" id="pane-software-security">
+                        <a href="{% url 'security_utilities' %}" class="browse-all-btn">Browse Security &amp; Utilities <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Protection</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'antivirus_security' %}">Antivirus &amp; Security</a></li>
+                                    <li><a href="{% url 'remote_desktop_vpn' %}">Remote Desktop &amp; VPN</a></li>
+                                    <li><a href="{% url 'backup_recovery' %}">Backup &amp; Recovery</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="mega-group-title">System Tools</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'network_management' %}">Network Management</a></li>
+                                    <li><a href="{% url 'security_utilities' %}">Utility Software</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Development Pane -->
+                    <div class="mega-content-pane" id="pane-development">
+                        <a href="{% url 'developmentTools' %}" class="browse-all-btn">Browse Development Tools <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Developer Hub</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'development_tools_only' %}">Development Tools</a></li>
+                                    <li><a href="{% url 'database_software' %}">Database Software</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

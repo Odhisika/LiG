@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 from .models import (
     Product, ComputerProduct, SoftwareProduct, PeripheralProduct,
-    NetworkingProduct, SecurityCameraProduct,
+    NetworkingProduct, UPSProduct, SecurityCameraProduct,
     ReviewRating, ProductGallery, Brand, ProductSpecification,
     ProductVariant, ProductTag, ProductTagRelation, ReviewHelpful,
     HomeBanner
@@ -504,7 +504,6 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             'modem': 'Hardware → Networking → Routers & Modems',
             'modem_router': 'Hardware → Networking → Routers & Modems',
             'access_point': 'Hardware → Networking → Access Points',
-            'ups': 'Hardware → UPS',
         }
         return destinations.get(obj.device_type, 'Hardware → Networking')
     storefront_destination.short_description = 'Storefront Destination'
@@ -516,7 +515,7 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 ('category', 'brand', 'model_number'),
                 'short_description',
             ),
-            'description': 'ℹ️ Networking products include Switches, Routers, Modems, Access Points, and UPS units.'
+            'description': 'ℹ️ Networking products include Switches, Routers, Modems, and Access Points.'
         }),
         ('🌐 Device Classification — REQUIRED', {
             'fields': (('device_type', 'condition'), 'storefront_destination'),
@@ -524,8 +523,7 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 '⚠️ <b>IMPORTANT</b>: Select the correct device type.<br>'
                 '→ <b>Switches</b> (managed/unmanaged/PoE) appear on the Switches page.<br>'
                 '→ <b>Routers / Modems</b> appear on the Routers &amp; Modems page.<br>'
-                '→ <b>Access Points</b> appear on the Access Points page.<br>'
-                '→ <b>UPS</b> appears on the UPS page.'
+                '→ <b>Access Points</b> appear on the Access Points page.'
             )
         }),
         ('📄 Description', {
@@ -557,6 +555,144 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
         }),
         ('⚙️ Management Features', {
             'fields': (('managed', 'vlan_support', 'rack_mountable'),),
+            'classes': ('collapse',)
+        }),
+        ('🛡️ Warranty', {
+            'fields': (('warranty_period',),),
+            'classes': ('collapse',)
+        }),
+        ('🚦 Product Status', {
+            'fields': (
+                ('is_available', 'is_featured'),
+                ('requires_shipping', 'is_digital'),
+            )
+        }),
+        ('💰 Pricing', {
+            'fields': (
+                ('price', 'compare_price'),
+                ('cost_price', 'barcode'),
+            ),
+        }),
+        ('📦 Inventory', {
+            'fields': (
+                ('stock', 'low_stock_threshold'),
+                ('track_inventory', 'allow_backorders'),
+            ),
+        }),
+        ('🔍 SEO & Marketing', {
+            'fields': ('meta_title', 'meta_description', 'tags'),
+            'classes': ('collapse',)
+        }),
+        ('📐 Physical Properties', {
+            'fields': (
+                ('weight', 'dimensions_length'),
+                ('dimensions_width', 'dimensions_height'),
+            ),
+            'classes': ('collapse',)
+        }),
+        ('🕒 Timestamps', {
+            'fields': (('created_date', 'modified_date'),),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 🔋 UPS PRODUCT ADMIN
+# ─────────────────────────────────────────────────────────────────────────────
+
+@admin.register(UPSProduct)
+class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
+    extra_readonly_fields = ('storefront_destination',)
+    list_display = (
+        'product_name', 'brand', 'capacity_va', 'capacity_watts',
+        'ups_type', 'form_factor', 'price', 'stock', 'is_available'
+    )
+    list_editable = ('price', 'stock', 'is_available')
+    list_filter = ('ups_type', 'form_factor', 'output_type', 'brand', 'avr', 'lcd_display', 'is_available', 'is_featured')
+    search_fields = ('product_name', 'slug', 'description', 'model_number')
+    ordering = ('-created_date',)
+    readonly_fields = ('created_date', 'modified_date')
+    inlines = [ProductGalleryInline, ProductSpecificationInline, ProductTagRelationInline]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'brand':
+            kwargs['queryset'] = Brand.objects.filter(for_ups=True, is_active=True)
+        if db_field.name == 'category':
+            from category.models import Category
+            kwargs['queryset'] = Category.objects.filter(slug='ups')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        from category.models import Category
+        ups_cat = Category.objects.filter(slug='ups').first()
+        if ups_cat:
+            initial['category'] = ups_cat.id
+        return initial
+
+    def storefront_destination(self, obj):
+        return 'Hardware → UPS'
+    storefront_destination.short_description = 'Storefront Destination'
+
+    fieldsets = (
+        ('📝 Basic Information', {
+            'fields': (
+                ('product_name', 'slug'),
+                ('category', 'brand', 'model_number'),
+                'short_description',
+                'storefront_destination',
+            ),
+            'description': 'ℹ️ UPS products: Standby, Line Interactive, and Online Double Conversion units.'
+        }),
+        ('📄 Description', {
+            'fields': ('description',)
+        }),
+        ('⚡ Power Ratings — REQUIRED', {
+            'fields': (
+                ('capacity_va', 'capacity_watts'),
+            ),
+            'description': mark_safe(
+                '⚠️ <b>IMPORTANT</b>: Enter the VA and Watt ratings.<br>'
+                '→ <b>VA</b>: Apparent power (e.g. 1500).<br>'
+                '→ <b>Watts</b>: Real power output (e.g. 900). Leave blank if unknown.'
+            )
+        }),
+        ('🔋 UPS Classification', {
+            'fields': (
+                ('ups_type', 'output_type'),
+                ('form_factor', 'condition'),
+            ),
+            'description': mark_safe(
+                '<b>Standby</b>: Basic protection for home/office PCs.<br>'
+                '<b>Line Interactive</b>: AVR + battery backup, most popular for SMBs.<br>'
+                '<b>Online Double Conversion</b>: Continuous power conditioning for servers.'
+            )
+        }),
+        ('🔌 Battery', {
+            'fields': (
+                ('battery_type', 'number_of_batteries'),
+                'replaceable_battery',
+                ('runtime_half_load', 'runtime_full_load'),
+            ),
+            'description': 'Battery type (e.g. Sealed Lead Acid). Runtime in minutes at 50% and 100% load.'
+        }),
+        ('🔌 Outlets & Connectivity', {
+            'fields': (
+                ('num_outlets', 'num_battery_backup_outlets', 'num_surge_only_outlets'),
+                ('usb_port', 'network_manageable'),
+            ),
+            'description': mark_safe(
+                '<b>Total Outlets</b>: All output sockets.<br>'
+                '<b>Battery Backup Outlets</b>: Sockets with UPS protection.<br>'
+                '<b>Surge Only</b>: Sockets with surge protection but no battery backup.'
+            )
+        }),
+        ('🛡️ Protection Features', {
+            'fields': (
+                ('surge_protection_joules', 'avr'),
+                ('lcd_display', 'audible_alarm'),
+            ),
             'classes': ('collapse',)
         }),
         ('🛡️ Warranty', {
@@ -740,9 +876,9 @@ class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'is_active', 'for_computers', 'for_networking', 'for_security', 'for_peripherals', 'for_software', 'website')
-    list_editable = ('is_active', 'for_computers', 'for_networking', 'for_security', 'for_peripherals', 'for_software')
-    list_filter = ('is_active', 'for_computers', 'for_networking', 'for_security', 'for_peripherals', 'for_software')
+    list_display = ('name', 'slug', 'is_active', 'for_computers', 'for_networking', 'for_ups', 'for_security', 'for_peripherals', 'for_software', 'website')
+    list_editable = ('is_active', 'for_computers', 'for_networking', 'for_ups', 'for_security', 'for_peripherals', 'for_software')
+    list_filter = ('is_active', 'for_computers', 'for_networking', 'for_ups', 'for_security', 'for_peripherals', 'for_software')
     search_fields = ('name', 'slug')
 
     fieldsets = (
@@ -750,11 +886,10 @@ class BrandAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'logo', 'description', 'website', 'is_active')
         }),
         ('Product Groups — Tick all that apply', {
-            'fields': ('for_computers', 'for_networking', 'for_security', 'for_peripherals', 'for_software'),
+            'fields': ('for_computers', 'for_networking', 'for_ups', 'for_security', 'for_peripherals', 'for_software'),
             'description': mark_safe(
                 '⚠️ Tick the sections this brand belongs to. '
-                'The brand will only appear in the brand dropdown for the ticked product types. '
-                'Networking brands also cover UPS products.'
+                'The brand will only appear in the brand dropdown for the ticked product types.'
             )
         }),
     )
