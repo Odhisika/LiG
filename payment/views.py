@@ -7,6 +7,9 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.conf import settings
 from django.db import models
+from django.core.cache import cache
+from django.utils import timezone
+from datetime import timedelta
 import json
 import logging
 import traceback
@@ -19,6 +22,10 @@ from .hubtel import Hubtel, HubtelException
 from cart.models import Cart, CartItem
 
 logger = logging.getLogger(__name__)
+
+HUBTEL_STATUS_CHECK_DELAY = timedelta(minutes=5)
+HUBTEL_STATUS_CHECK_CACHE_TTL = int(HUBTEL_STATUS_CHECK_DELAY.total_seconds())
+LOCAL_PAYMENT_STATUS_POLL_SECONDS = 10
 
 
 def _build_callback_url(request, route_name):
@@ -36,6 +43,49 @@ def _build_callback_url(request, route_name):
         return url
 
     return url.replace('http://', 'https://', 1)
+
+
+def _hubtel_status_check_cache_key(payment_id):
+    return f"hubtel-status-check:{payment_id}"
+
+
+def _get_hubtel_status_check_wait_seconds(payment):
+    if payment.gateway != 'hubtel' or not payment.created_at:
+        return 0
+
+    initial_wait = payment.created_at + HUBTEL_STATUS_CHECK_DELAY
+    remaining = int((initial_wait - timezone.now()).total_seconds())
+    if remaining > 0:
+        return remaining
+
+    last_status_check_at = cache.get(_hubtel_status_check_cache_key(payment.id))
+    if not last_status_check_at:
+        return 0
+
+    retry_at = last_status_check_at + HUBTEL_STATUS_CHECK_DELAY
+    retry_remaining = int((retry_at - timezone.now()).total_seconds())
+    return max(0, retry_remaining)
+
+
+def _record_hubtel_status_check(payment):
+    cache.set(
+        _hubtel_status_check_cache_key(payment.id),
+        timezone.now(),
+        timeout=HUBTEL_STATUS_CHECK_CACHE_TTL,
+    )
+
+
+def _render_hubtel_processing(request, payment):
+    return render(
+        request,
+        "payment/payment_processing.html",
+        {
+            "payment": payment,
+            "order": payment.order,
+            "status_check_wait_seconds": _get_hubtel_status_check_wait_seconds(payment),
+            "status_poll_seconds": LOCAL_PAYMENT_STATUS_POLL_SECONDS,
+        },
+    )
 
 
 def initialize_payment(request, order_id, gateway='hubtel'):
@@ -238,6 +288,15 @@ def verify_payment(request):
             return render(request, "payment/payment_success.html",
                           {"payment": payment, "order": payment.order, "success": True})
 
+        if payment.gateway == 'hubtel':
+            wait_seconds = _get_hubtel_status_check_wait_seconds(payment)
+            if wait_seconds > 0:
+                logger.info(
+                    f"Hubtel status check for {reference} deferred for {wait_seconds}s "
+                    f"to respect the 5-minute verification window."
+                )
+                return _render_hubtel_processing(request, payment)
+
         # Hubtel may omit the transaction/check-out id on return.
         # Fall back to the stored Hubtel checkout id when we have one.
         if (
@@ -248,22 +307,23 @@ def verify_payment(request):
         ):
             transaction_id = payment.hubtel_token
 
-        # Hubtel redirect with no TransactionId → webhook will confirm
+        # Hubtel redirect with no TransactionId → stay on processing page and
+        # let the webhook or the delayed merchant status check confirm payment.
         if payment.gateway == 'hubtel' and not transaction_id:
             logger.info(
-                f"Hubtel returnUrl for {reference} has no TransactionId — redirecting to home page."
+                f"Hubtel returnUrl for {reference} has no TransactionId — waiting on webhook or delayed status check."
             )
-            messages.info(request, "Your payment is being processed. We will notify you once it's confirmed.")
-            return redirect('home')
+            return _render_hubtel_processing(request, payment)
 
         # Normal verification (Paystack, or Hubtel with a TransactionId)
         try:
+            if payment.gateway == 'hubtel':
+                _record_hubtel_status_check(payment)
             verified = payment.verify_payment(transaction_id)
         except Exception as verify_error:
             logger.error(f"Error in payment.verify_payment(): {str(verify_error)}")
             if payment.gateway == 'hubtel':
-                messages.info(request, "Your payment is being processed. We will notify you once it's confirmed.")
-                return redirect('home')
+                return _render_hubtel_processing(request, payment)
             messages.error(request, "Payment verification failed. Please contact support.")
             return redirect('cart')
 
@@ -280,8 +340,7 @@ def verify_payment(request):
 
         # Not confirmed yet (pending) — redirect to home
         if payment.status == 'pending' and payment.gateway == 'hubtel':
-            messages.info(request, "Your payment is being processed. We will notify you once it's confirmed.")
-            return redirect('home')
+            return _render_hubtel_processing(request, payment)
 
         # Explicitly failed
         messages.error(request, "Payment was not successful. Please contact support if you were charged.")
@@ -349,22 +408,31 @@ def payment_status(request, payment_id):
     """AJAX polling endpoint — check payment status and try to verify if pending."""
     try:
         payment = get_object_or_404(Payment, id=payment_id)
+        next_status_check_in = 0
 
         if payment.status == 'pending' and payment.gateway == 'hubtel':
-            # Pass stored hubtel_token as transaction_id so the API call is valid
-            txn_id = payment.hubtel_token or None
-            # Only call the API if we have a real Hubtel ID (not our own PAY_xxx ref)
-            if txn_id and not txn_id.startswith('PAY_'):
-                payment.verify_payment(txn_id)
-            else:
-                # Try using clientReference-only lookup
-                payment.verify_payment(None)
+            next_status_check_in = _get_hubtel_status_check_wait_seconds(payment)
+
+            if next_status_check_in == 0:
+                txn_id = payment.hubtel_token or None
+                _record_hubtel_status_check(payment)
+
+                # Only call the API if we have a real Hubtel ID (not our own PAY_xxx ref)
+                if txn_id and not txn_id.startswith('PAY_'):
+                    payment.verify_payment(txn_id)
+                else:
+                    # Try using clientReference-only lookup
+                    payment.verify_payment(None)
+
+                payment.refresh_from_db()
+                next_status_check_in = _get_hubtel_status_check_wait_seconds(payment)
 
         return JsonResponse({
             'status': payment.status,
             'verified': payment.verified,
             'success': payment.is_successful(),
             'ref': payment.ref,
+            'next_status_check_in': next_status_check_in,
         })
 
     except Exception as e:
@@ -452,8 +520,18 @@ def hubtel_webhook(request):
             return HttpResponse("OK", status=200)
 
         if status in ('success', 'successfull', 'completed', 'approved', '0000'):
-            logger.info(f"Hubtel webhook: triggering verification for {reference}")
-            payment.verify_payment(transaction_id or None)
+            logger.info(f"Hubtel webhook: marking {reference} successful from callback payload.")
+            payment.mark_hubtel_success({
+                'transaction_id': transaction_id or None,
+                'paymentMethod': payload.get('PaymentMethod') or payload.get('paymentMethod'),
+                'currency': payload.get('Currency') or payload.get('currency'),
+                'TransactionDate': (
+                    payload.get('TransactionDate') or
+                    payload.get('DatePaid') or
+                    payload.get('TransactionDateTime')
+                ),
+                'last4': payload.get('Last4') or payload.get('last4'),
+            })
         elif status in ('failed', 'cancelled', 'rejected'):
             payment.status = 'failed'
             payment.save()

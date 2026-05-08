@@ -21,9 +21,9 @@
                             <p class="page-meta">Placed on {{ order.created_at|date:"F d, Y g:i A" }}</p>
                         </div>
                         <div class="header-actions no-print">
-                            <button class="btn-professional btn-outline" onclick="printInvoice()">
-                                <i class="fa-solid fa-print"></i> Print Invoice
-                            </button>
+                            <a href="{% url 'generate_invoice_pdf' order.order_number %}" class="btn-professional btn-primary" target="_blank">
+                                <i class="fa-solid fa-file-pdf"></i> Download Receipt
+                            </a>
                         </div>
                     </div>
 
@@ -235,15 +235,13 @@
 .grand-total-row td { font-size: 1.25rem; font-weight: 700; color: var(--text-main); border-top: 2px solid var(--border-color); }
 
 /* Buttons */
-.btn-professional { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; }
-.btn-outline { border: 1px solid var(--border-color); background: #fff; color: var(--text-main); }
-.btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+.btn-professional { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
+.btn-primary { background: var(--primary); color: #fff; border: none; }
+.btn-primary:hover { background: var(--primary-dark); }
 
 /* Print Styles */
+/* Cleaned up old print styles as we now use professional PDF */
 @media print {
-    body * { visibility: hidden; }
-    #invoice-content, #invoice-content *, .invoice-table, .invoice-table * { visibility: visible; }
-    #invoice-content { position: absolute; top: 0; left: 0; width: 100%; }
     .no-print { display: none !important; }
 }
 
@@ -259,9 +257,7 @@
 
 <!-- JavaScript -->
 <script>
-    function printInvoice() {
-        window.print();
-    }
+    // Old printInvoice removed in favor of professional PDF generation
 
     function initializePayment(orderId) {
         const payBtn = document.getElementById('pay-btn');

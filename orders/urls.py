@@ -6,6 +6,5 @@ urlpatterns = [
     path('order_complete/<str:order_number>/', views.order_complete, name='order_complete'),
     path('submit-proof/<str:order_number>/', views.submit_proof, name='submit_proof'),
     path('confirm-payment/<int:proof_id>/', views.confirm_payment, name='confirm_payment'),
-    
-
+    path('invoice-pdf/<str:order_number>/', views.generate_invoice_pdf, name='generate_invoice_pdf'),
 ]

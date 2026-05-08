@@ -26,8 +26,13 @@
                 Pay with Hubtel
             </a>
         </div>
-        <div class="mt-3">
-            <strong>Total: GHS {{ order.order_total }}</strong>
+        <div class="mt-3 d-flex justify-content-center align-items-center gap-3">
+            <div class="p-2 border rounded bg-light">
+                <strong>Total: GHS {{ order.order_total }}</strong>
+            </div>
+            <a href="{% url 'generate_invoice_pdf' order.order_number %}" class="btn btn-outline-primary" target="_blank">
+                <i class="fas fa-file-pdf me-2"></i> Download Receipt
+            </a>
         </div>
     </div>
     

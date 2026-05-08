@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice {{ order.order_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 1cm;
+                margin-left: 1cm;
+                margin-right: 1cm;
+                height: 1cm;
+            }
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #2c3e50;
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: bold; }
+        .text-blue { color: #1a56db; }
+        
+        /* Header Table */
+        .header-table {
+            width: 100%;
+            border-bottom: 2pt solid #1a56db;
+            margin-bottom: 20pt;
+            padding-bottom: 10pt;
+        }
+        .company-name {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #1a56db;
+            margin-bottom: 4pt;
+        }
+        .company-info {
+            font-size: 9pt;
+            color: #64748b;
+        }
+        .invoice-title {
+            font-size: 24pt;
+            font-weight: bold;
+            text-align: right;
+            color: #cbd5e1;
+            text-transform: uppercase;
+        }
+
+        /* Info Grid */
+        .info-table {
+            width: 100%;
+            margin-bottom: 30pt;
+        }
+        .section-header {
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #64748b;
+            border-bottom: 1pt solid #e2e8f0;
+            margin-bottom: 5pt;
+            padding-bottom: 2pt;
+        }
+        .info-content {
+            font-size: 10pt;
+        }
+
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20pt;
+        }
+        .items-table th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: bold;
+            text-align: left;
+            padding: 8pt;
+            border-bottom: 1pt solid #cbd5e1;
+            font-size: 9pt;
+        }
+        .items-table td {
+            padding: 8pt;
+            border-bottom: 1pt solid #f1f5f9;
+            vertical-align: top;
+        }
+
+        /* Totals Area */
+        .totals-container {
+            width: 100%;
+        }
+        .totals-table {
+            width: 40%;
+            margin-left: 60%;
+        }
+        .totals-table td {
+            padding: 4pt 8pt;
+        }
+        .grand-total-row {
+            background-color: #f8fafc;
+            border-top: 2pt solid #1a56db;
+        }
+        .grand-total-label {
+            font-weight: bold;
+            font-size: 12pt;
+            color: #1a56db;
+        }
+        .grand-total-value {
+            font-weight: bold;
+            font-size: 12pt;
+            color: #1a56db;
+        }
+
+        /* Status Stamp */
+        .status-container {
+            margin-top: 10pt;
+        }
+        .status-stamp {
+            display: inline-block;
+            border: 2pt solid #16a34a;
+            color: #16a34a;
+            padding: 4pt 12pt;
+            font-weight: bold;
+            font-size: 14pt;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            border-color: #ca8a04;
+            color: #ca8a04;
+        }
+
+        #footerContent {
+            font-size: 8pt;
+            color: #94a3b8;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <table class="header-table">
+        <tr>
+            <td width="60%">
+                <div class="company-name">LuckyTech Innovation Ground</div>
+                <div class="company-info">
+                    Adweso-Koforidua Road, Eastern Region, Ghana<br>
+                    Phone: +233 59 188 4422 | Email: info@lig.com.gh<br>
+                    Web: www.lig.com.gh
+                </div>
+            </td>
+            <td width="40%" class="text-right">
+                <div class="invoice-title">Invoice</div>
+                <div style="font-size: 11pt; color: #1e293b;">
+                    #{{ order.order_number }}<br>
+                    {{ order.created_at|date:"F d, Y" }}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="info-table">
+        <tr>
+            <td width="48%">
+                <div class="section-header">Billed To</div>
+                <div class="info-content">
+                    <strong>{{ order.full_name }}</strong><br>
+                    {{ order.email }}<br>
+                    {{ order.phone }}
+                </div>
+            </td>
+            <td width="4%"></td>
+            <td width="48%">
+                <div class="section-header">Shipping Address</div>
+                <div class="info-content">
+                    {{ order.full_address }}<br>
+                    {{ order.city }}, {{ order.state }}<br>
+                    {{ order.country }}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th width="50%">Description</th>
+                <th width="15%" class="text-center">Quantity</th>
+                <th width="15%" class="text-right">Unit Price</th>
+                <th width="20%" class="text-right">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order_detail %}
+            <tr>
+                <td>
+                    <div class="font-bold">{{ item.product.product_name }}</div>
+                    {% if item.color or item.size or item.footsizes %}
+                    <div style="font-size: 8pt; color: #64748b;">
+                        {% if item.color %}Color: {{ item.color }}{% endif %}
+                        {% if item.size %} | Size: {{ item.size }}{% endif %}
+                        {% if item.footsizes %} | Foot Size: {{ item.footsizes }}{% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-right">GHS {{ item.product_price }}</td>
+                <td class="text-right font-bold">GHS {{ item.total_price|default:item.product_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals-container">
+        <table width="100%">
+            <tr>
+                <td width="60%">
+                    <div class="status-container">
+                        {% if order.is_ordered %}
+                        <div class="status-stamp">PAID</div>
+                        {% else %}
+                        <div class="status-stamp status-pending">PAYMENT PENDING</div>
+                        {% endif %}
+                    </div>
+                    <div style="margin-top: 20pt; font-size: 9pt; color: #64748b;">
+                        <strong>Notes:</strong><br>
+                        Thank you for your business. Please keep this receipt for your records.
+                    </div>
+                </td>
+                <td width="40%">
+                    <table class="totals-table">
+                        <tr>
+                            <td class="text-right">Subtotal:</td>
+                            <td class="text-right font-bold">GHS {{ subtotal }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Tax (0%):</td>
+                            <td class="text-right font-bold">GHS {{ order.tax|default:"0.00" }}</td>
+                        </tr>
+                        <tr class="grand-total-row">
+                            <td class="text-right grand-total-label">Total:</td>
+                            <td class="text-right grand-total-value">GHS {{ order.order_total }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="footerContent">
+        LuckyTech Innovation Ground - Delivering Excellence in IT Solutions<br>
+        This is an electronically generated document. No signature required.
+    </div>
+</body>
+</html>

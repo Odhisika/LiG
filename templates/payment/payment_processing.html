@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Processing Payment — LiG Store</title>
+    <title>Payment Received — LiG Store</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -29,19 +29,18 @@
             box-shadow: 0 25px 60px rgba(0,0,0,0.4);
         }
 
-        /* Hubtel orange spinner */
-        .spinner-ring {
-            width: 90px;
-            height: 90px;
-            border: 6px solid rgba(255,102,0,0.2);
-            border-top-color: #FF6600;
+        .status-icon {
+            width: 96px;
+            height: 96px;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
             margin: 0 auto 1.5rem;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,102,0,0.15);
+            border: 1px solid rgba(255,102,0,0.35);
+            color: #FF6600;
+            font-size: 2.5rem;
         }
 
         .amount-badge {
@@ -73,34 +72,27 @@
         .info-row .label { color: rgba(255,255,255,0.6); }
         .info-row .value { color: white; font-weight: 600; }
 
-        .status-dots {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
+        .message-box {
             margin: 1.5rem 0;
+            padding: 1rem 1.1rem;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            text-align: left;
         }
 
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: #FF6600;
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out;
+        .message-box p {
+            margin: 0;
+            color: rgba(255,255,255,0.82);
+            line-height: 1.6;
         }
 
-        .dot:nth-child(1) { animation-delay: 0s; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-            40%            { transform: scale(1);   opacity: 1;   }
-        }
-
-        .countdown {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.4);
-            margin-top: 1rem;
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
         }
 
         .hubtel-badge {
@@ -111,17 +103,46 @@
             font-size: 0.75rem;
             font-weight: 700;
         }
+
+        .btn-ack-primary {
+            background: #FF6600;
+            border: none;
+            color: white;
+            padding: 0.8rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .btn-ack-primary:hover {
+            background: #e55b00;
+            color: white;
+        }
+
+        .btn-ack-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.8rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .btn-ack-secondary:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="processing-card">
 
-        <div class="spinner-ring"></div>
+        <div class="status-icon">
+            <i class="fas fa-check"></i>
+        </div>
 
-        <h2 class="fw-bold mb-1">Confirming Payment</h2>
+        <h2 class="fw-bold mb-1">Thank You For Your Payment</h2>
         <p class="text-white-50 mb-3">
-            We're waiting for <span class="hubtel-badge">Hubtel</span> to confirm your payment.<br>
-            This usually takes a few seconds.
+            Your payment has been received through <span class="hubtel-badge">Hubtel</span>.
         </p>
 
         <div class="amount-badge">
@@ -137,87 +158,26 @@
             <span class="value">{{ payment.ref }}</span>
         </div>
 
-        <div class="status-dots">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
+        <div class="message-box">
+            <p>
+                Your payment status will be updated once it is fully confirmed.
+                You can safely leave this page and check your order details later.
+            </p>
         </div>
 
         <p class="text-white-50 small">
-            <i class="fas fa-lock me-1"></i>
-            Your payment is being securely verified. <strong>Do not close this page.</strong>
+            <i class="fas fa-shield-alt me-1"></i>
+            We will only initiate merchant status checks after the required confirmation window.
         </p>
 
-        <div class="countdown" id="countdown-text">Checking status in <span id="counter">5</span>s…</div>
-
-        <!-- Manual escape hatch — shown after 30s -->
-        <div id="manual-check" style="display:none; margin-top:1.5rem;">
-            <hr style="border-color:rgba(255,255,255,0.1);">
-            <p class="text-white-50 small">Taking longer than expected?</p>
-            <a href="{% url 'verify_payment' %}?clientReference={{ payment.ref }}"
-               class="btn btn-outline-light btn-sm px-4">
-                <i class="fas fa-sync-alt me-1"></i> Check Payment Status Now
+        <div class="actions">
+            <a href="{% url 'order_detail' order.order_number %}" class="btn btn-ack-primary">
+                <i class="fas fa-receipt me-2"></i>View Order
+            </a>
+            <a href="/" class="btn btn-ack-secondary">
+                <i class="fas fa-home me-2"></i>Back To Home
             </a>
         </div>
     </div>
-
-    <script>
-    (function () {
-        const paymentRef   = "{{ payment.ref }}";
-        const pollUrl      = "{% url 'payment_status' payment.id %}";
-        const verifyUrl    = "{% url 'verify_payment' %}?clientReference=" + encodeURIComponent(paymentRef);
-        const POLL_SEC     = 3;    // poll every 3 seconds
-        const SHOW_BTN_SEC = 30;   // show manual button after 30 seconds
-        const MAX_SEC      = 90;   // auto-redirect after 90 seconds
-        let elapsed    = 0;
-        let countdownVal = POLL_SEC;
-        const counterEl  = document.getElementById("counter");
-        const manualEl   = document.getElementById("manual-check");
-
-        function goVerify() {
-            window.location.href = verifyUrl;
-        }
-
-        function poll() {
-            fetch(pollUrl, { credentials: "same-origin" })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success || data.status === "successful") {
-                        // Payment confirmed — go show success page
-                        goVerify();
-                    } else if (data.status === "failed") {
-                        goVerify();
-                    }
-                })
-                .catch(() => { /* network hiccup — keep polling */ });
-        }
-
-        const ticker = setInterval(() => {
-            elapsed++;
-            countdownVal--;
-            counterEl.textContent = countdownVal;
-
-            // Show manual button after 30s
-            if (elapsed >= SHOW_BTN_SEC && manualEl.style.display === "none") {
-                manualEl.style.display = "block";
-            }
-
-            // Auto-redirect after 90s regardless
-            if (elapsed >= MAX_SEC) {
-                clearInterval(ticker);
-                goVerify();
-                return;
-            }
-
-            if (countdownVal <= 0) {
-                countdownVal = POLL_SEC;
-                poll();
-            }
-        }, 1000);
-
-        // First poll immediately on page load
-        poll();
-    })();
-    </script>
 </body>
 </html>

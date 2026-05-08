@@ -12,6 +12,9 @@ from cart.models import CartItem
 from .forms import OrderForm
 from .models import Order, OrderProduct, PaymentProof
 from django.contrib import messages
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+from io import BytesIO
 
 
 @login_required
@@ -157,3 +160,37 @@ def send_order_invoice(user, order, order_detail, subtotal):
     email = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
     email.attach_alternative(html_content, "text/html")
     email.send()
+
+@login_required
+def generate_invoice_pdf(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number)
+    
+    # Security check: Ensure the order belongs to the user or user is staff
+    if order.user != request.user and not request.user.is_staff:
+        messages.error(request, "You do not have permission to view this invoice.")
+        return redirect('dashboard')
+
+    order_detail = OrderProduct.objects.filter(order=order)
+    subtotal = sum(item.product_price * item.quantity for item in order_detail)
+
+    context = {
+        'order': order,
+        'order_detail': order_detail,
+        'subtotal': subtotal,
+    }
+    
+    # Render template to HTML string
+    html_string = render_to_string('orders/invoice_pdf.html', context)
+    
+    # Create a file-like buffer to receive PDF data
+    result = BytesIO()
+    
+    # Convert HTML to PDF
+    pdf = pisa.pisaDocument(BytesIO(html_string.encode("UTF-8")), result)
+    
+    if not pdf.err:
+        response = HttpResponse(result.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Invoice_{order_number}.pdf"'
+        return response
+    
+    return HttpResponse("Error generating PDF", status=500)
