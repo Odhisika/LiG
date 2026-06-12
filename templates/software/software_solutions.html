@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
+
+<style>
+  .software-hero {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 50%, #1a3a5c 100%);
+    padding: 7rem 0 5rem;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  .software-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -15%;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(66,133,244,0.15) 0%, transparent 70%);
+    z-index: 0;
+  }
+  .software-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(52,168,83,0.1) 0%, transparent 70%);
+    z-index: 0;
+  }
+  .software-hero .container {
+    position: relative;
+    z-index: 1;
+  }
+  .software-hero .hero-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -1.5px;
+    margin-bottom: 1.25rem;
+    line-height: 1.1;
+  }
+  .software-hero .hero-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.75);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  .software-hero .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.5rem 1.5rem;
+    border-radius: 100px;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.5px;
+  }
+
+  .software-card {
+    background: #ffffff;
+    border: 1px solid #f1f3f4;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .software-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.06), 0 4px 8px rgba(0,0,0,0.04);
+  }
+  .software-card .card-img {
+    height: 200px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #f1f3f4;
+  }
+  .software-card .card-img img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .software-card .card-body {
+    padding: 1.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .software-card .card-body h4 {
+    font-weight: 600;
+    color: #202124;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+  }
+  .software-card .card-body .version-tag {
+    font-size: 0.8rem;
+    color: #5f6368;
+    margin-bottom: 0.75rem;
+  }
+  .software-card .card-body p {
+    color: #5f6368;
+    line-height: 1.6;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+  .software-card .card-footer {
+    padding: 1rem 1.75rem 1.75rem;
+    border: none;
+    background: transparent;
+  }
+
+  .platform-badge {
+    display: inline-block;
+    background: #f1f3f4;
+    color: #5f6368;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin: 0.15rem;
+  }
+
+  .cta-section {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 100%);
+    padding: 5rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(66,133,244,0.12) 0%, transparent 70%);
+  }
+  .cta-section h2 {
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .cta-section p {
+    color: rgba(255,255,255,0.75);
+    max-width: 550px;
+    margin: 0 auto 2rem;
+    position: relative;
+  }
+
+  .btn-software {
+    background-color: #25D366;
+    color: #ffffff;
+    border-radius: 24px;
+    padding: 0.75rem 2.5rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    border: none;
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
+    transition: all 0.2s ease;
+    display: inline-block;
+    text-decoration: none;
+  }
+  .btn-software:hover {
+    background-color: #1da851;
+    color: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+    transform: translateY(-1px);
+  }
+
+  .btn-software-outline {
+    background-color: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 24px;
+    padding: 0.75rem 2.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+    text-decoration: none;
+    margin-left: 0.75rem;
+  }
+  .btn-software-outline:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+    color: #ffffff;
+  }
+
+  @media (max-width: 576px) {
+    .btn-software-outline {
+      margin-left: 0;
+      margin-top: 0.75rem;
+    }
+  }
+</style>
+
+<section class="software-hero">
+  <div class="container">
+    <span class="hero-badge">
+      <i class="fas fa-cube me-2"></i>Software Solutions
+    </span>
+    <h1 class="hero-title">{{ hero_title }}</h1>
+    <p class="hero-subtitle">{{ hero_subtitle }}</p>
+    <div>
+      <a href="#software-listing" class="btn-premium">Browse Software</a>
+      <a href="https://wa.me/+233591884422" class="btn-software-outline" target="_blank">
+        <i class="fab fa-whatsapp me-2"></i>Talk to an Expert
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="premium-bg-white py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="premium-section-title">{{ page_title }}</h2>
+      <p class="premium-section-subtitle">{{ page_subtitle }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="premium-bg-light py-5" id="software-listing">
+  <div class="container pb-5">
+    <div class="text-center mb-5">
+      <h2 class="premium-section-title">Available Solutions</h2>
+      <p class="premium-section-subtitle">Browse our software catalogue. Each solution can be deployed and tailored to your environment.</p>
+    </div>
+
+    <div class="row g-4">
+      {% for product in products %}
+      <div class="col-lg-4 col-md-6 d-flex">
+        <div class="software-card w-100">
+          <div class="card-img">
+            <img src="{{ product.primary_image_url }}"
+                 alt="{{ product.product_name }}"
+                 loading="lazy">
+          </div>
+          <div class="card-body">
+            <h4>{{ product.product_name }}</h4>
+            <div class="version-tag">
+              {% if product.version %}v{{ product.version }}{% endif %}
+              {% if product.developer %} &mdash; {{ product.developer }}{% endif %}
+            </div>
+            <p>{{ product.short_description|default:product.description|truncatewords:30 }}</p>
+            {% if product.platforms_list %}
+            <div class="mt-auto mb-3">
+              {% for platform in product.platforms_list %}
+              <span class="platform-badge">{{ platform }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          <div class="card-footer">
+            <a href="https://wa.me/+233591884422?text=I'm%20interested%20in%20{{ product.product_name|urlencode }}%20training%20and%20setup"
+               class="btn-software btn-sm w-100 text-center" target="_blank">
+              <i class="fab fa-whatsapp me-2"></i>Request Training &amp; Setup
+            </a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center py-5">
+        <i class="fas {{ empty_icon }} fa-3x text-muted mb-3"></i>
+        <p class="h5 text-muted">{{ empty_message }}</p>
+        <p class="text-muted mt-2">In the meantime, feel free to <a href="https://wa.me/+233591884422" target="_blank">contact us</a> for more information.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+    <h2>Not Sure Which Software You Need?</h2>
+    <p>Our consultants will help you evaluate, select, and deploy the right software for your business — with full training and ongoing support.</p>
+    <div>
+      <a href="https://wa.me/+233591884422" class="btn-software btn-lg" target="_blank">
+        <i class="fab fa-whatsapp me-2"></i>Chat with Us on WhatsApp
+      </a>
+      <a href="tel:+233591884422" class="btn-software-outline">
+        <i class="fas fa-phone me-2"></i>Call +233 59 188 4422
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

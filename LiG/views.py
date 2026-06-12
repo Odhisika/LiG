@@ -283,17 +283,22 @@ def _render_software_collection(
     empty_message,
     empty_icon,
 ):
+    for product in products:
+        product.platforms_list = (
+            [p.strip() for p in product.platforms.split(',') if p.strip()]
+            if product.platforms else []
+        )
+
     context = {
         'products': products,
         'page_title': page_title,
         'page_subtitle': page_subtitle,
         'hero_title': hero_title,
         'hero_subtitle': hero_subtitle,
-        'hero_alt': page_title,
         'empty_message': empty_message,
         'empty_icon': empty_icon,
     }
-    return render(request, 'software/software_collection.html', context)
+    return render(request, 'software/software_solutions.html', context)
 
 
 def software_all(request):
