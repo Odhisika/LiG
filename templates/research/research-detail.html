@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
 {% load static %}
+
+{% block title %}{{ blog.title }} | LiG Research{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ blog.meta_description|default:blog.content|truncatewords:25 }}">
+{% endblock %}
+
 {% block content %}
 
 
@@ -51,7 +58,7 @@
     
     <!-- Article Content -->
     <div class="article-content">
-        {{ blog.content|safe }}
+        {{ blog.sanitized_content }}
     </div>
     
     <!-- Article Footer -->

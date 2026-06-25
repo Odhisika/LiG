@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}{{ page_title }} | LiG{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ page_subtitle }}">
+{% endblock %}
+
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
 

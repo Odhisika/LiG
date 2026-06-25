@@ -3,8 +3,10 @@
 {% load humanize %}
 {% load custom_filters %}
 
+{% block canonical_url %}{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url }}{% endblock %}
+
 {% block meta %}
-<meta name="description" content="{{ single_product.short_description|default:single_product.description|truncatewords:25 }}">
+<meta name="description" content="{{ single_product.meta_description|default:single_product.short_description|default:single_product.description|truncatewords:25 }}">
 <meta name="keywords" content="{{ single_product.tags }}">
 <meta property="og:type" content="product">
 <meta property="og:title" content="{{ single_product.product_name }} | LiG">
@@ -28,7 +30,49 @@
 <meta name="twitter:image:alt" content="{{ single_product.product_name }}">
 {% endblock %}
 
-{% block title %}{{ single_product.product_name }} | LiG - {{ single_product.price|floatformat:0 }} GHS{% endblock %}
+{% block title %}{{ single_product.meta_title|default:single_product.product_name }} | LiG - {{ single_product.price|floatformat:0 }} GHS{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "{{ single_product.product_name|escapejs }}",
+    "image": "{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}",
+    "description": "{{ single_product.short_description|default:single_product.description|truncatewords:30|escapejs }}",
+    "sku": "{{ single_product.sku }}",
+    {% if single_product.meta_title %}"headline": "{{ single_product.meta_title|escapejs }}",{% endif %}
+    "offers": {
+        "@type": "Offer",
+        "url": "{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url }}",
+        "priceCurrency": "GHS",
+        "price": "{{ single_product.price }}",
+        "availability": "{% if single_product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+        "itemCondition": "{% if single_product.condition == 'slightly_used' %}https://schema.org/UsedCondition{% else %}https://schema.org/NewCondition{% endif %}"
+    }
+    {% if single_product.average_review %},
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ single_product.average_review }}",
+        "reviewCount": "{{ single_product.count_review }}"
+    }
+    {% endif %}
+}
+</script>
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
+        {"@type": "ListItem", "position": 2, "name": "Store", "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'store' %}"},
+        {"@type": "ListItem", "position": 3, "name": "{{ single_product.category.category_name|escapejs }}", "item": "{{ request.scheme }}://{{ request.get_host }}{{ single_product.category.get_url }}"},
+        {"@type": "ListItem", "position": 4, "name": "{{ single_product.product_name|escapejs }}", "item": "{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url }}"}
+    ]
+}
+</script>
+{% endblock %}
 
 
 

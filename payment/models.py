@@ -4,8 +4,11 @@ from django.conf import settings
 import secrets
 import uuid
 from datetime import datetime
+import logging
 from .paystack import Paystack
 from .hubtel import Hubtel
+
+logger = logging.getLogger(__name__)
 
 
 class Payment(models.Model):
@@ -84,9 +87,7 @@ class Payment(models.Model):
             else:
                 return self._verify_paystack_payment()
         except Exception as e:
-            print(f"Error verifying payment {self.ref}: {str(e)}")
-            import traceback
-            print(f"Full traceback: {traceback.format_exc()}")
+            logger.error(f"Error verifying payment %s: %s", self.ref, str(e), exc_info=True)
             self.status = 'failed'
             self.save()
             return False
@@ -138,7 +139,7 @@ class Payment(models.Model):
                 return False
                 
         except Exception as e:
-            print(f"Paystack verification error: {str(e)}")
+            logger.error("Paystack verification error: %s", str(e), exc_info=True)
             self.status = 'failed'
             self.save()
             return False

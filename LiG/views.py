@@ -567,7 +567,7 @@ def projects(request):
     return render(request, "research/projects.html", {"form": form})
 
 
-def seurity(request):
+def security(request):
     try:
         research_type = ResearchTypes.objects.get(slug="security")
         blogs = BlogModel.objects.filter(research_type=research_type)
@@ -607,11 +607,17 @@ def networking(request):
     return render(request, 'research/networking.html', context)
 
 
-def hadware(request):
+def handler404(request, exception):
+    return render(request, '404.html', status=404)
+
+def handler500(request):
+    return render(request, '500.html', status=500)
+
+def hardware(request):
     try:
         research_type = ResearchTypes.objects.get(slug="hardware")
         blogs = BlogModel.objects.filter(research_type=research_type)
     except ResearchTypes.DoesNotExist:
         blogs = []
     context = {'blogs': blogs}
-    return render(request, 'research/hadware.html', context)
+    return render(request, 'research/hardware.html', context)

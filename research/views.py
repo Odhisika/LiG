@@ -3,6 +3,7 @@ from django.utils.safestring import mark_safe
 from .form import *
 from .models import BlogModel
 from django.db.models import Q
+import bleach
 
 
 
@@ -38,6 +39,27 @@ def search1(request):
 
 def research_detail(request, slug):
     blog = get_object_or_404(BlogModel, slug=slug)
+    allowed_tags = ['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'a', 'ul', 'ol', 'li',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'code', 'blockquote',
+                    'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'div',
+                    'span', 'sup', 'sub', 'figure', 'figcaption', 'video', 'source',
+                    'iframe']
+    allowed_attrs = {
+        'a': ['href', 'title', 'rel', 'target'],
+        'img': ['src', 'alt', 'width', 'height', 'class'],
+        'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
+        'video': ['src', 'controls', 'width', 'height'],
+        'source': ['src', 'type'],
+        '*': ['class', 'id', 'style'],
+    }
+    allowed_protocols = ['http', 'https', 'mailto']
+    blog.sanitized_content = mark_safe(bleach.clean(
+        blog.content,
+        tags=allowed_tags,
+        attributes=allowed_attrs,
+        protocols=allowed_protocols,
+        strip=True
+    ))
     return render(request, "research/research-detail.html", {"blog": blog})
 
 
@@ -50,9 +72,8 @@ def see_blog(request):
         blog_objs = BlogModel.objects.filter(user=request.user)
         context['blog_objs'] = blog_objs
     except Exception as e:
-        print(e)
+        pass
 
-    print(context)
     return render(request, 'see_blog.html', context)
 
 
@@ -61,23 +82,20 @@ def add_blog(request):
     try:
         if request.method == 'POST':
             form = BlogForm(request.POST)
-            print(request.FILES)
             image = request.FILES.get('image', '')
             title = request.POST.get('title')
             user = request.user
 
             if form.is_valid():
-                print('Valid')
                 content = form.cleaned_data['content']
 
             blog_obj = BlogModel.objects.create(
                 user=user, title=title,
                 content=content, image=image
             )
-            print(blog_obj)
             return redirect('/add-blog/')
     except Exception as e:
-        print(e)
+        pass
 
     return render(request, 'add_blog.html', context)
 
@@ -95,7 +113,6 @@ def blog_update(request, slug):
         form = BlogForm(initial=initial_dict)
         if request.method == 'POST':
             form = BlogForm(request.POST)
-            print(request.FILES)
             image = request.FILES['image']
             title = request.POST.get('title')
             user = request.user
@@ -111,7 +128,7 @@ def blog_update(request, slug):
         context['blog_obj'] = blog_obj
         context['form'] = form
     except Exception as e:
-        print(e)
+        pass
 
     return render(request, 'update_blog.html', context)
 
@@ -124,7 +141,7 @@ def blog_delete(request, id):
             blog_obj.delete()
 
     except Exception as e:
-        print(e)
+        pass
 
     return redirect('/see-blog/')
 

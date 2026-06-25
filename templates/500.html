@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Server Error | LiG{% endblock %}
+
+{% block meta %}
+<meta name="description" content="We are experiencing a temporary issue. Please try again later.">
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+<section class="error-section py-5">
+    <div class="container text-center py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="display-1 fw-bold text-danger">500</h1>
+                <h2 class="mb-3">Server Error</h2>
+                <p class="text-muted mb-4">We're experiencing a temporary issue. Please try again later. If the problem persists, contact us.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

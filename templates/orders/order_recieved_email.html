@@ -1,9 +1,5 @@
-{% autoescape off %}
+Hi {{ user.first_name }},
 
-Hi {{user.first_name}},
+YOUR ORDER HAS BEEN RECEIVED
 
-YOUR ORDER HAS BEEN RECIEVED
-
-Order Number: {{order.order_number}}
-
-{% endautoescape %}
+Order Number: {{ order.order_number }}

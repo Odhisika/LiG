@@ -20,11 +20,13 @@ from . import views
 from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.sitemaps.views import sitemap
-from store.sitemaps import ProductSitemap
+from store.sitemaps import ProductSitemap, CategorySitemap, StaticViewSitemap
 from django.views.generic import TemplateView
 
 sitemaps = {
     'products': ProductSitemap,
+    'categories': CategorySitemap,
+    'pages': StaticViewSitemap,
 }
 
 
@@ -96,8 +98,10 @@ urlpatterns = [
    
     # Navigation Research Hub links
     path('research/projects/', views.projects, name='projects'),
-    path('research/hadware/', views.hadware, name='hadware'),
-    path('research/security/', views.seurity, name='security'),
+    path('research/hardware/', views.hardware, name='hardware'),
+    path('research/hadware/', views.hardware, name='hadware'),
+    path('research/security/', views.security, name='security'),
+    path('research/seurity/', views.security, name='seurity'),
     path('research/networking/', views.networking, name='networking'),
     path('research/ai/', views.ai, name='ai'),
     path('research/cloud/', views.cloud, name='cloud'),
@@ -117,6 +121,10 @@ urlpatterns = [
 
 
 ] 
+# Error handlers
+handler404 = 'LiG.views.handler404'
+handler500 = 'LiG.views.handler500'
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

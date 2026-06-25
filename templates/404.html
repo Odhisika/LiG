@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Page Not Found | LiG{% endblock %}
+
+{% block meta %}
+<meta name="description" content="The page you are looking for does not exist. Browse LiG for laptops, computers, software, and IT solutions in Ghana.">
+<meta name="robots" content="noindex, follow">
+{% endblock %}
+
+{% block content %}
+<section class="error-section py-5">
+    <div class="container text-center py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="display-1 fw-bold text-primary">404</h1>
+                <h2 class="mb-3">Page Not Found</h2>
+                <p class="text-muted mb-4">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

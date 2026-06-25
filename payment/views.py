@@ -13,6 +13,8 @@ from datetime import timedelta
 import json
 import logging
 import traceback
+import hashlib
+import hmac
 from cart.views import _cart_id
 from .models import Payment
 from orders.models import Order
@@ -129,7 +131,6 @@ def initialize_payment(request, order_id, gateway='hubtel'):
             
     except Exception as e:
         logger.error(f"Error initializing payment for order {order_id}: {str(e)}")
-        print(f"Full traceback in initialize_payment: {traceback.format_exc()}")
         messages.error(request, "An error occurred while processing your payment. Please try again.")
         return redirect('cart')
 
@@ -377,8 +378,16 @@ def paystack_webhook(request):
         if not signature:
             return HttpResponse("No signature", status=400)
         
-        # Verify webhook signature (implement based on Paystack docs)
-        # This is important for security
+        # Verify webhook signature using HMAC-SHA512
+        expected_signature = hmac.new(
+            settings.PAYSTACK_SECRET_KEY.encode('utf-8'),
+            payload,
+            hashlib.sha512
+        ).hexdigest()
+        
+        if not hmac.compare_digest(signature, expected_signature):
+            logger.warning("Invalid Paystack webhook signature")
+            return HttpResponse("Invalid signature", status=400)
         
         data = json.loads(payload)
         event = data.get('event')
@@ -457,6 +466,20 @@ def payment_detail(request, payment_id):
     return render(request, 'payment/payment_detail.html', context)
 
 
+def _redact_sensitive(data, sensitive_keys=None):
+    """Redact sensitive fields from data for logging."""
+    if sensitive_keys is None:
+        sensitive_keys = {'msisdn', 'customerMsisdn', 'CustomerMsisdn', 'email', 
+                         'CustomerEmail', 'customerEmail', 'phone', 'Phone',
+                         'last4', 'Last4', 'card_number', 'cvv'}
+    if isinstance(data, dict):
+        return {k: ('[REDACTED]' if k in sensitive_keys else _redact_sensitive(v, sensitive_keys)) 
+                for k, v in data.items()}
+    if isinstance(data, list):
+        return [_redact_sensitive(item, sensitive_keys) for item in data]
+    return data
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def hubtel_webhook(request):
@@ -467,7 +490,7 @@ def hubtel_webhook(request):
     """
     try:
         raw_body = request.body.decode('utf-8')
-        logger.info(f"Hubtel webhook RAW body: {raw_body[:1000]}")
+        logger.debug(f"Hubtel webhook received")
 
         content_type = request.headers.get('Content-Type', '')
         if 'application/json' in content_type:
@@ -475,7 +498,7 @@ def hubtel_webhook(request):
         else:
             data = QueryDict(raw_body).dict()
 
-        logger.info(f"Hubtel webhook parsed: {data}")
+        logger.info(f"Hubtel webhook parsed: {_redact_sensitive(data)}")
 
         # Hubtel may nest data inside a 'Data' or 'data' key
         payload = data.get('Data') or data.get('data') or data

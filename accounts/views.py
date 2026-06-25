@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from datetime import datetime, timedelta
+from django_ratelimit.decorators import ratelimit
 
 
 from accounts.forms import RegistrationForm, UserForm, UserProfileForm
@@ -61,6 +62,7 @@ def transfer_guest_cart_to_user(request, user):
 
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -95,6 +97,7 @@ def register(request):
             context = {
                 'user': user,
                 'domain': current_site.domain,
+                'protocol': request.scheme,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
             }
@@ -108,7 +111,7 @@ def register(request):
                 email_message.attach_alternative(html_content, "text/html")
                 email_message.send()
             except Exception as e:
-                print(f"Email sending failed: {e}")  # Debugging
+                pass
 
             # Redirect to login with verification message
             redirect_url = reverse('login') + f"?command=verification&email={email}"
@@ -122,6 +125,7 @@ def register(request):
 
 
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def login(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -185,7 +189,6 @@ def dashboard(request):
     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
     user_profile, created = UserProfile.objects.get_or_create(user=request.user)
 
-    print(f"Orders count for {request.user}: {orders.count()}")
     
     context = {
         'orders_count': orders.count(),
@@ -195,33 +198,33 @@ def dashboard(request):
     return render(request, 'accounts/dashboard.html', context)
 
 
+@ratelimit(key='ip', rate='3/m', method='POST', block=True)
 def forgot_password(request):
     if request.method == 'POST':
         email = request.POST['email']
-        try:
-            user = Account.objects.get(email=email)
+        user = Account.objects.filter(email=email).first()
+        
+        # Always show the same message to prevent user enumeration
+        if user:
             current_site = get_current_site(request)
             mail_subject = 'Reset Your Password'
 
             context = {
                 'user': user,
                 'domain': current_site.domain,
+                'protocol': request.scheme,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
             }
 
-            # Render both templates
             text_content = render_to_string('accounts/password_reset_email.txt', context)
             html_content = render_to_string('accounts/reset_password_email.html', context)
 
-            # Send multi-part email
             email_message = EmailMultiAlternatives(mail_subject, text_content, to=[email])
             email_message.attach_alternative(html_content, "text/html")
             email_message.send()
-
-            messages.success(request, 'Password reset email sent.')
-        except Account.DoesNotExist:
-            messages.error(request, 'Account does not exist!')
+        
+        messages.success(request, 'If an account with that email exists, we have sent a password reset link.')
 
     return render(request, 'accounts/forgotPassword.html')
 
@@ -235,6 +238,8 @@ def reset_password_validate(request, uidb64, token):
     
     if user and default_token_generator.check_token(user, token):
         request.session['uid'] = uid
+        request.session['reset_token'] = token
+        request.session['uidb64'] = uidb64
         messages.success(request, 'Please reset your password')
         return redirect('resetPassword')
     else:
@@ -249,9 +254,32 @@ def reset_password(request):
         
         if password == confirm_password:
             uid = request.session.get('uid')
-            user = Account.objects.get(pk=uid)
+            token = request.session.get('reset_token')
+            uidb64 = request.session.get('uidb64')
+            
+            if not uid or not token or not uidb64:
+                messages.error(request, 'Invalid password reset session. Please request a new reset link.')
+                return redirect('login')
+            
+            try:
+                user = Account.objects.get(pk=uid)
+            except Account.DoesNotExist:
+                messages.error(request, 'Account not found. Please request a new reset link.')
+                return redirect('login')
+            
+            # Re-validate the token
+            if not default_token_generator.check_token(user, token):
+                messages.error(request, 'Reset link has expired. Please request a new one.')
+                return redirect('login')
+            
             user.set_password(password)
             user.save()
+            
+            # Clear session data
+            request.session.pop('uid', None)
+            request.session.pop('reset_token', None)
+            request.session.pop('uidb64', None)
+            
             messages.success(request, 'Password reset successful')
             return redirect('login')
         else:

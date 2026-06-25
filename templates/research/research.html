@@ -1,24 +1,13 @@
 {% extends "base.html" %}
 
+{% block title %}Research Everything IT | LiG{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Explore IT research at LiG. Cutting-edge technology research, innovations, and analysis from industry experts in Ghana.">
+{% endblock %}
+
 {% block content %}
 
-
-    
-    
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research Everything IT</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-</head>
-<body>
     <!-- Header Banner with Search -->
     <div class="header-banner">
         <div class="container">
@@ -43,7 +32,7 @@
                 <div class="category-icon">AI</div>
                 <span>Artificial Intelligence</span>
             </a>
-            <a href="{% url 'hadware' %}" class="category-item">
+            <a href="{% url 'hardware' %}" class="category-item">
                 <div class="category-icon">H</div>
                 <span>Hardware</span>
             </a>
@@ -109,8 +98,4 @@
             </div>
         </div>
     </div>
-</body>
-</html>
-
-
 {% endblock %}

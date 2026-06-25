@@ -93,14 +93,11 @@ def product_detail(request, category_slug, product_slug):
 
 
 def search(request):
-    print("Search function triggered")  
-
     products = None
     product_count = 0
 
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
-        print(f"Keyword searched: {keyword}")  
 
         if keyword:
             products = Product.objects.order_by('-created_date').filter(

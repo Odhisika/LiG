@@ -12,7 +12,7 @@ Thanks for signing up! Please confirm your email address by clicking the button 
 {% block button %}
 <tr>
   <td align="center" style="padding:20px;">
-    <a href="http://{{ domain }}{% url 'activate' uidb64=uid token=token %}"
+    <a href="{{ protocol }}://{{ domain }}{% url 'activate' uidb64=uid token=token %}"
        style="background:#007bff; color:#fff; text-decoration:none;
               padding:15px 30px; border-radius:5px; font-size:16px; display:inline-block;">
       Confirm Your Account

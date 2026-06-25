@@ -3,6 +3,22 @@
 {% load humanize %}
 {% load custom_filters %}
 
+{% block title %}
+{% if 'search' in request.path %}
+Search Results | LiG Store
+{% else %}
+Store | LiG - Computers, Software & Accessories in Ghana
+{% endif %}
+{% endblock %}
+
+{% block meta %}
+{% if 'search' in request.path %}
+<meta name="description" content="Search results for products at LiG Store. Find laptops, computers, software, and accessories in Ghana.">
+{% else %}
+<meta name="description" content="Browse LiG Store for laptops, desktop computers, software, accessories, and IT solutions in Ghana. Premium products at exceptional quality.">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section">

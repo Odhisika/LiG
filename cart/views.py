@@ -3,9 +3,7 @@ from store.models import Product, ComputerProduct, SoftwareProduct, PeripheralPr
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
-
-# Create your views here.
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 def _cart_id(request):
     cart = request.session.session_key
@@ -51,7 +49,6 @@ def transfer_guest_cart_to_user(request, user):
 def add_cart(request, product_id):
     current_user = request.user
 
-    # Try to get the product from any subclass
     product = None
     for model in [ComputerProduct, SoftwareProduct, PeripheralProduct, NetworkingProduct, SecurityCameraProduct]:
         try:
@@ -61,49 +58,47 @@ def add_cart(request, product_id):
             continue
 
     if not product:
-        return redirect('cart')  # Handle case where product doesn't exist
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Product not found'}, status=404)
+        return redirect(request.META.get('HTTP_REFERER', 'cart'))
 
-    # If user is authenticated
     if current_user.is_authenticated:
         is_cart_item_exists = CartItem.objects.filter(product=product, user=current_user).exists()
-        
         if is_cart_item_exists:
             cart_item = CartItem.objects.get(product=product, user=current_user)
             cart_item.quantity += 1
             cart_item.save()
         else:
-            cart_item = CartItem.objects.create(
-                product=product,
-                quantity=1,
-                user=current_user,
-            )
-            cart_item.save()
-        
-        return redirect('cart')
-
-    # If user is not authenticated (guest cart)
+            CartItem.objects.create(product=product, quantity=1, user=current_user)
     else:
         try:
-            cart = Cart.objects.get(cart_id=_cart_id(request))  # Get cart using session cart_id
+            cart = Cart.objects.get(cart_id=_cart_id(request))
         except Cart.DoesNotExist:
             cart = Cart.objects.create(cart_id=_cart_id(request))
-        cart.save()
-
+            cart.save()
         is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
-
         if is_cart_item_exists:
             cart_item = CartItem.objects.get(product=product, cart=cart)
             cart_item.quantity += 1
             cart_item.save()
         else:
-            cart_item = CartItem.objects.create(
-                product=product,
-                quantity=1,
-                cart=cart,
-            )
-            cart_item.save()
-        
-        return redirect('cart')
+            CartItem.objects.create(product=product, quantity=1, cart=cart)
+
+    # Count total cart items for the response
+    if current_user.is_authenticated:
+        cart_items = CartItem.objects.filter(user=current_user)
+    else:
+        try:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_items = CartItem.objects.filter(cart=cart)
+        except Cart.DoesNotExist:
+            cart_items = []
+    cart_count = sum(item.quantity for item in cart_items)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'cart_count': cart_count, 'in_cart': True})
+
+    return redirect(request.META.get('HTTP_REFERER', 'cart'))
 
 
 

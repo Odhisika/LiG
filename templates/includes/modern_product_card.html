@@ -70,9 +70,15 @@
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1">
             {% if product.stock > 0 %}
-            <button type="submit" class="btn btn-primary btn-add-cart w-100">
-                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-            </button>
+                {% if product.id in cart_product_ids %}
+                <button type="submit" class="btn btn-success btn-add-cart w-100">
+                    <i class="fas fa-check me-2"></i>Added ✓
+                </button>
+                {% else %}
+                <button type="submit" class="btn btn-primary btn-add-cart w-100">
+                    <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                </button>
+                {% endif %}
             {% else %}
             <button type="button" class="btn btn-outline-secondary w-100" disabled>
                 Out of Stock
@@ -81,3 +87,4 @@
         </form>
     </div>
 </div>
+
