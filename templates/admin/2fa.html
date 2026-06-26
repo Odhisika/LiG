@@ -1,0 +1,40 @@
+{% extends "admin/login.html" %}
+{% load i18n jazzmin %}
+{% get_jazzmin_settings request as jazzmin_settings %}
+{% get_jazzmin_ui_tweaks as jazzmin_ui %}
+
+{% block content %}
+<p class="login-box-msg">Two-Factor Authentication</p>
+<p style="text-align:center;margin-bottom:1rem;">
+    Enter the 6-digit code from your authenticator app.
+</p>
+<form action="{% url 'admin:2fa' %}" method="post">
+    {% csrf_token %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="callout callout-{{ message.tags }}">
+                <p>{{ message }}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="input-group mb-3">
+        <input type="text" name="code" class="form-control" placeholder="000000" 
+               inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" required>
+        <div class="input-group-append">
+            <div class="input-group-text">
+                <span class="fas fa-shield-alt"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <button type="submit" class="btn {{ jazzmin_ui.button_classes.primary }} btn-block">
+                {% trans "Verify" %}
+            </button>
+        </div>
+    </div>
+    <div class="mt-3" style="text-align:center;">
+        <a href="{% url 'admin:login' %}">{% trans "Back to login" %}</a>
+    </div>
+</form>
+{% endblock %}

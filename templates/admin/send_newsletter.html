@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Send Newsletter</h1>
+<p style="color:#666;">This will send an email to <strong>{{ subscriber_count }}</strong> active subscriber{{ subscriber_count|pluralize }}.</p>
+<form method="post">
+  {% csrf_token %}
+  {% if ids %}<input type="hidden" name="ids" value="{{ ids }}">{% endif %}
+  <fieldset style="border:1px solid #ddd; padding:20px; margin-bottom:20px;">
+    <legend style="padding:0 10px; font-weight:bold;">Email Content</legend>
+
+    <p>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Subject</label>
+      <input type="text" name="subject" value="{{ subject }}" required
+             style="width:100%; max-width:600px; padding:8px; border:1px solid #ccc;">
+    </p>
+
+    <p>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Body (HTML)</label>
+      <textarea name="body" rows="15" required
+                style="width:100%; max-width:600px; padding:8px; border:1px solid #ccc; font-family:monospace;">{{ body }}</textarea>
+    </p>
+
+    <p>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Button Text (optional)</label>
+      <input type="text" name="button_text" value="{{ button_text }}"
+             style="width:100%; max-width:600px; padding:8px; border:1px solid #ccc;">
+    </p>
+
+    <p>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Button URL (optional)</label>
+      <input type="url" name="button_url" value="{{ button_url }}"
+             style="width:100%; max-width:600px; padding:8px; border:1px solid #ccc;">
+    </p>
+  </fieldset>
+
+  <fieldset style="border:1px solid #ddd; padding:20px; margin-bottom:20px;">
+    <legend style="padding:0 10px; font-weight:bold;">Featured Products (optional)</legend>
+    <p style="color:#666; margin-top:0;">Select products to showcase in the email. Hold Ctrl/Cmd to select multiple.</p>
+    <select name="product_ids" multiple style="width:100%; max-width:600px; height:200px; padding:8px; border:1px solid #ccc;">
+      {% for p in products %}
+      <option value="{{ p.id }}" {% if p.id in selected_product_ids %}selected{% endif %}>
+        {{ p.product_name }} — GH¢{{ p.price }}
+      </option>
+      {% endfor %}
+    </select>
+  </fieldset>
+
+  <fieldset style="border:1px solid #ddd; padding:20px; margin-bottom:20px;">
+    <legend style="padding:0 10px; font-weight:bold;">Actions</legend>
+    <button type="submit" name="action" value="send"
+            style="padding:10px 25px; background:#1a73e8; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:14px;">
+      Send to all subscribers
+    </button>
+    <button type="submit" name="action" value="test"
+            style="padding:10px 25px; background:#555; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:14px; margin-left:10px;">
+      Send test to me ({{ request.user.email }})
+    </button>
+  </fieldset>
+</form>
+
+<a href="{% url 'admin:accounts_newslettersubscriber_changelist' %}" style="color:#1a73e8;">← Back to subscribers</a>
+{% endblock %}

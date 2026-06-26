@@ -1,0 +1,65 @@
+{% extends "emails/base_email.html" %}
+{% block title %}{{ subject }}{% endblock %}
+{% block header %}{{ subject }}{% endblock %}
+{% block content %}
+{{ body|safe }}
+
+{% if featured_products %}
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr>
+    <td style="padding:10px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          {% for p in featured_products %}
+          <td width="33%" style="padding:10px; vertical-align:top;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eee; border-radius:6px;">
+              <tr>
+                <td align="center" style="padding:10px;">
+                  <img src="{{ p.primary_image_url }}" alt="{{ p.product_name }}"
+                       width="100%" style="max-width:160px; display:block;">
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:0 10px 5px; font-size:14px; font-weight:bold; color:#333;">
+                  {{ p.product_name|truncatechars:40 }}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:0 10px 5px; font-size:14px; color:#1a73e8;">
+                  {% if p.compare_price > p.price %}
+                  <span style="text-decoration:line-through; color:#999; margin-right:5px;">GH¢{{ p.compare_price }}</span>
+                  {% endif %}
+                  <strong>GH¢{{ p.price }}</strong>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:10px;">
+                  <a href="{{ site_url }}{{ p.get_url }}" style="display:inline-block; padding:8px 20px; background:#1a73e8; color:#fff; text-decoration:none; border-radius:4px; font-size:13px;">
+                    View Product
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+          {% if forloop.counter|divisibleby:3 and not forloop.last %}
+        </tr><tr>
+          {% endif %}
+          {% endfor %}
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+{% endif %}
+{% endblock %}
+{% block button %}
+{% if button_url and button_text %}
+<tr>
+  <td align="center" style="padding: 20px;">
+    <a href="{{ button_url }}" style="display:inline-block; padding:12px 30px; background:#1a73e8; color:#fff; text-decoration:none; border-radius:5px; font-size:16px;">
+      {{ button_text }}
+    </a>
+  </td>
+</tr>
+{% endif %}
+{% endblock %}

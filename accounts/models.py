@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from accounts.utils.validators import validate_image
 
 class MyAccountManager(BaseUserManager):
     def create_user(self, first_name, last_name, username, email, password=None):
@@ -72,7 +73,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
     address_line_1 = models.CharField(blank=True, max_length=100)
     address_line_2 = models.CharField(blank=True, max_length=100)
-    profile_picture = models.ImageField(blank=True, upload_to='userprofile')
+    profile_picture = models.ImageField(blank=True, upload_to='userprofile', validators=[validate_image])
     city = models.CharField(blank=True, max_length=20)
     state = models.CharField(blank=True, max_length=20)
     country = models.CharField(blank=True, max_length=20)
@@ -91,4 +92,57 @@ class NewsletterSubscriber(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class Admin2FA(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='two_factor')
+    totp_secret = models.CharField(max_length=64)
+    is_enabled = models.BooleanField(default=False)
+    backup_codes = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.user.email} 2FA'
+
+
+class AuditLog(models.Model):
+    ACTION_CHOICES = [
+        ('LOGIN_SUCCESS', 'Login Successful'),
+        ('LOGIN_FAILED', 'Login Failed'),
+        ('LOGOUT', 'Logout'),
+        ('2FA_SUCCESS', '2FA Successful'),
+        ('2FA_FAILED', '2FA Failed'),
+        ('2FA_ENABLED', '2FA Enabled'),
+        ('2FA_DISABLED', '2FA Disabled'),
+        ('PASSWORD_CHANGE', 'Password Change'),
+        ('PASSWORD_RESET', 'Password Reset'),
+        ('ACCOUNT_CREATE', 'Account Created'),
+        ('ACCOUNT_UPDATE', 'Account Updated'),
+        ('ACCOUNT_DELETE', 'Account Deleted'),
+        ('ADMIN_ACTION', 'Admin Action'),
+        ('ADMIN_LOGIN_SUCCESS', 'Admin Login Successful'),
+        ('ADMIN_LOGIN_FAILED', 'Admin Login Failed'),
+        ('ADMIN_2FA_REQUIRED', 'Admin 2FA Required'),
+        ('SENSITIVE_ACTION', 'Sensitive Action'),
+    ]
+
+    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES, db_index=True)
+    target_model = models.CharField(max_length=100, blank=True)
+    target_id = models.CharField(max_length=50, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    details = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['user', 'action']),
+            models.Index(fields=['timestamp']),
+        ]
+
+    def __str__(self):
+        return f'{self.get_action_display()} - {self.user} @ {self.timestamp}'
 

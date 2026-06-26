@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from froala_editor.fields import FroalaField
 from category.models import ResearchTypes
 from accounts.models import Account
+from accounts.utils.validators import validate_image
 from .helpers import *
 
 
@@ -14,7 +15,7 @@ class BlogModel(models.Model):
     research_type = models.ForeignKey(
     'category.ResearchTypes', on_delete=models.CASCADE, )
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='blog')
+    image = models.ImageField(upload_to='blog', validators=[validate_image])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     upload_to = models.DateTimeField(auto_now=True)

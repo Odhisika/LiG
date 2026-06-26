@@ -3,6 +3,7 @@ from django.db import models
 from accounts.models import Account
 from store.models import Product
 from datetime import timedelta
+from accounts.utils.validators import validate_image
 from django.utils.timezone import now
 from decimal import Decimal
 import datetime
@@ -90,7 +91,7 @@ class PaymentProof(models.Model):
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
-    proof_image = models.ImageField(upload_to='payment_proofs/')
+    proof_image = models.ImageField(upload_to='payment_proofs/', validators=[validate_image])
     note = models.TextField(blank=True, null=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')

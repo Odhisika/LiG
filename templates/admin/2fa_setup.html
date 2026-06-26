@@ -1,0 +1,77 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static jazzmin %}
+{% get_jazzmin_settings request as jazzmin_settings %}
+{% get_jazzmin_ui_tweaks as jazzmin_ui %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Two-Factor Authentication Setup</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if twofa and twofa.is_enabled %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Two-factor authentication is currently <strong>enabled</strong>.
+                        </div>
+                        <div class="mb-3">
+                            <p><strong>Backup Codes:</strong></p>
+                            <div class="bg-light p-3 rounded" style="font-family: monospace;">
+                                {% for bc in twofa.backup_codes %}
+                                    {% if not bc.used %}
+                                        <div>{{ bc.code }}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <p class="text-muted mt-2">
+                                <i class="fas fa-info-circle"></i> Save these backup codes in a safe place. Each can be used only once.
+                            </p>
+                        </div>
+                        <form method="post" action="{% url 'admin:2fa_disable' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Disable 2FA
+                            </button>
+                        </form>
+                    {% elif qr_data_url %}
+                        <p>Scan this QR code with your authenticator app (e.g. Google Authenticator, Authy):</p>
+                        <div class="text-center mb-3">
+                            <img src="{{ qr_data_url }}" alt="2FA QR Code" class="img-fluid" style="max-width: 250px;">
+                        </div>
+                        <p class="text-muted">Or enter this secret manually: <code>{{ secret }}</code></p>
+                        <form method="post" action="{% url 'admin:2fa_verify_setup' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="secret" value="{{ secret }}">
+                            <div class="form-group">
+                                <label for="code">Enter the 6-digit code from your app to verify:</label>
+                                <input type="text" name="code" class="form-control" 
+                                       inputmode="numeric" pattern="[0-9]*" maxlength="6" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Verify & Enable 2FA
+                            </button>
+                        </form>
+                    {% else %}
+                        <p>Two-factor authentication adds an extra layer of security to your admin account.</p>
+                        <p>Once enabled, you'll need to enter a 6-digit code from your authenticator app in addition to your password.</p>
+                        <form method="post" action="{% url 'admin:2fa_setup' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shield-alt"></i> Enable Two-Factor Authentication
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

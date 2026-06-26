@@ -77,3 +77,14 @@ Your application handles callbacks via the `hubtel_webhook` view.
 4. **Auto-Confirmation:** Show the user being redirected back to the "Success" page.
 5. **Admin Proof:** Navigate to the Django Admin $\rightarrow$ Payments section to show the verified record.
 6. **Live Logs:** (Optional) Show `tail -f logs/payments.log` to demonstrate the real-time API communication.
+
+
+todo
+
+
+1. Secrets exposed in .env — SECRET_KEY, Paystack (sk_test_*), Hubtel credentials, SMTP password, Google OAuth secrets — all real values. Rotate every single one.
+2. Admin password in .env — admin12345 on line 42. Change immediately.
+3. No Content Security Policy (CSP) — no protection against injected scripts
+4. No 2FA/MFA — admin accounts have no second factor
+5. No audit logging — no logging of admin actions, failed logins, etc.
+6. DEBUG=True in production-ready .env — must be False before going live

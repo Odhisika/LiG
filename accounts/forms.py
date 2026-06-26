@@ -1,5 +1,10 @@
 from django import forms
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
 from accounts.models import Account, UserProfile
+from accounts.utils.validators import validate_image
+
+import re
 
 
 class RegistrationForm(forms.ModelForm):
@@ -15,6 +20,27 @@ class RegistrationForm(forms.ModelForm):
     class Meta:
         model = Account
         fields = ['first_name', 'last_name', 'phone_number', 'email', 'password']
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if not password:
+            return password
+
+        # Run Django's built-in validators (length, similarity, common, numeric)
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            raise forms.ValidationError(list(e.messages))
+
+        # Custom: require at least one uppercase letter
+        if not re.search(r'[A-Z]', password):
+            raise forms.ValidationError("Password must contain at least one uppercase letter.")
+
+        # Custom: require at least one special character
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\;~`]', password):
+            raise forms.ValidationError("Password must contain at least one special character (!@#$%^&* etc.).")
+
+        return password
 
     def clean(self):
         cleaned_data = super().clean()
@@ -48,6 +74,7 @@ class UserForm(forms.ModelForm):
 class UserProfileForm(forms.ModelForm):
     profile_picture = forms.ImageField(
         required=False,
+        validators=[validate_image],
         error_messages={'invalid': "Image files only"},
         widget=forms.FileInput
     )

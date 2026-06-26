@@ -2,7 +2,20 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
+import requests
+
+
+def verify_turnstile(request):
+    token = request.POST.get('cf-turnstile-response', '')
+    if not token:
+        return False
+    resp = requests.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', data={
+        'secret': settings.TURNSTILE_SECRET_KEY,
+        'response': token,
+    })
+    return resp.json().get('success', False)
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
@@ -18,6 +31,7 @@ from django_ratelimit.decorators import ratelimit
 
 from accounts.forms import RegistrationForm, UserForm, UserProfileForm
 from accounts.models import Account, UserProfile
+from accounts.utils.lockout import is_locked_out, record_failed_attempt, clear_attempts, get_remaining_attempts, LOCKOUT_MAX_ATTEMPTS
 from orders.models import Order, OrderProduct
 from cart.views import _cart_id
 from cart.models import Cart, CartItem
@@ -65,6 +79,9 @@ def transfer_guest_cart_to_user(request, user):
 @ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def register(request):
     if request.method == 'POST':
+        if not verify_turnstile(request):
+            messages.error(request, 'Please complete the security check.')
+            return redirect('register')
         form = RegistrationForm(request.POST)
         if form.is_valid():
             first_name = form.cleaned_data['first_name']
@@ -120,7 +137,7 @@ def register(request):
     else:
         form = RegistrationForm()
 
-    context = {'form': form}
+    context = {'form': form, 'TURNSTILE_SITE_KEY': settings.TURNSTILE_SITE_KEY}
     return render(request, 'accounts/register.html', context)
 
 
@@ -128,13 +145,23 @@ def register(request):
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def login(request):
     if request.method == 'POST':
+        if not verify_turnstile(request):
+            messages.error(request, 'Please complete the security check.')
+            return render(request, 'accounts/login.html', {'TURNSTILE_SITE_KEY': settings.TURNSTILE_SITE_KEY})
+
         email = request.POST['email']
         password = request.POST['password']
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
 
-        # Authenticate using email
-        user = auth.authenticate(username=email, password=password)  # Use 'username' instead of 'email'
+        if is_locked_out(email, ip):
+            remaining = 0
+            messages.error(request, 'Account temporarily locked due to too many failed attempts. Try again in 15 minutes.')
+            return render(request, 'accounts/login.html', {'TURNSTILE_SITE_KEY': settings.TURNSTILE_SITE_KEY})
+
+        user = auth.authenticate(username=email, password=password)
 
         if user:
+            clear_attempts(email, ip)
             # Transfer guest cart items to user BEFORE logging in
             transfer_guest_cart_to_user(request, user)
             
@@ -154,9 +181,14 @@ def login(request):
                 # Default redirect to cart to show merged items, then to home
                 return redirect('cart')
         else:
-            messages.error(request, 'Invalid login credentials')
+            attempts = record_failed_attempt(email, ip)
+            remaining = LOCKOUT_MAX_ATTEMPTS - attempts
+            if remaining > 0:
+                messages.error(request, f'Invalid login credentials. {remaining} attempt(s) remaining.')
+            else:
+                messages.error(request, 'Account temporarily locked due to too many failed attempts. Try again in 15 minutes.')
     
-    return render(request, 'accounts/login.html')
+    return render(request, 'accounts/login.html', {'TURNSTILE_SITE_KEY': settings.TURNSTILE_SITE_KEY})
 
 
 

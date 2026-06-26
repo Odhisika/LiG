@@ -6,6 +6,7 @@ from decimal import Decimal
 import uuid
 from category.models import Category, ComputerTypes, SoftwareTypes
 from accounts.models import Account
+from accounts.utils.validators import validate_image
 
 
 def generate_sku():
@@ -67,7 +68,7 @@ class Product(models.Model):
                                           help_text="Height in cm")
     
     # Images
-    images = models.ImageField(upload_to='photos/products', blank=True, null=True)
+    images = models.ImageField(upload_to='photos/products', blank=True, null=True, validators=[validate_image])
 
     
     # Timestamps
@@ -128,7 +129,7 @@ class Product(models.Model):
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
-    logo = models.ImageField(upload_to='photos/brands', blank=True, null=True)
+    logo = models.ImageField(upload_to='photos/brands', blank=True, null=True, validators=[validate_image])
     description = models.TextField(blank=True)
     website = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
@@ -586,7 +587,7 @@ class ProductGallery(models.Model):
     ]
     
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='gallery_images')
-    image = models.ImageField(upload_to='store/products', max_length=255)
+    image = models.ImageField(upload_to='store/products', max_length=255, validators=[validate_image])
     alt_text = models.CharField(max_length=255, blank=True)
     image_type = models.CharField(max_length=20, choices=IMAGE_TYPES, default='gallery')
     order = models.PositiveIntegerField(default=0)
@@ -615,7 +616,7 @@ class ProductVariant(models.Model):
     attributes = models.JSONField(default=dict, help_text="e.g., {'color': 'red', 'size': 'large'}")
     
     # Images specific to this variant
-    image = models.ImageField(upload_to='store/variants', blank=True, null=True)
+    image = models.ImageField(upload_to='store/variants', blank=True, null=True, validators=[validate_image])
     
     # Status
     is_active = models.BooleanField(default=True)
@@ -667,7 +668,7 @@ class HomeBanner(models.Model):
     button_link = models.CharField(max_length=200, default="/store/", help_text="Can be relative like /store/ or absolute like https://...")
     
     # Background Image
-    background_image = models.ImageField(upload_to='photos/banners/')
+    background_image = models.ImageField(upload_to='photos/banners/', validators=[validate_image])
     
     # Status
     is_active = models.BooleanField(default=True, help_text="Uncheck to hide this custom banner and show the default one.")

@@ -1,12 +1,13 @@
 from django.db import models
 from django.urls import reverse
+from accounts.utils.validators import validate_image
 
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(max_length=255, blank=True)
-    cat_image = models.ImageField(upload_to='photos/categories', blank=True)
+    cat_image = models.ImageField(upload_to='photos/categories', blank=True, validators=[validate_image])
     
     # New additions
     is_active = models.BooleanField(default=True)
@@ -30,7 +31,7 @@ class ComputerTypes(models.Model):
     computer_type = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(max_length=255, blank=True)
-    cat_image = models.ImageField(upload_to='photos/computer_types', blank=True)
+    cat_image = models.ImageField(upload_to='photos/computer_types', blank=True, validators=[validate_image])
 
     # New additions
     is_active = models.BooleanField(default=True)
@@ -63,7 +64,7 @@ class SoftwareTypes(models.Model):
     software_type = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(max_length=255, blank=True)
-    cat_image = models.ImageField(upload_to='photos/software_types', blank=True)
+    cat_image = models.ImageField(upload_to='photos/software_types', blank=True, validators=[validate_image])
     
     # New additions
     is_active = models.BooleanField(default=True)

@@ -87,8 +87,7 @@ INSTALLED_APPS = [
     'category',
     'orders',
     'store',
-    
-    
+
 ]
 
 MIDDLEWARE = [
@@ -102,6 +101,8 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     'analytics.middleware.VisitorTrackingMiddleware',
     'accounts.middleware.AdminAutoLogoutMiddleware',
+    'accounts.middleware.SecurityHeadersMiddleware',
+    'accounts.middleware.AuditMiddleware',
 ]
 
 
@@ -280,6 +281,10 @@ SOCIALACCOUNT_PROVIDERS = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# Cloudflare Turnstile
+TURNSTILE_SITE_KEY = config('TURNSTILE_SITE_KEY', default='')
+TURNSTILE_SECRET_KEY = config('TURNSTILE_SECRET_KEY', default='')
+
 # SMTP configuration
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT', cast=int)
@@ -374,4 +379,16 @@ JAZZMIN_SETTINGS["custom_links"] = {
             "permissions": ["auth.view_user"],
         },
     ],
+    "accounts": [
+        {
+            "name": "Security Settings",
+            "url": "admin:2fa_setup",
+            "icon": "fas fa-shield-alt",
+            "permissions": ["auth.view_user"],
+        },
+    ],
 }
+
+JAZZMIN_SETTINGS["icons"]["accounts.Admin2FA"] = "fas fa-shield-alt"
+JAZZMIN_SETTINGS["icons"]["accounts.AuditLog"] = "fas fa-history"
+JAZZMIN_SETTINGS["icons"]["admin.LogEntry"] = "fas fa-clipboard-list"

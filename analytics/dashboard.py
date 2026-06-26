@@ -14,6 +14,7 @@ class DashboardSite(AdminSite):
     def get_urls(self):
         from django.urls import path
         urls = super().get_urls()
+        urls = [u for u in urls if not getattr(u, 'name', None) or not u.name.startswith('2fa')]
         urls += [
             path('dashboard/', self.admin_view(self.dashboard_view), name='dashboard'),
         ]
