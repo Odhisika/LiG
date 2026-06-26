@@ -46,6 +46,7 @@ def build_csp_policy(request):
             "'self'",
             'https://challenges.cloudflare.com',
             'https://www.paypal.com',
+            'https://www.google.com',
         ],
         'connect-src': [
             "'self'",
