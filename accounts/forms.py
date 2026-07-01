@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from accounts.models import Account, UserProfile
-from accounts.utils.validators import validate_image
+from accounts.utils.validators import validate_image, validate_email_domain, validate_ghana_phone_number
 
 import re
 
@@ -50,6 +50,16 @@ class RegistrationForm(forms.ModelForm):
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Password does not match!")
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            validate_email_domain(email)
+        return email
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number')
+        return validate_ghana_phone_number(phone)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['first_name'].widget.attrs['placeholder'] = 'Enter First Name'
@@ -69,6 +79,10 @@ class UserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number')
+        return validate_ghana_phone_number(phone)
 
 
 class UserProfileForm(forms.ModelForm):

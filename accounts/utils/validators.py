@@ -1,4 +1,5 @@
 import os
+import re
 import struct
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -49,3 +50,56 @@ def validate_image(value):
     validate_file_extension(value)
     validate_file_size(value)
     validate_file_content(value)
+
+
+ALLOWED_EMAIL_DOMAINS = {
+    'gmail.com', 'googlemail.com',
+    'yahoo.com', 'yahoo.co.uk', 'yahoo.fr', 'yahoo.de', 'yahoo.co.jp',
+    'yahoo.com.au', 'yahoo.co.in', 'yahoo.com.br', 'yahoo.com.mx',
+    'yahoo.es', 'yahoo.it', 'yahoo.ca',
+    'outlook.com', 'hotmail.com', 'hotmail.co.uk', 'live.com', 'msn.com',
+    'proton.me', 'protonmail.com',
+    'icloud.com',
+    'aol.com',
+    'mail.com',
+}
+
+
+def validate_email_domain(email):
+    if not email:
+        return
+    domain = email.split('@')[-1].lower()
+    if domain not in ALLOWED_EMAIL_DOMAINS:
+        raise ValidationError(
+            "Registration is limited to trusted email providers. "
+            "Please use Gmail, Yahoo, Outlook/Hotmail, Proton, iCloud, AOL, or Mail.com."
+        )
+
+
+GHANA_PHONE_PREFIXES = {
+    '020', '023', '024', '025', '026', '027', '028', '029',
+    '037', '050', '053', '054', '055', '056', '057', '059',
+}
+
+
+def validate_ghana_phone_number(value):
+    if not value:
+        return ''
+    cleaned = re.sub(r'[\s\-\(\)\.]+', '', value)
+    if cleaned.startswith('+233'):
+        if not cleaned[1:].isdigit() or len(cleaned) != 13:
+            raise ValidationError("Enter a valid Ghana phone number (e.g. 024XXXXXXX or +23324XXXXXXX).")
+        local = '0' + cleaned[4:]
+    elif cleaned.startswith('233'):
+        if not cleaned.isdigit() or len(cleaned) != 12:
+            raise ValidationError("Enter a valid Ghana phone number (e.g. 024XXXXXXX or +23324XXXXXXX).")
+        local = '0' + cleaned[3:]
+    elif cleaned.startswith('0'):
+        if not cleaned.isdigit() or len(cleaned) != 10:
+            raise ValidationError("Enter a valid Ghana phone number (e.g. 024XXXXXXX).")
+        local = cleaned
+    else:
+        raise ValidationError("Enter a valid Ghana phone number (e.g. 024XXXXXXX or +23324XXXXXXX).")
+    if local[:3] not in GHANA_PHONE_PREFIXES:
+        raise ValidationError("Enter a valid Ghana phone number with a recognised mobile network prefix.")
+    return local

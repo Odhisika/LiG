@@ -7,6 +7,8 @@ from research.form import ProjectBookingForm
 from django.db.models import Q
 from category.models import ResearchTypes, ComputerTypes, SoftwareTypes
 from accounts.models import NewsletterSubscriber
+from django.core.exceptions import ValidationError
+from accounts.utils.validators import validate_email_domain
 from django.contrib import messages
 
 
@@ -27,6 +29,11 @@ def subscribe_newsletter(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         if email:
+            try:
+                validate_email_domain(email)
+            except ValidationError as e:
+                messages.error(request, e.message)
+                return redirect(request.META.get('HTTP_REFERER', 'home'))
             if NewsletterSubscriber.objects.filter(email=email).exists():
                 messages.info(request, 'You are already subscribed to our newsletter.')
             else:

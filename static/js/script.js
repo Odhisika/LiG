@@ -51,6 +51,31 @@ $(document).ready(function() {
 		$('[data-toggle="tooltip"]').tooltip()
 	} // end if
 
+	//////////////////////// Password show/hide toggle
+	$('input[type="password"]').each(function() {
+		var $input = $(this);
+		if ($input.siblings('.password-toggle-icon').length) return;
+		if ($input.closest('.password-toggle-wrapper').length) return;
+
+		var $toggle = $('<span class="password-toggle-icon"><i class="far fa-eye"></i></span>');
+		$input.after($toggle);
+
+		var $parent = $input.parent();
+		if ($parent.css('position') === 'static') {
+			$parent.css('position', 'relative');
+		}
+
+		$toggle.on('click', function() {
+			if ($input.attr('type') === 'password') {
+				$input.attr('type', 'text');
+				$toggle.html('<i class="far fa-eye-slash"></i>');
+			} else {
+				$input.attr('type', 'password');
+				$toggle.html('<i class="far fa-eye"></i>');
+			}
+		});
+	});
+
 
 
 

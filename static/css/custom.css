@@ -107,3 +107,41 @@ ul.thumb li img{
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 35, 102, 0.2) !important;
 }
+
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+ul.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+}
+
+ul.errorlist li {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 5;
+    color: #94a3b8;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+.password-toggle-icon:hover {
+    color: var(--royal-blue, #002366);
+}
