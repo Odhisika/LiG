@@ -109,7 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(res) { return res.json(); })
             .then(function(data) {
                 if (data.success) {
-                    btn.className = 'btn btn-success btn-add-cart w-100';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-success');
                     btn.innerHTML = '<i class="fas fa-check me-2"></i>Added \u2713';
                     var badge = document.getElementById('notification-count');
                     if (badge) badge.textContent = data.cart_count;

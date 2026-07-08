@@ -230,9 +230,7 @@
                         {% if single_product.compare_price and single_product.compare_price > single_product.price %}
                         <div class="price-comparison mt-2 d-flex align-items-center gap-2">
                             <span class="text-muted small">List Price: <span class="text-decoration-line-through">GHS {{ single_product.compare_price|floatformat:2|intcomma }}</span></span>
-                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 py-1 px-2" style="font-size: 0.75rem;">
-                                Save {{ single_product.get_discount_percentage }}%
-                            </span>
+
                         </div>
                         {% endif %}
                     </div>
@@ -333,7 +331,7 @@
                     </div>
                     
                     <!-- Add to Cart Form -->
-                <form action="{% url 'add_cart' single_product.id %}" method="POST" class="mb-3">
+                <form action="{% url 'add_cart' single_product.id %}" method="POST" class="add-to-cart-form mb-3">
                     {% csrf_token %}
                     <div class="cart-actions">
                         <div class="row g-3">
@@ -390,7 +388,7 @@
                                target="_blank" 
                                class="btn btn-share x-twitter-brand" 
                                title="Share on X (Twitter)">
-                                <i class="fab fa-x-twitter"></i>
+                                <i class="fab fa-twitter"></i>
                             </a>
                             
                             <!-- Instagram -->
