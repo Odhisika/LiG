@@ -124,6 +124,36 @@ class Product(models.Model):
     def get_primary_image_url(self):
         return self.primary_image_url
 
+    @property
+    def primary_image_width(self):
+        if self.images:
+            try:
+                return self.images.width
+            except Exception:
+                return None
+        first_gallery = self.gallery_images.filter(is_active=True).first()
+        if first_gallery:
+            try:
+                return first_gallery.image.width
+            except Exception:
+                return None
+        return None
+
+    @property
+    def primary_image_height(self):
+        if self.images:
+            try:
+                return self.images.height
+            except Exception:
+                return None
+        first_gallery = self.gallery_images.filter(is_active=True).first()
+        if first_gallery:
+            try:
+                return first_gallery.image.height
+            except Exception:
+                return None
+        return None
+
 
 # Brand Model (normalized)
 class Brand(models.Model):

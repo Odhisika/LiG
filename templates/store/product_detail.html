@@ -13,6 +13,8 @@
 <meta property="og:description" content="{{ single_product.short_description|default:single_product.description|truncatewords:25 }}">
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}">
 <meta property="og:image:secure_url" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.primary_image_url }}">
+<meta property="og:image:width" content="{{ single_product.primary_image_width|default:'1200' }}">
+<meta property="og:image:height" content="{{ single_product.primary_image_height|default:'630' }}">
 <meta property="og:image:alt" content="{{ single_product.product_name }}">
 <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url }}">
 <meta property="og:site_name" content="LiG Store">
