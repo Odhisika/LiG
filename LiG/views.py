@@ -152,6 +152,16 @@ def all_in_one_computers(request):
     return render(request, 'hardware/all_in_one.html', context)
 
 
+def monitors(request):
+    """All monitors."""
+    products = ComputerProduct.objects.filter(
+        Q(computer_type__slug='monitor') | Q(computer_type__parent__slug='monitor'),
+        is_available=True
+    ).distinct().order_by('-created_date')
+    context = {'products': products}
+    return render(request, 'hardware/monitors.html', context)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # NETWORKING — filter NetworkingProduct by device_type field
 # ─────────────────────────────────────────────────────────────────────────────

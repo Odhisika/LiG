@@ -56,6 +56,7 @@ urlpatterns = [
     path('hardware/laptops/', views.laptops, name='laptops'),
     path('hardware/computers/', views.computers_all, name='computers_all'),
     path('hardware/all-in-one/', views.all_in_one_computers, name='all_in_one_computers'),
+    path('hardware/monitors/', views.monitors, name='monitors'),
     path('hardware/fresh_laptops/', views.fresh_laptops, name='fresh_laptops'),
     path('hardware/fresh_desktops/', views.fresh_desktops, name='fresh_desktops'),
     path('hardware/used_laptops/', views.used_laptops, name='used_laptops'),

@@ -77,6 +77,7 @@ class Command(BaseCommand):
             {'name': 'Laptop',   'sort_order': 1},
             {'name': 'Desktop',  'sort_order': 2},
             {'name': 'Server',   'sort_order': 3},
+            {'name': 'Monitor',  'sort_order': 4},
         ]
         parents = {}
         for item in top_level:

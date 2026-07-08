@@ -115,6 +115,9 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 return 'Hardware → Computers → Desktops → Slightly Used'
             return 'Hardware → Computers → Desktops'
 
+        if slug == 'monitor' or parent_slug == 'monitor':
+            return 'Hardware → Computers → Monitors'
+
         return 'Hardware → Computers → All Computers'
     storefront_destination.short_description = 'Storefront Destination'
 
@@ -146,7 +149,8 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 '→ <b>Laptop</b> types appear on the All Computers and Laptops pages.<br>'
                 '→ <b>Desktop</b> types appear on the All Computers and Desktops pages.<br>'
                 '→ <b>Fresh / Slightly Used</b> sub-types appear on their matching condition pages.<br>'
-                '→ <b>All-in-One Desktop</b> appears on the All-in-One page.'
+                '→ <b>All-in-One Desktop</b> appears on the All-in-One page.<br>'
+                '→ <b>Monitor</b> types appear on the All Computers and Monitors pages.'
             )
         }),
         ('📄 Description', {
