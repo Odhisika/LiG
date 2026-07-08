@@ -112,8 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     btn.classList.remove('btn-primary');
                     btn.classList.add('btn-success');
                     btn.innerHTML = '<i class="fas fa-check me-2"></i>Added \u2713';
-                    var badge = document.getElementById('notification-count');
-                    if (badge) badge.textContent = data.cart_count;
                     var badge2 = document.querySelector('.cart-badge:not(#notification-count)');
                     if (badge2) badge2.textContent = data.cart_count;
                 } else {

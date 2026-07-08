@@ -782,6 +782,22 @@
             border-bottom: 1px solid var(--border-color);
             font-weight: 600;
             color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification-header .mark-read {
+            font-size: 12px;
+            color: var(--primary-color);
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .notification-header .mark-read:hover {
+            text-decoration: underline;
         }
 
         .notification-item {
@@ -790,6 +806,10 @@
             display: flex;
             align-items: flex-start;
             gap: 12px;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
         }
 
         .notification-icon {
@@ -817,6 +837,24 @@
         .notification-text {
             color: var(--text-light);
             font-size: 12px;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .notification-dropdown {
+                position: fixed;
+                top: 60px;
+                right: 10px;
+                left: 10px;
+                width: auto;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
         }
 
         /* Profile Dropdown Custom Styles */
@@ -1111,18 +1149,22 @@
                     <span>Alerts</span>
                     <span class="cart-badge" id="notification-count">0</span>
                   </a>
-                  <div class="dropdown-menu notification-dropdown" id="notifications-dropdown">
-                    <div class="notification-header">Notifications</div>
-                    <div class="notification-item">
-                      <div class="notification-icon">
-                        <i class="fa fa-info"></i>
-                      </div>
-                      <div class="notification-content">
-                        <div class="notification-title">Welcome!</div>
-                        <div class="notification-text">No new notifications</div>
-                      </div>
-                    </div>
-                  </div>
+  <div class="dropdown-menu notification-dropdown" id="notifications-dropdown">
+    <div class="notification-header">
+      <span>Notifications</span>
+      <button class="mark-read" onclick="markAllNotificationsRead()">Mark all as read</button>
+    </div>
+    <div class="notification-item">
+      <div class="notification-icon">
+        <i class="fa fa-info"></i>
+      </div>
+      <div class="notification-content">
+        <div class="notification-title">Welcome to LiG!</div>
+        <div class="notification-text">Browse our latest products and deals.</div>
+        <div class="notification-time">Just now</div>
+      </div>
+    </div>
+  </div>
                 </div>
 
                       <!-- User Account -->
@@ -1759,10 +1801,10 @@
             dropdown.classList.toggle('active');
         }
 
-        // Close dropdowns when clicking outside
+        // Close notification dropdown when clicking outside
         document.addEventListener('click', function(event) {
             const notifications = document.getElementById('notifications-dropdown');
-            if (!event.target.closest('.nav-item')) {
+            if (notifications && !event.target.closest('.nav-item')) {
                 notifications.classList.remove('active');
             }
         });
@@ -1771,7 +1813,8 @@
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeMobileMenu();
-        document.getElementById('notifications-dropdown').classList.remove('active');
+        var notifDropdown = document.getElementById('notifications-dropdown');
+        if (notifDropdown) notifDropdown.classList.remove('active');
     }
 });
 
@@ -1801,6 +1844,32 @@ function updateNotificationCount(count) {
         notificationBadge.textContent = count;
         notificationBadge.style.display = count > 0 ? 'inline-block' : 'none';
     }
+}
+
+function markAllNotificationsRead() {
+    const items = document.querySelectorAll('.notification-item');
+    items.forEach(function(item) {
+        item.style.opacity = '0.5';
+    });
+    updateNotificationCount(0);
+    showNotificationToast('All notifications marked as read');
+}
+
+function showNotificationToast(message) {
+    var toast = document.getElementById('notificationToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'notificationToast';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transform:translateY(20px);transition:all 0.3s ease;';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+    setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+    }, 2500);
 }
 
 
@@ -1936,9 +2005,6 @@ header.style.transition = 'transform 0.3s ease-in-out';
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Mobile navigation initialized');
-    
-    // Set initial cart count
-    updateCartCount(0);
     
     // Set initial notification count
     updateNotificationCount(0);
