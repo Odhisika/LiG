@@ -20,7 +20,7 @@ def home(request):
 
 
 def allproducts(request):
-    products = Product.objects.filter(is_available=True).select_related('category').order_by('?')
+    products = Product.objects.filter(is_available=True).exclude(softwareproduct__isnull=False).select_related('category').order_by('?')
     context = {'products': products}
     return render(request, 'hardware/allproducts.html', context)
 
