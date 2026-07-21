@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us | LuckyTech Innovation Ground{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ about_page.meta_description|default:'Learn about LuckyTech Innovation Ground - our mission, vision, and team.' }}">
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
+
+<!-- Hero Section -->
+<section class="premium-hero">
+    <div class="container text-center">
+        <h1 class="hero-title">{{ about_page.hero_title|default:'About LuckyTech Innovation Ground' }}</h1>
+        <p class="hero-subtitle">{{ about_page.hero_subtitle|default:'Empowering businesses through innovative technology solutions.' }}</p>
+    </div>
+</section>
+
+<!-- Mission, Vision, Values -->
+{% if about_page.mission or about_page.vision or about_page.values %}
+<section class="premium-bg-white py-5">
+    <div class="container">
+        <div class="row g-4">
+            {% if about_page.mission %}
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-blue">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h4>Our Mission</h4>
+                    <p>{{ about_page.mission }}</p>
+                </div>
+            </div>
+            {% endif %}
+            {% if about_page.vision %}
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-purple">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h4>Our Vision</h4>
+                    <p>{{ about_page.vision }}</p>
+                </div>
+            </div>
+            {% endif %}
+            {% if about_page.values %}
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <div class="premium-icon-box icon-teal">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h4>Our Values</h4>
+                    <p>{{ about_page.values }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Our Story -->
+{% if about_page.story %}
+<section class="premium-bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">Our Story</h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="premium-card p-4">
+                    {{ about_page.story|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Team Section -->
+{% if about_page.team_section_content %}
+<section class="premium-bg-white py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">{{ about_page.team_section_title|default:'Our Team' }}</h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                {{ about_page.team_section_content|safe }}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="premium-bg-light py-5">
+    <div class="container text-center">
+        <h2 class="premium-section-title">Ready to Work With Us?</h2>
+        <p class="premium-section-subtitle mb-4">Let's discuss how we can help your business grow.</p>
+        <a href="{% url 'home' %}" class="btn-premium me-3">Get Started</a>
+        <a href="{% url 'help_center' %}" class="btn-premium">Help Center</a>
+    </div>
+</section>
+
+{% endblock %}

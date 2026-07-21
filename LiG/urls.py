@@ -42,7 +42,8 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('accounts/', include('accounts.urls')),
     path('froala_editor/',include('froala_editor.urls')),
-    path('research/', include('research.urls')),   
+    path('research/', include('research.urls')),
+    path('', include('pages.urls')),
     path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')), 
     path("googlec8d038f8f2eae61f.html", TemplateView.as_view(

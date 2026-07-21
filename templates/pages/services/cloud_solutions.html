@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cloud Solutions | LuckyTech Innovation Ground{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Enterprise cloud solutions at LiG. Cloud migration, hosting, management, and infrastructure services in Ghana.">
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
+
+<section class="premium-hero">
+    <div class="container text-center">
+        <h1 class="hero-title">Cloud Solutions</h1>
+        <p class="hero-subtitle">Migrate, deploy, and manage your infrastructure on the cloud for scalability, security, and cost efficiency.</p>
+    </div>
+</section>
+
+<section class="premium-bg-white py-5">
+    <div class="container pb-5">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-blue mb-0 me-3">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h4 class="mb-0">Cloud Migration</h4>
+                    </div>
+                    <p>Seamless transition of your applications, data, and infrastructure to leading cloud platforms.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> AWS / Azure / GCP</li>
+                        <li><i class="fas fa-check"></i> Zero-Downtime Migration</li>
+                        <li><i class="fas fa-check"></i> Data Integrity Assurance</li>
+                        <li><i class="fas fa-check"></i> Post-Migration Support</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-purple mb-0 me-3">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <h4 class="mb-0">Cloud Hosting</h4>
+                    </div>
+                    <p>Reliable, high-uptime hosting solutions tailored to your workload requirements.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> Virtual Private Servers</li>
+                        <li><i class="fas fa-check"></i> Managed WordPress</li>
+                        <li><i class="fas fa-check"></i> Auto-Scaling</li>
+                        <li><i class="fas fa-check"></i> SSL & CDN</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-teal mb-0 me-3">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4 class="mb-0">Cloud Security</h4>
+                    </div>
+                    <p>Protect your cloud environment with firewalls, encryption, access controls, and compliance audits.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> Firewall Configuration</li>
+                        <li><i class="fas fa-check"></i> Data Encryption</li>
+                        <li><i class="fas fa-check"></i> IAM Policies</li>
+                        <li><i class="fas fa-check"></i> Compliance Audits</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-yellow mb-0 me-3">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h4 class="mb-0">Cloud Management</h4>
+                    </div>
+                    <p>Ongoing monitoring, optimization, and cost management for your cloud resources.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> 24/7 Monitoring</li>
+                        <li><i class="fas fa-check"></i> Cost Optimization</li>
+                        <li><i class="fas fa-check"></i> Backup & Disaster Recovery</li>
+                        <li><i class="fas fa-check"></i> Performance Reports</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="premium-bg-light py-5">
+    <div class="container text-center">
+        <h2 class="premium-section-title">Ready for the Cloud?</h2>
+        <p class="premium-section-subtitle mb-4">Let us help you harness the power of cloud computing.</p>
+        <a href="https://wa.me/+233591884422" target="_blank" class="btn-premium">
+            <i class="fab fa-whatsapp me-2"></i>Start Your Migration
+        </a>
+    </div>
+</section>
+
+{% endblock %}

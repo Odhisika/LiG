@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Help Center | LuckyTech Innovation Ground{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Get help with LuckyTech Innovation Ground. Browse FAQs, guides, and contact support.">
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
+
+<!-- Hero Section -->
+<section class="premium-hero">
+    <div class="container text-center">
+        <h1 class="hero-title">Help Center</h1>
+        <p class="hero-subtitle">Find answers, guides, and support for everything you need.</p>
+
+        <!-- Search Bar -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <form method="get" action="{% url 'help_center' %}">
+                    <div class="input-group input-group-lg shadow">
+                        <input type="text" name="q" class="form-control border-0" placeholder="Search for help..."
+                               value="{{ query|default:'' }}">
+                        <button class="btn btn-primary px-4" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Results -->
+{% if search_results %}
+<section class="premium-bg-white py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="premium-section-title">Search Results for "{{ query }}"</h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% for article in search_results %}
+                <div class="premium-card mb-3 p-4">
+                    <div class="d-flex align-items-start">
+                        <div class="premium-icon-box icon-blue me-3" style="min-width:50px;height:50px;">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary mb-2">{{ article.category }}</span>
+                            <h5><a href="{% url 'help_article_detail' article.slug %}" class="text-decoration-none">{{ article.title }}</a></h5>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No results found for "{{ query }}". Try different keywords.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Categories -->
+<section class="premium-bg-white py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="premium-section-title">Browse by Category</h2>
+            <p class="premium-section-subtitle">Select a topic to find relevant articles and guides.</p>
+        </div>
+
+        <div class="row g-4 text-center">
+            {% for category in categories %}
+            <div class="col-md-4 col-lg-3">
+                <div class="premium-card h-100" id="cat-{{ category.slug }}">
+                    <div class="premium-icon-box icon-blue">
+                        <i class="fas {{ category.icon }}"></i>
+                    </div>
+                    <h5>{{ category.title }}</h5>
+                    <p class="text-muted small">{{ category.description|default:"" }}</p>
+
+                    {% if category.articles.all %}
+                    <ul class="list-unstyled text-start mt-3">
+                        {% for article in category.articles.all %}
+                        {% if article.is_active %}
+                        <li class="mb-2">
+                            <a href="{% url 'help_article_detail' article.slug %}" class="text-decoration-none text-dark">
+                                <i class="fas fa-chevron-right text-primary me-2 small"></i>{{ article.title }}
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="premium-card p-5">
+                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Help articles are being prepared. Check back soon!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Contact Support -->
+<section class="premium-bg-light py-5">
+    <div class="container text-center">
+        <h2 class="premium-section-title">Still Need Help?</h2>
+        <p class="premium-section-subtitle mb-4">Our support team is ready to assist you.</p>
+        <a href="https://wa.me/+233591884422" target="_blank" class="btn-premium me-3">
+            <i class="fab fa-whatsapp me-2"></i>WhatsApp Us
+        </a>
+        <a href="mailto:info@lig.com.gh" class="btn-premium">
+            <i class="fas fa-envelope me-2"></i>Email Support
+        </a>
+    </div>
+</section>
+
+{% endblock %}

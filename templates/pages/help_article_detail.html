@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ article.title }} | Help Center{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ article.title }} - Help Center at LuckyTech Innovation Ground.">
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
+
+<!-- Hero Section -->
+<section class="premium-hero" style="padding: 2rem 0;">
+    <div class="container text-center">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center mb-3">
+                <li class="breadcrumb-item"><a href="{% url 'help_center' %}" class="text-white text-decoration-none">Help Center</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'help_center' %}#cat-{{ article.category.slug }}" class="text-white text-decoration-none">{{ article.category }}</a></li>
+                <li class="breadcrumb-item active text-white-50" aria-current="page">{{ article.title }}</li>
+            </ol>
+        </nav>
+        <h1 class="hero-title" style="font-size: 1.8rem;">{{ article.title }}</h1>
+        <p class="text-white-50 mt-2">
+            <i class="fas fa-eye me-1"></i>{{ article.views_count }} views
+            <span class="mx-2">|</span>
+            <i class="fas fa-clock me-1"></i>Updated {{ article.updated_at|date:"M d, Y" }}
+        </p>
+    </div>
+</section>
+
+<!-- Article Content -->
+<section class="premium-bg-white py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="premium-card p-4">
+                    <div class="fr-view">
+                        {{ article.content|safe }}
+                    </div>
+                </div>
+
+                <!-- Back to Help Center -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'help_center' %}" class="btn-premium">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Help Center
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Articles from Same Category -->
+{% with related=article.category.articles.all %}
+{% if related.count > 1 %}
+<section class="premium-bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="premium-section-title">Related Articles</h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% for r in related %}
+                {% if r.is_active and r.slug != article.slug %}
+                <div class="premium-card mb-3 p-3">
+                    <a href="{% url 'help_article_detail' r.slug %}" class="text-decoration-none text-dark d-flex align-items-center">
+                        <i class="fas fa-chevron-right text-primary me-3"></i>
+                        <span>{{ r.title }}</span>
+                    </a>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endwith %}
+
+{% endblock %}

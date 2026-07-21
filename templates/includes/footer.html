@@ -260,11 +260,13 @@
             <div class="footer-section">
                 <h3>Services</h3>
                 <ul class="footer-links">
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Web Development</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Mobile Apps</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Cloud Solutions</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>IT Consulting</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Digital Strategy</a></li>
+                    <li><a href="{% url 'web_development' %}"><i class="fas fa-chevron-right"></i>Web Development</a></li>
+                    <li><a href="{% url 'mobile_apps' %}"><i class="fas fa-chevron-right"></i>Mobile Apps</a></li>
+                    <li><a href="{% url 'cloud_solutions' %}"><i class="fas fa-chevron-right"></i>Cloud Solutions</a></li>
+                    <li><a href="{% url 'hardwareRepairs' %}"><i class="fas fa-chevron-right"></i>Hardware Repairs</a></li>
+                    <li><a href="{% url 'networkingSolutions' %}"><i class="fas fa-chevron-right"></i>Networking Solutions</a></li>
+                    <li><a href="{% url 'CCTVInstallation' %}"><i class="fas fa-chevron-right"></i>CCTV Installation</a></li>
+                    <li><a href="{% url 'digital_strategy' %}"><i class="fas fa-chevron-right"></i>Digital Strategy</a></li>
                 </ul>
             </div>
 
@@ -272,11 +274,10 @@
             <div class="footer-section">
                 <h3>Company</h3>
                 <ul class="footer-links">
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>About Us</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Our Team</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Careers</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Blog</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Case Studies</a></li>
+                    <li><a href="{% url 'about' %}"><i class="fas fa-chevron-right"></i>About Us</a></li>
+                    <li><a href="{% url 'about' %}"><i class="fas fa-chevron-right"></i>Our Team</a></li>
+                    <li><a href="{% url 'research' %}"><i class="fas fa-chevron-right"></i>Blog</a></li>
+                    <li><a href="{% url 'projects' %}"><i class="fas fa-chevron-right"></i>Projects</a></li>
                 </ul>
             </div>
 
@@ -284,11 +285,10 @@
             <div class="footer-section">
                 <h3>Support</h3>
                 <ul class="footer-links">
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Help Center</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Documentation</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Contact Support</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>System Status</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i>Resources</a></li>
+                    <li><a href="{% url 'help_center' %}"><i class="fas fa-chevron-right"></i>Help Center</a></li>
+                    <li><a href="{% url 'help_center' %}"><i class="fas fa-chevron-right"></i>Documentation</a></li>
+                    <li><a href="https://wa.me/+233591884422" target="_blank"><i class="fas fa-chevron-right"></i>Contact Support</a></li>
+                    <li><a href="mailto:info@lig.com.gh"><i class="fas fa-chevron-right"></i>Contact Us</a></li>
                 </ul>
             </div>
 
@@ -330,10 +330,10 @@
                 © {% now "Y" %} LuckyTech Innovations. All rights reserved.
             </div>
             <ul class="footer-bottom-links">
-                <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Terms of Service</a></li>
-                <li><a href="#">Cookie Policy</a></li>
-                <li><a href="#">Sitemap</a></li>
+                <li><a href="{% url 'policy_page' 'privacy' %}">Privacy Policy</a></li>
+                <li><a href="{% url 'policy_page' 'terms' %}">Terms of Service</a></li>
+                <li><a href="{% url 'policy_page' 'cookies' %}">Cookie Policy</a></li>
+                <li><a href="{% url 'sitemap' %}">Sitemap</a></li>
             </ul>
         </div>
     </div>

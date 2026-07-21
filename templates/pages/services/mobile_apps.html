@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mobile App Development | LuckyTech Innovation Ground{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Professional mobile app development at LiG. Native and cross-platform apps for Android and iOS in Ghana.">
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
+
+<section class="premium-hero">
+    <div class="container text-center">
+        <h1 class="hero-title">Mobile App Development</h1>
+        <p class="hero-subtitle">Native and cross-platform mobile applications that engage users and drive business growth.</p>
+    </div>
+</section>
+
+<section class="premium-bg-white py-5">
+    <div class="container pb-5">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-blue mb-0 me-3">
+                            <i class="fas fa-android"></i>
+                        </div>
+                        <h4 class="mb-0">Android Development</h4>
+                    </div>
+                    <p>Native Android apps built with Kotlin and Java, optimized for the full range of devices.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> Play Store Publishing</li>
+                        <li><i class="fas fa-check"></i> Material Design UI</li>
+                        <li><i class="fas fa-check"></i> Push Notifications</li>
+                        <li><i class="fas fa-check"></i> Offline Support</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-purple mb-0 me-3">
+                            <i class="fab fa-apple"></i>
+                        </div>
+                        <h4 class="mb-0">iOS Development</h4>
+                    </div>
+                    <p>Polished iOS apps using Swift and SwiftUI, following Apple's Human Interface Guidelines.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> App Store Publishing</li>
+                        <li><i class="fas fa-check"></i> SwiftUI Interfaces</li>
+                        <li><i class="fas fa-check"></i> In-App Purchases</li>
+                        <li><i class="fas fa-check"></i> HealthKit / CoreML</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-teal mb-0 me-3">
+                            <i class="fas fa-random"></i>
+                        </div>
+                        <h4 class="mb-0">Cross-Platform Apps</h4>
+                    </div>
+                    <p>One codebase, both platforms. Faster delivery with React Native or Flutter.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> React Native / Flutter</li>
+                        <li><i class="fas fa-check"></i> Shared Business Logic</li>
+                        <li><i class="fas fa-check"></i> Native Performance</li>
+                        <li><i class="fas fa-check"></i> Faster Time to Market</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-red mb-0 me-3">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h4 class="mb-0">App Maintenance</h4>
+                    </div>
+                    <p>Continuous support, updates, and performance optimization post-launch.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> Bug Fixes & Patches</li>
+                        <li><i class="fas fa-check"></i> OS Version Updates</li>
+                        <li><i class="fas fa-check"></i> Analytics & Crash Reports</li>
+                        <li><i class="fas fa-check"></i> Feature Enhancements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="premium-bg-light py-5">
+    <div class="container text-center">
+        <h2 class="premium-section-title">Have an App Idea?</h2>
+        <p class="premium-section-subtitle mb-4">Turn your concept into a reality with our mobile development team.</p>
+        <a href="https://wa.me/+233591884422" target="_blank" class="btn-premium">
+            <i class="fab fa-whatsapp me-2"></i>Discuss Your Project
+        </a>
+    </div>
+</section>
+
+{% endblock %}

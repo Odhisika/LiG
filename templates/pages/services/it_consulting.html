@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IT Consulting | LuckyTech Innovation Ground{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Expert IT consulting at LiG. Strategic technology planning, digital transformation, and infrastructure advisory in Ghana.">
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/premium-it.css' %}">
+
+<section class="premium-hero">
+    <div class="container text-center">
+        <h1 class="hero-title">IT Consulting</h1>
+        <p class="hero-subtitle">Strategic technology guidance to align your IT infrastructure with business objectives and maximize ROI.</p>
+    </div>
+</section>
+
+<section class="premium-bg-white py-5">
+    <div class="container pb-5">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-blue mb-0 me-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4 class="mb-0">Technology Strategy</h4>
+                    </div>
+                    <p>Align your technology investments with long-term business goals for maximum impact.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> IT Roadmap Planning</li>
+                        <li><i class="fas fa-check"></i> Budget Optimization</li>
+                        <li><i class="fas fa-check"></i> Vendor Evaluation</li>
+                        <li><i class="fas fa-check"></i> ROI Analysis</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-purple mb-0 me-3">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h4 class="mb-0">Digital Transformation</h4>
+                    </div>
+                    <p>Modernize operations with automation, cloud adoption, and digital-first workflows.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> Process Automation</li>
+                        <li><i class="fas fa-check"></i> Legacy System Modernization</li>
+                        <li><i class="fas fa-check"></i> Digital Workflows</li>
+                        <li><i class="fas fa-check"></i> Change Management</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-teal mb-0 me-3">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <h4 class="mb-0">Infrastructure Advisory</h4>
+                    </div>
+                    <p>Expert guidance on designing, deploying, and scaling your IT infrastructure.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> Network Design</li>
+                        <li><i class="fas fa-check"></i> Hardware Procurement</li>
+                        <li><i class="fas fa-check"></i> Scalability Planning</li>
+                        <li><i class="fas fa-check"></i> Redundancy Design</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="premium-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="premium-icon-box icon-red mb-0 me-3">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h4 class="mb-0">Cybersecurity Advisory</h4>
+                    </div>
+                    <p>Assess vulnerabilities and build a robust security posture to protect your business.</p>
+                    <ul class="premium-features">
+                        <li><i class="fas fa-check"></i> Security Audits</li>
+                        <li><i class="fas fa-check"></i> Risk Assessment</li>
+                        <li><i class="fas fa-check"></i> Policy Development</li>
+                        <li><i class="fas fa-check"></i> Staff Training</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="premium-bg-light py-5">
+    <div class="container text-center">
+        <h2 class="premium-section-title">Need Expert Guidance?</h2>
+        <p class="premium-section-subtitle mb-4">Schedule a consultation with our experienced IT consultants.</p>
+        <a href="https://wa.me/+233591884422" target="_blank" class="btn-premium">
+            <i class="fab fa-whatsapp me-2"></i>Book a Consultation
+        </a>
+    </div>
+</section>
+
+{% endblock %}

@@ -40,7 +40,7 @@ SITE_ID = 2
 # Security settings
 PASSWORD_RESET_TIMEOUT = 3600  # 1 hour
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -87,8 +87,23 @@ INSTALLED_APPS = [
     'category',
     'orders',
     'store',
+    'pages',
 
 ]
+
+# Froala Editor Settings
+FROALA_EDITOR_OPTIONS = {
+    'language': 'en',
+    'toolbarSticky': False,
+    'imageUploadURL': '/froala_editor/image_upload/',
+    'fileUploadURL': '/froala_editor/file_upload/',
+    'imageAllowedTypes': ['jpeg', 'jpg', 'png', 'gif'],
+    'imageInsertButtons': ['imageBack', '|', 'imageUpload', 'imageByURL'],
+    'paragraphFormat': {'N': '', 'H1': 'h1', 'H2': 'h2', 'H3': 'h3'},
+    'heightMin': 200,
+}
+FROALA_UPLOAD_PATH = 'uploads/froala_editor/images/'
+FILE_UPLOAD_PERMISSIONS = 0o644
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
