@@ -1,59 +1,598 @@
-/* Admin UI Cleanup - Custom Styling for LiG Product Backend */
+/* Google-like Admin UI Cleanup - Straight-Line Single Field Form Layout */
 
-/* Fix horizontal field groupings to be more balanced */
+/* Import a premium Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+/* Apply font stack universally in admin */
+body, td, th, input, select, textarea, button, .nav-tabs {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FORM LAYOUT (Single Field Line-by-Line Layout)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Form rows: Vertical column container so each fieldBox gets its own full line */
+.form-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 18px 24px !important;
+    border-bottom: 1px solid #334155 !important; /* clean dark divider */
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background-color: transparent !important;
+}
+
 .form-row.field-product_name, .form-row.field-slug {
-    border-bottom: none !important;
+    border-bottom: 1px solid #334155 !important;
 }
 
-/* Add spacing between fields in the same row */
+/* Each field container (.fieldBox, .form-group, or direct div): Single horizontal line */
+.form-row > div,
+.form-row .form-group,
 .form-row .fieldBox {
-    padding-right: 20px !important;
-    float: left !important;
-    margin-bottom: 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 20px !important;
+    box-sizing: border-box !important;
 }
 
-/* Fix checkbox and label alignment */
-.form-row input[type="checkbox"] {
-    margin-top: 5px !important;
-    vertical-align: middle !important;
+/* Align label to top for multi-line textareas */
+.form-row > div:has(textarea),
+.form-row .fieldBox:has(textarea) {
+    align-items: flex-start !important;
 }
 
-.form-row label.vCheckboxLabel {
-    display: inline-block !important;
-    margin-top: 2px !important;
-    padding-left: 5px !important;
-    color: #b0b0b0 !important;
-}
+/* ─────────────────────────────────────────────────────────────────────────────
+   LABEL ALIGNMENT (Fixed 220px width on left for straight vertical input line)
+   ───────────────────────────────────────────────────────────────────────────── */
 
-/* Styling help text for better readability */
-.help {
+.form-row label:not(.vCheckboxLabel),
+.form-row .col-form-label {
     display: block !important;
-    padding: 2px 0 8px 0 !important;
-    font-style: italic !important;
-    color: #888 !important;
-    font-size: 0.85rem !important;
+    float: none !important;
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    font-weight: 600 !important;
+    color: #e2e8f0 !important; /* slate-100 */
+    font-size: 0.88rem !important;
+    letter-spacing: 0.2px !important;
+    text-align: left !important;
 }
 
-/* Section headers improvements */
-.module h2 {
-    background: #2c3e50 !important;
-    color: #ecf0f1 !important;
-}
+/* ─────────────────────────────────────────────────────────────────────────────
+   INPUT CONTROLS & WIDGETS (Straight Vertical Line Alignment)
+   ───────────────────────────────────────────────────────────────────────────── */
 
-/* Ensure descriptions are clear and don't overlap */
-.description {
-    background: rgba(44, 62, 80, 0.3) !important;
-    padding: 10px !important;
+/* Style all standard input fields */
+.form-row input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.form-row select,
+.form-row textarea,
+.form-row .form-control:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.form-row .vTextField,
+.form-row .vIntegerField,
+.form-row .vDateField,
+.form-row .vTimeField,
+.form-row .vForeignKeyRawIdAdminField {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: 650px !important; /* Consistent maximum width for straight input alignment */
+    box-sizing: border-box !important;
+    background-color: #1e293b !important; /* slate-800 */
+    border: 1px solid #475569 !important; /* slate-600 */
+    color: #f8fafc !important; /* slate-50 */
+    padding: 10px 14px !important;
     border-radius: 4px !important;
-    border-left: 4px solid #3498db !important;
-    margin-bottom: 15px !important;
+    font-size: 0.9rem !important;
+    font-family: inherit !important;
+    height: 42px !important; /* fixed height for input fields */
+    line-height: 1.5 !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
 }
 
-/* Responsive adjustment for small screens */
+/* Textareas need variable height */
+.form-row textarea {
+    height: auto !important;
+    min-height: 110px !important;
+}
+
+/* Related Widget Wrappers (for selects with pencil/plus/eye icons) */
+.related-widget-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex: 1 1 auto !important;
+    max-width: 650px !important;
+}
+
+.related-widget-wrapper select {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Edit/Add/View related links alignment next to selects */
+.related-widget-wrapper a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #334155 !important;
+    border-radius: 4px !important;
+    width: 32px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.related-widget-wrapper a:hover {
+    background-color: #475569 !important;
+}
+
+/* Focus state - Google Signature Blue Glow */
+.form-row input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+.form-row select:focus,
+.form-row textarea:focus,
+.form-row .form-control:focus {
+    border-color: #3b82f6 !important; /* Google Blue */
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+    outline: none !important;
+    background-color: #1e293b !important;
+}
+
+/* Readonly fields styling */
+.form-row .readonly {
+    flex: 1 1 auto !important;
+    max-width: 650px !important;
+    color: #cbd5e1 !important; /* slate-300 */
+    font-size: 0.9rem !important;
+    word-break: break-all !important;
+}
+
+/* Help / description styling - positioned cleanly underneath the input box */
+.help, .form-row .help {
+    display: block !important;
+    margin-top: 6px !important;
+    margin-left: 240px !important; /* aligns right under the input box start */
+    font-size: 0.78rem !important;
+    color: #94a3b8 !important;
+    font-style: italic !important;
+    line-height: 1.4 !important;
+}
+
+/* Place placeholder styling */
+::placeholder {
+    color: #64748b !important; /* slate-500 */
+    opacity: 1 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CHECKBOX HANDLING (Aligned with Input Box Column)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.form-row > div:has(input[type="checkbox"]),
+.form-row .form-group:has(input[type="checkbox"]),
+.form-row .fieldBox:has(input[type="checkbox"]) {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+}
+
+.form-row input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    accent-color: #2563eb !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TABBED NAVIGATION (Pill Button Layout)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.nav-tabs {
+    border-bottom: none !important; /* Remove bottom tab border */
+    margin-bottom: 28px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important; /* space between buttons */
+    padding: 8px 0 !important;
+}
+
+.nav-tabs .nav-item {
+    margin: 0 !important;
+}
+
+.nav-tabs .nav-item .nav-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #2d3748 !important; /* dark button base */
+    border: 1px solid #4a5568 !important; /* subtle border */
+    color: #cbd5e1 !important; /* slate-300 */
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+    padding: 10px 18px !important;
+    border-radius: 6px !important; /* smooth rounded button */
+    transition: all 0.2s ease-in-out !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
+.nav-tabs .nav-item .nav-link:hover {
+    background-color: #3e4e68 !important; /* slightly lighter */
+    color: #ffffff !important;
+    border-color: #718096 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+}
+
+.nav-tabs .nav-item .nav-link.active,
+.nav-tabs .nav-item .nav-link.active:hover {
+    background-color: #2563eb !important; /* solid Google Blue */
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important; /* blue glow */
+    transform: translateY(0) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SUBMIT ACTIONS / BUTTONS (Flat modern Google look)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.submit-row,
+.card-footer,
+.form-actions {
+    background-color: #1e293b !important; /* slate-800 background for actions */
+    border-top: 1px solid #334155 !important;
+    padding: 16px 24px !important;
+    border-radius: 4px !important;
+    margin-top: 24px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+}
+
+/* Save (Primary Action Button) */
+.btn-primary, 
+input[name="_save"] {
+    background-color: #2563eb !important; /* Google signature blue */
+    border: 1px solid #2563eb !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+    border-radius: 4px !important;
+    padding: 10px 20px !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.btn-primary:hover, 
+input[name="_save"]:hover {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+
+/* Delete (Danger Action Button) */
+.btn-danger, 
+.deletelink,
+a.deletelink {
+    background-color: transparent !important;
+    border: 1px solid #ef4444 !important; /* Google signature red border */
+    color: #ef4444 !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+    border-radius: 4px !important;
+    padding: 10px 20px !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    display: inline-block !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.btn-danger:hover, 
+.deletelink:hover,
+a.deletelink:hover {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+/* Save & Continue, Save & Add another, History (Secondary Action Buttons) */
+input[name="_addanother"],
+input[name="_continue"],
+.btn-info,
+.btn-secondary {
+    background-color: transparent !important;
+    border: 1px solid #475569 !important; /* slate-600 outline */
+    color: #cbd5e1 !important; /* slate-300 */
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+    border-radius: 4px !important;
+    padding: 10px 20px !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+}
+
+input[name="_addanother"]:hover,
+input[name="_continue"]:hover,
+.btn-info:hover,
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: #94a3b8 !important;
+    color: #f8fafc !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DESCRIPTION / INSTRUCTION BANNER
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.description {
+    background: rgba(30, 41, 59, 0.7) !important; /* slate-800 with transparency */
+    padding: 14px 20px !important;
+    border-radius: 6px !important;
+    border-left: 4px solid #3b82f6 !important; /* Google Blue sidebar accent */
+    margin-bottom: 24px !important;
+    color: #cbd5e1 !important; /* slate-300 */
+    font-size: 0.88rem !important;
+    line-height: 1.5 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CONTAINER CARD OVERLAY
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.card {
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15) !important;
+    background-color: #1e293b !important;
+}
+
+.card-header {
+    background-color: #0f172a !important; /* darker title bar */
+    border-bottom: 1px solid #334155 !important;
+    padding: 16px 24px !important;
+}
+
+.card-title {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    color: #f8fafc !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN (Adjusts labels for small screens)
+   ───────────────────────────────────────────────────────────────────────────── */
+
 @media (max-width: 768px) {
+    .form-row > div,
+    .form-row .form-group,
     .form-row .fieldBox {
-        float: none !important;
-        padding-right: 0 !important;
-        width: 100% !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
     }
+
+    .form-row label:not(.vCheckboxLabel),
+    .form-row .col-form-label {
+        width: 100% !important;
+        min-width: 100% !important;
+        margin-bottom: 6px !important;
+    }
+
+    .help, .form-row .help {
+        margin-left: 0 !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   IMAGE UPLOAD WIDGET — Clean Modern Upload Area
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.admin-image-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-image-preview-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+/* Thumbnail preview when image exists */
+.admin-image-preview {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #334155;
+    background: #0f172a;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+}
+
+.admin-image-preview:hover {
+    border-color: #3b82f6;
+}
+
+.admin-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Controls row */
+.admin-image-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+/* Upload / Change button */
+.admin-image-file-label {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #1e293b;
+    border: 1px dashed #475569;
+    border-radius: 6px;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: fit-content;
+}
+
+.admin-image-file-label i {
+    font-size: 1rem;
+}
+
+.admin-image-file-label:hover {
+    border-color: #3b82f6;
+    color: #60a5fa;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+/* Clear / Remove checkbox */
+.admin-image-clear-label {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem !important;
+    color: #ef4444 !important;
+    cursor: pointer;
+}
+
+.admin-image-clear-label input[type="checkbox"] {
+    accent-color: #ef4444;
+}
+
+/* Empty upload state (no image yet) */
+.admin-image-upload-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 32px;
+    border: 2px dashed #334155;
+    border-radius: 8px;
+    background: #0f172a;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 100px;
+}
+
+.admin-image-upload-empty:hover {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.03);
+}
+
+.admin-image-upload-empty .admin-upload-icon {
+    font-size: 2rem;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.admin-image-upload-empty:hover .admin-upload-icon {
+    color: #3b82f6;
+}
+
+.admin-image-upload-empty .admin-upload-text {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GALLERY INLINE — Improved Tabular Inline Styling
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.inline-group .inline-related {
+    border: 1px solid #334155;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    background: #1e293b;
+    overflow: hidden;
+}
+
+.inline-group .inline-related h3 {
+    background: #0f172a;
+    padding: 12px 20px;
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    border-bottom: 1px solid #334155;
+}
+
+.inline-group .inline-related .row {
+    padding: 12px 16px;
+}
+
+.inline-group .tabular .related-widget-wrapper {
+    max-width: 100%;
+}
+
+.inline-group .tabular .related-widget-wrapper select {
+    max-width: 100%;
+}
+
+/* Gallery inline: image cell styling */
+.inline-group .tabular td.field-image,
+.inline-group .tabular td.field-main_image {
+    width: 160px;
+    min-width: 160px;
+}
+
+.inline-group .tabular .delete {
+    text-align: center;
+}
+
+.inline-group .tabular .delete label {
+    color: #ef4444 !important;
+    font-size: 0.8rem;
+}
+
+/* Add row button */
+.inline-group .add-row a {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px dashed #3b82f6;
+    border-radius: 6px;
+    color: #60a5fa !important;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.inline-group .add-row a:hover {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PRODUCT STATUS CHECKBOX ROW — Nice side-by-side layout
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.form-row:has(input[type="checkbox"]):not(:has(textarea)) {
+    padding: 10px 24px !important;
 }

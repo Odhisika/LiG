@@ -54,7 +54,9 @@
 
         <!-- Stock Status -->
         <div class="stock-status mb-3">
-            {% if product.stock > 0 %}
+            {% if product.is_sold %}
+                <span class="stock-out">Sold</span>
+            {% elif product.stock > 0 %}
                 {% if product.stock <= 10 %}
                     <span class="stock-low">Only {{ product.stock }} left in stock</span>
                 {% else %}
@@ -69,7 +71,11 @@
         <form action="{% url 'add_cart' product.id %}" method="POST" class="add-to-cart-form">
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1">
-            {% if product.stock > 0 %}
+            {% if product.is_sold %}
+            <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                Sold
+            </button>
+            {% elif product.stock > 0 %}
                 {% if product.id in cart_product_ids %}
                 <button type="submit" class="btn btn-success btn-add-cart w-100">
                     <i class="fas fa-check me-2"></i>Added ✓

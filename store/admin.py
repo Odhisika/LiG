@@ -1,5 +1,7 @@
 from django.contrib import admin
+from django.db import models
 from django.utils.safestring import mark_safe
+from django import forms
 from .models import (
     Product, ComputerProduct, SoftwareProduct, PeripheralProduct,
     NetworkingProduct, UPSProduct, SecurityCameraProduct,
@@ -10,15 +12,70 @@ from .models import (
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# CUSTOM IMAGE WIDGET WITH PREVIEW
+# ─────────────────────────────────────────────────────────────────────────────
+
+class AdminImageWidget(forms.ClearableFileInput):
+
+    def __init__(self, attrs=None):
+        default_attrs = {'accept': 'image/*'}
+        if attrs:
+            default_attrs.update(attrs)
+        super().__init__(attrs=default_attrs)
+
+    def format_value(self, value):
+        return value
+
+    def value_from_datadict(self, data, files, name):
+        return files.get(name)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        is_initial = bool(value) and hasattr(value, 'url')
+        if is_initial:
+            return mark_safe(
+                '<div class="admin-image-widget">'
+                '  <div class="admin-image-preview-wrapper">'
+                '    <div class="admin-image-preview">'
+                f'      <img src="{value.url}" alt="Product image" loading="lazy" />'
+                '    </div>'
+                '    <div class="admin-image-controls">'
+                '      <label class="admin-image-file-label">'
+                '        <i class="fas fa-camera"></i> Change Image'
+                f'        <input type="file" name="{name}" accept="image/*" style="display:none;" />'
+                '      </label>'
+                '      <label class="admin-image-clear-label">'
+                f'        <input type="checkbox" name="{name}-clear" /> Remove'
+                '      </label>'
+                '    </div>'
+                '  </div>'
+                '</div>'
+            )
+        return mark_safe(
+            '<div class="admin-image-widget">'
+            '  <div class="admin-image-preview-wrapper">'
+            '    <div class="admin-image-upload-empty">'
+            '      <i class="fas fa-cloud-upload-alt admin-upload-icon"></i>'
+            '      <span class="admin-upload-text">Click to upload image</span>'
+            f'      <input type="file" name="{name}" accept="image/*" class="admin-file-input" />'
+            '    </div>'
+            '  </div>'
+            '</div>'
+        )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # INLINE CLASSES
 # ─────────────────────────────────────────────────────────────────────────────
 
 class ProductGalleryInline(admin.TabularInline):
     model = ProductGallery
+    formfield_overrides = {
+        models.ImageField: {'widget': AdminImageWidget},
+    }
     extra = 2
     fields = ('image', 'alt_text', 'image_type', 'order', 'is_active')
     verbose_name = "Product Image"
-    verbose_name_plural = "📷 Product Gallery Images"
+    verbose_name_plural = "Product Gallery Images"
 
 
 class ProductSpecificationInline(admin.TabularInline):
@@ -26,7 +83,7 @@ class ProductSpecificationInline(admin.TabularInline):
     extra = 3
     fields = ('group', 'name', 'value', 'order')
     verbose_name = "Specification"
-    verbose_name_plural = "📋 Technical Specifications (e.g. Processor: Intel i7)"
+    verbose_name_plural = "Technical Specifications (e.g. Processor: Intel i7)"
 
 
 class ProductVariantInline(admin.TabularInline):
@@ -34,7 +91,7 @@ class ProductVariantInline(admin.TabularInline):
     extra = 0
     fields = ('sku', 'price', 'compare_price', 'stock', 'attributes', 'is_active')
     readonly_fields = ('sku',)
-    verbose_name_plural = "🔀 Product Variants"
+    verbose_name_plural = "Product Variants"
 
 
 class ProductTagRelationInline(admin.TabularInline):
@@ -61,6 +118,12 @@ class ProductAdminMixin:
             return {}
         return {'slug': ('product_name',)}
 
+    def save_model(self, request, obj, form, change):
+        if obj.is_sold:
+            obj.is_available = False
+            obj.stock = 0
+        super().save_model(request, obj, form, change)
+
     class Media:
         css = {
             'all': ('css/admin_custom.css',)
@@ -76,9 +139,9 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'get_computer_type', 'condition', 'brand',
-        'processor_model', 'ram_size', 'storage_capacity', 'price', 'stock', 'is_available'
+        'processor_model', 'ram_size', 'storage_capacity', 'price', 'stock', 'is_available', 'is_sold'
     )
-    list_editable = ('price', 'stock', 'is_available')
+    list_editable = ('price', 'stock', 'is_available', 'is_sold')
     list_filter = ('computer_type', 'condition', 'brand', 'processor_brand', 'is_available', 'is_featured')
     search_fields = ('product_name', 'slug', 'model_number', 'processor_model')
     ordering = ('-created_date',)
@@ -130,40 +193,40 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     fieldsets = (
-        ('📝 Basic Information', {
+        ('Basic Information', {
             'fields': (
                 ('product_name', 'slug'),
                 ('category', 'brand', 'model_number'),
                 'short_description',
             ),
             'description': mark_safe(
-                'ℹ️ <b>Category</b>: Select the general category (e.g. "Computers"). '
+                '<b>Category</b>: Select the general category (e.g. "Computers"). '
                 '<b>Computer Type</b> below determines which sub-page this product appears on '
                 '(e.g. Laptops, Desktops, All-in-One, Slightly Used Laptops).'
             )
         }),
-        ('🖥️ Computer Classification — REQUIRED FOR CORRECT PAGE ROUTING', {
+        ('Computer Classification — REQUIRED FOR CORRECT PAGE ROUTING', {
             'fields': (('computer_type', 'condition'), 'storefront_destination'),
             'description': mark_safe(
-                '⚠️ <b>IMPORTANT</b>: Select the Computer Type to determine which page this product appears on.<br>'
-                '→ <b>Laptop</b> types appear on the All Computers and Laptops pages.<br>'
-                '→ <b>Desktop</b> types appear on the All Computers and Desktops pages.<br>'
-                '→ <b>Fresh / Slightly Used</b> sub-types appear on their matching condition pages.<br>'
-                '→ <b>All-in-One Desktop</b> appears on the All-in-One page.<br>'
-                '→ <b>Monitor</b> types appear on the All Computers and Monitors pages.'
+                '<b>IMPORTANT</b>: Select the Computer Type to determine which page this product appears on.<br>'
+                '- <b>Laptop</b> types appear on the All Computers and Laptops pages.<br>'
+                '- <b>Desktop</b> types appear on the All Computers and Desktops pages.<br>'
+                '- <b>Fresh / Slightly Used</b> sub-types appear on their matching condition pages.<br>'
+                '- <b>All-in-One Desktop</b> appears on the All-in-One page.<br>'
+                '- <b>Monitor</b> types appear on the All Computers and Monitors pages.'
             )
         }),
-        ('📄 Description', {
+        ('Description', {
             'fields': ('description',)
         }),
-        ('⚙️ Processor', {
+        ('Processor', {
             'fields': (
                 ('processor_brand', 'processor_model'),
                 ('processor_generation', 'processor_cores', 'processor_speed'),
             ),
             'description': 'e.g. Intel, Core i7-1165G7, 11th Gen, 4 cores, 2.8GHz'
         }),
-        ('💾 Memory & Storage', {
+        ('Memory & Storage', {
             'fields': (
                 ('ram_size', 'ram_type'),
                 ('ram_expandable', 'max_ram'),
@@ -172,12 +235,12 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             ),
             'description': 'RAM in GB (e.g. 16). Storage in GB (e.g. 512 for 512GB SSD).'
         }),
-        ('🎮 Graphics (GPU)', {
+        ('Graphics (GPU)', {
             'fields': (('gpu_brand', 'gpu_model', 'gpu_memory'),),
             'description': 'e.g. NVIDIA, RTX 3050, 4GB. Leave blank for integrated graphics.',
             'classes': ('collapse',)
         }),
-        ('🖥️ Display', {
+        ('Display', {
             'fields': (
                 ('screen_size', 'screen_type'),
                 ('screen_resolution', 'refresh_rate'),
@@ -186,7 +249,7 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             'description': 'Screen size in inches. Resolution e.g. 1920x1080 (FHD).',
             'classes': ('collapse',)
         }),
-        ('🔌 Connectivity & Features', {
+        ('Connectivity & Features', {
             'fields': (
                 ('operating_system', 'wifi_standard'),
                 ('bluetooth_version', 'webcam'),
@@ -195,11 +258,11 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             ),
             'classes': ('collapse',)
         }),
-        ('🛡️ Warranty', {
+        ('Warranty', {
             'fields': (('warranty_period',),),
             'classes': ('collapse',)
         }),
-        ('💰 Pricing', {
+        ('Pricing', {
             'fields': (
                 ('price', 'compare_price'),
                 ('cost_price', 'barcode'),
@@ -210,31 +273,32 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 '<b>Cost Price</b>: Your internal cost (not shown to customers).'
             )
         }),
-        ('📦 Inventory', {
+        ('Inventory', {
             'fields': (
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders'),
             ),
             'description': 'Set stock level. A low-stock alert fires when stock drops to the threshold.'
         }),
-        ('🚦 Product Status', {
+        ('Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital'),
+                ('is_sold', 'requires_shipping'),
+                ('is_digital',),
             )
         }),
-        ('🔍 SEO & Marketing', {
+        ('SEO & Marketing', {
             'fields': ('meta_title', 'meta_description', 'tags'),
             'classes': ('collapse',)
         }),
-        ('📐 Physical Properties', {
+        ('Physical Properties', {
             'fields': (
                 ('weight', 'dimensions_length'),
                 ('dimensions_width', 'dimensions_height'),
             ),
             'classes': ('collapse',)
         }),
-        ('🕒 Timestamps', {
+        ('Timestamps', {
             'fields': (('created_date', 'modified_date'),),
             'classes': ('collapse',)
         }),
@@ -250,9 +314,9 @@ class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'software_category', 'license_type',
-        'version', 'platforms', 'price', 'stock', 'is_available'
+        'version', 'platforms', 'price', 'stock', 'is_available', 'is_sold'
     )
-    list_editable = ('price', 'stock', 'is_available')
+    list_editable = ('price', 'stock', 'is_available', 'is_sold')
     list_filter = ('software_category', 'license_type', 'condition', 'is_available', 'is_featured')
     search_fields = ('product_name', 'slug', 'developer', 'publisher')
     ordering = ('-created_date',)
@@ -288,29 +352,29 @@ class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     storefront_destination.short_description = 'Storefront Destination'
 
     fieldsets = (
-        ('📝 Basic Information', {
+        ('Basic Information', {
             'fields': (
                 ('product_name', 'slug'),
                 ('category', 'condition'),
                 'short_description',
             ),
-            'description': mark_safe('ℹ️ <b>Category</b>: Select the general "Software" category.')
+            'description': mark_safe('<b>Category</b>: Select the general "Software" category.')
         }),
-        ('💾 Software Classification — REQUIRED FOR CORRECT PAGE ROUTING', {
+        ('Software Classification — REQUIRED FOR CORRECT PAGE ROUTING', {
             'fields': (('software_category',), 'storefront_destination'),
             'description': mark_safe(
-                '⚠️ <b>IMPORTANT</b>: Select the <b>Software Type</b> to route this product '
+                '<b>IMPORTANT</b>: Select the <b>Software Type</b> to route this product '
                 'to the correct software sub-page.<br>'
-                '→ <b>Office Suite / Design / Accounting / Video / POS</b> appear under <b>Software → Applications</b>.<br>'
-                '→ <b>Antivirus / VPN / Backup / Network Management</b> appear under <b>Software → Security &amp; Utilities</b>.<br>'
-                '→ <b>Development Tools / Database Software</b> appear under <b>Software → Development</b>.<br>'
+                '- <b>Office Suite / Design / Creative / Accounting / Video / POS</b> appear under <b>Software → Applications</b>.<br>'
+                '- <b>Antivirus / VPN / Backup / Network Management</b> appear under <b>Software → Security &amp; Utilities</b>.<br>'
+                '- <b>Development Tools / Database Software</b> appear under <b>Software → Development</b>.<br>'
                 'If the type does not exist yet, go to <b>Catalogue → Software Types</b> first.'
             )
         }),
-        ('📄 Description', {
+        ('Description', {
             'fields': ('description',)
         }),
-        ('🔧 Software Details', {
+        ('Software Details', {
             'fields': (
                 ('version', 'license_type'),
                 ('platforms', 'max_devices'),
@@ -323,7 +387,7 @@ class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 '<b>Subscription Duration</b>: In months (12 = yearly).'
             )
         }),
-        ('🔑 Digital Delivery', {
+        ('Digital Delivery', {
             'fields': (
                 'download_link',
                 ('license_key', 'installation_guide'),
@@ -350,7 +414,8 @@ class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
         ('🚦 Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital'),
+                ('is_sold', 'requires_shipping'),
+                ('is_digital',),
             )
         }),
         ('🔍 SEO & Marketing', {
@@ -373,9 +438,9 @@ class PeripheralProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'brand', 'connectivity', 'condition',
-        'price', 'stock', 'is_available'
+        'price', 'stock', 'is_available', 'is_sold'
     )
-    list_editable = ('price', 'stock', 'is_available')
+    list_editable = ('price', 'stock', 'is_available', 'is_sold')
     list_filter = ('brand', 'connectivity', 'condition', 'is_available', 'is_featured')
     search_fields = ('product_name', 'slug', 'model_number', 'description')
     ordering = ('-created_date',)
@@ -395,7 +460,7 @@ class PeripheralProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     storefront_destination.short_description = 'Storefront Destination'
 
     fieldsets = (
-        ('📝 Basic Information', {
+        ('Basic Information', {
             'fields': (
                 ('product_name', 'slug'),
                 ('category', 'brand', 'model_number'),
@@ -403,67 +468,68 @@ class PeripheralProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 'storefront_destination',
             ),
             'description': (
-                'ℹ️ Peripherals include Mice, Keyboards, Monitors, Headsets, Webcams, '
+                'Peripherals include Mice, Keyboards, Monitors, Headsets, Webcams, '
                 'External Drives, Docking Stations, and any PC accessory. '
                 'These products appear on the Accessories page.'
             )
         }),
-        ('📄 Description', {
+        ('Description', {
             'fields': ('description',)
         }),
-        ('🔌 Connectivity & Compatibility', {
+        ('Connectivity & Compatibility', {
             'fields': (('connectivity', 'compatibility'),),
             'description': mark_safe(
                 '<b>Connectivity</b>: How it connects (USB, Bluetooth, etc.).<br>'
                 '<b>Compatibility</b>: e.g. "Windows 10/11, macOS 12+, Linux".'
             )
         }),
-        ('🎨 Physical Details', {
+        ('Physical Details', {
             'fields': (('color', 'material'),),
             'classes': ('collapse',)
         }),
-        ('🔋 Power / Battery', {
+        ('Power / Battery', {
             'fields': (
                 ('battery_required', 'battery_type'),
                 ('battery_life', 'power_consumption'),
             ),
             'classes': ('collapse',)
         }),
-        ('🛡️ Warranty', {
+        ('Warranty', {
             'fields': (('warranty_period', 'warranty_type'),),
             'classes': ('collapse',)
         }),
-        ('🚦 Product Status', {
+        ('Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital'),
+                ('is_sold', 'requires_shipping'),
+                ('is_digital',),
                 'condition',
             )
         }),
-        ('💰 Pricing', {
+        ('Pricing', {
             'fields': (
                 ('price', 'compare_price'),
                 ('cost_price', 'barcode'),
             ),
         }),
-        ('📦 Inventory', {
+        ('Inventory', {
             'fields': (
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders'),
             ),
         }),
-        ('🔍 SEO & Marketing', {
+        ('SEO & Marketing', {
             'fields': ('meta_title', 'meta_description', 'tags'),
             'classes': ('collapse',)
         }),
-        ('📐 Physical Properties', {
+        ('Physical Properties', {
             'fields': (
                 ('weight', 'dimensions_length'),
                 ('dimensions_width', 'dimensions_height'),
             ),
             'classes': ('collapse',)
         }),
-        ('🕒 Timestamps', {
+        ('Timestamps', {
             'fields': (('created_date', 'modified_date'),),
             'classes': ('collapse',)
         }),
@@ -479,9 +545,9 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'device_type', 'brand', 'max_speed',
-        'poe_support', 'wifi_standard', 'price', 'stock', 'is_available'
+        'poe_support', 'wifi_standard', 'price', 'stock', 'is_available', 'is_sold'
     )
-    list_editable = ('price', 'stock', 'is_available')
+    list_editable = ('price', 'stock', 'is_available', 'is_sold')
     list_filter = ('device_type', 'brand', 'poe_support', 'managed', 'wifi_standard', 'is_available', 'is_featured')
     search_fields = ('product_name', 'slug', 'description', 'model_number')
     ordering = ('-created_date',)
@@ -513,27 +579,27 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     storefront_destination.short_description = 'Storefront Destination'
 
     fieldsets = (
-        ('📝 Basic Information', {
+        ('Basic Information', {
             'fields': (
                 ('product_name', 'slug'),
                 ('category', 'brand', 'model_number'),
                 'short_description',
             ),
-            'description': 'ℹ️ Networking products include Switches, Routers, Modems, and Access Points.'
+            'description': 'Networking products include Switches, Routers, Modems, and Access Points.'
         }),
-        ('🌐 Device Classification — REQUIRED', {
+        ('Device Classification — REQUIRED', {
             'fields': (('device_type', 'condition'), 'storefront_destination'),
             'description': mark_safe(
-                '⚠️ <b>IMPORTANT</b>: Select the correct device type.<br>'
-                '→ <b>Switches</b> (managed/unmanaged/PoE) appear on the Switches page.<br>'
-                '→ <b>Routers / Modems</b> appear on the Routers &amp; Modems page.<br>'
-                '→ <b>Access Points</b> appear on the Access Points page.'
+                '<b>IMPORTANT</b>: Select the correct device type.<br>'
+                '- <b>Switches</b> (managed/unmanaged/PoE) appear on the Switches page.<br>'
+                '- <b>Routers / Modems</b> appear on the Routers &amp; Modems page.<br>'
+                '- <b>Access Points</b> appear on the Access Points page.'
             )
         }),
-        ('📄 Description', {
+        ('Description', {
             'fields': ('description',)
         }),
-        ('🔌 Ports & Connectivity', {
+        ('Ports & Connectivity', {
             'fields': (
                 ('total_ports', 'uplink_ports'),
                 ('poe_support', 'poe_budget_watts'),
@@ -545,7 +611,7 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 '<b>DSL Type</b>: Only for modems — e.g. ADSL2+, VDSL2, Fibre.'
             )
         }),
-        ('⚡ Speed & Wi-Fi', {
+        ('Speed & Wi-Fi', {
             'fields': (
                 ('max_speed', 'switching_capacity'),
                 ('wifi_standard', 'wifi_speed'),
@@ -557,44 +623,45 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 '<b>Wi-Fi Speed</b>: e.g. AX3000, AC1200. Leave blank for wired-only.'
             )
         }),
-        ('⚙️ Management Features', {
+        ('Management Features', {
             'fields': (('managed', 'vlan_support', 'rack_mountable'),),
             'classes': ('collapse',)
         }),
-        ('🛡️ Warranty', {
+        ('Warranty', {
             'fields': (('warranty_period',),),
             'classes': ('collapse',)
         }),
-        ('🚦 Product Status', {
+        ('Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital'),
+                ('is_sold', 'requires_shipping'),
+                ('is_digital',),
             )
         }),
-        ('💰 Pricing', {
+        ('Pricing', {
             'fields': (
                 ('price', 'compare_price'),
                 ('cost_price', 'barcode'),
             ),
         }),
-        ('📦 Inventory', {
+        ('Inventory', {
             'fields': (
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders'),
             ),
         }),
-        ('🔍 SEO & Marketing', {
+        ('SEO & Marketing', {
             'fields': ('meta_title', 'meta_description', 'tags'),
             'classes': ('collapse',)
         }),
-        ('📐 Physical Properties', {
+        ('Physical Properties', {
             'fields': (
                 ('weight', 'dimensions_length'),
                 ('dimensions_width', 'dimensions_height'),
             ),
             'classes': ('collapse',)
         }),
-        ('🕒 Timestamps', {
+        ('Timestamps', {
             'fields': (('created_date', 'modified_date'),),
             'classes': ('collapse',)
         }),
@@ -610,9 +677,9 @@ class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'brand', 'capacity_va', 'capacity_watts',
-        'ups_type', 'form_factor', 'price', 'stock', 'is_available'
+        'ups_type', 'form_factor', 'price', 'stock', 'is_available', 'is_sold'
     )
-    list_editable = ('price', 'stock', 'is_available')
+    list_editable = ('price', 'stock', 'is_available', 'is_sold')
     list_filter = ('ups_type', 'form_factor', 'output_type', 'brand', 'avr', 'lcd_display', 'is_available', 'is_featured')
     search_fields = ('product_name', 'slug', 'description', 'model_number')
     ordering = ('-created_date',)
@@ -640,30 +707,30 @@ class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     storefront_destination.short_description = 'Storefront Destination'
 
     fieldsets = (
-        ('📝 Basic Information', {
+        ('Basic Information', {
             'fields': (
                 ('product_name', 'slug'),
                 ('category', 'brand', 'model_number'),
                 'short_description',
                 'storefront_destination',
             ),
-            'description': mark_safe('ℹ️ UPS products: Standby, Line Interactive, and Online Double Conversion units.<br>'
-                                     '⚠️ <b>Note:</b> If you add a new Brand, ensure you tick the <b>"For UPS"</b> checkbox in the brand settings, otherwise it will not appear here.')
+            'description': mark_safe('UPS products: Standby, Line Interactive, and Online Double Conversion units.<br>'
+                                     '<b>Note:</b> If you add a new Brand, ensure you tick the <b>"For UPS"</b> checkbox in the brand settings, otherwise it will not appear here.')
         }),
-        ('📄 Description', {
+        ('Description', {
             'fields': ('description',)
         }),
-        ('⚡ Power Ratings — REQUIRED', {
+        ('Power Ratings — REQUIRED', {
             'fields': (
                 ('capacity_va', 'capacity_watts'),
             ),
             'description': mark_safe(
-                '⚠️ <b>IMPORTANT</b>: Enter the VA and Watt ratings.<br>'
-                '→ <b>VA</b>: Apparent power (e.g. 1500).<br>'
-                '→ <b>Watts</b>: Real power output (e.g. 900). Leave blank if unknown.'
+                '<b>IMPORTANT</b>: Enter the VA and Watt ratings.<br>'
+                '- <b>VA</b>: Apparent power (e.g. 1500).<br>'
+                '- <b>Watts</b>: Real power output (e.g. 900). Leave blank if unknown.'
             )
         }),
-        ('🔋 UPS Classification', {
+        ('UPS Classification', {
             'fields': (
                 ('ups_type', 'output_type'),
                 ('form_factor', 'condition'),
@@ -674,7 +741,7 @@ class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 '<b>Online Double Conversion</b>: Continuous power conditioning for servers.'
             )
         }),
-        ('🔌 Battery', {
+        ('Battery', {
             'fields': (
                 ('battery_type', 'number_of_batteries'),
                 'replaceable_battery',
@@ -682,7 +749,7 @@ class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             ),
             'description': 'Battery type (e.g. Sealed Lead Acid). Runtime in minutes at 50% and 100% load.'
         }),
-        ('🔌 Outlets & Connectivity', {
+        ('Outlets & Connectivity', {
             'fields': (
                 ('num_outlets', 'num_battery_backup_outlets', 'num_surge_only_outlets'),
                 ('usb_port', 'network_manageable'),
@@ -693,47 +760,48 @@ class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
                 '<b>Surge Only</b>: Sockets with surge protection but no battery backup.'
             )
         }),
-        ('🛡️ Protection Features', {
+        ('Protection Features', {
             'fields': (
                 ('surge_protection_joules', 'avr'),
                 ('lcd_display', 'audible_alarm'),
             ),
             'classes': ('collapse',)
         }),
-        ('🛡️ Warranty', {
+        ('Warranty', {
             'fields': (('warranty_period',),),
             'classes': ('collapse',)
         }),
-        ('🚦 Product Status', {
+        ('Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital'),
+                ('is_sold', 'requires_shipping'),
+                ('is_digital',),
             )
         }),
-        ('💰 Pricing', {
+        ('Pricing', {
             'fields': (
                 ('price', 'compare_price'),
                 ('cost_price', 'barcode'),
             ),
         }),
-        ('📦 Inventory', {
+        ('Inventory', {
             'fields': (
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders'),
             ),
         }),
-        ('🔍 SEO & Marketing', {
+        ('SEO & Marketing', {
             'fields': ('meta_title', 'meta_description', 'tags'),
             'classes': ('collapse',)
         }),
-        ('📐 Physical Properties', {
+        ('Physical Properties', {
             'fields': (
                 ('weight', 'dimensions_length'),
                 ('dimensions_width', 'dimensions_height'),
             ),
             'classes': ('collapse',)
         }),
-        ('🕒 Timestamps', {
+        ('Timestamps', {
             'fields': (('created_date', 'modified_date'),),
             'classes': ('collapse',)
         }),
@@ -749,9 +817,9 @@ class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     extra_readonly_fields = ('storefront_destination',)
     list_display = (
         'product_name', 'camera_type', 'brand', 'resolution',
-        'night_vision', 'weatherproof', 'price', 'stock', 'is_available'
+        'night_vision', 'weatherproof', 'price', 'stock', 'is_available', 'is_sold'
     )
-    list_editable = ('price', 'stock', 'is_available')
+    list_editable = ('price', 'stock', 'is_available', 'is_sold')
     list_filter = (
         'camera_type', 'brand', 'resolution', 'night_vision',
         'weatherproof', 'motion_detection', 'ai_detection', 'is_available'
@@ -781,44 +849,44 @@ class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     storefront_destination.short_description = 'Storefront Destination'
 
     fieldsets = (
-        ('📝 Basic Information', {
+        ('Basic Information', {
             'fields': (
                 ('product_name', 'slug'),
                 ('category', 'brand', 'model_number'),
                 'short_description',
             ),
             'description': (
-                'ℹ️ Security products: IP Cameras, Dome/Bullet Cameras, PTZ, NVRs, DVRs, Complete CCTV Kits.'
+                'Security products: IP Cameras, Dome/Bullet Cameras, PTZ, NVRs, DVRs, Complete CCTV Kits.'
             )
         }),
-        ('📷 Camera Classification — REQUIRED', {
+        ('Camera Classification — REQUIRED', {
             'fields': (('camera_type', 'resolution', 'condition'), 'storefront_destination'),
             'description': mark_safe(
-                '⚠️ <b>IMPORTANT</b>: Select the camera type to route to the correct CCTV section.<br>'
-                '→ <b>IP / PTZ / Dome / Bullet / Fisheye / Doorbell Cameras</b> → IP Cameras page.<br>'
-                '→ <b>Complete CCTV Kits</b> → CCTV Kits page.<br>'
-                '→ <b>NVR / DVR</b> → NVR / DVR page.'
+                '<b>IMPORTANT</b>: Select the camera type to route to the correct CCTV section.<br>'
+                '- <b>IP / PTZ / Dome / Bullet / Fisheye / Doorbell Cameras</b> → IP Cameras page.<br>'
+                '- <b>Complete CCTV Kits</b> → CCTV Kits page.<br>'
+                '- <b>NVR / DVR</b> → NVR / DVR page.'
             )
         }),
-        ('📄 Description', {
+        ('Description', {
             'fields': ('description',)
         }),
-        ('👁️ Vision', {
+        ('Vision', {
             'fields': (
                 ('night_vision', 'night_vision_range'),
                 'wide_angle',
             ),
             'description': 'Night vision range in metres. Wide angle in degrees e.g. 120°.'
         }),
-        ('🔌 Connectivity & Power', {
+        ('Connectivity & Power', {
             'fields': (('connectivity', 'poe_powered'),),
             'description': 'Connectivity: e.g. "Wired PoE", "Wi-Fi 2.4/5GHz", "4G LTE".'
         }),
-        ('💾 Storage', {
+        ('Storage', {
             'fields': (('storage_type', 'max_sd_card_gb'),),
             'classes': ('collapse',)
         }),
-        ('📦 Kit Details (NVR/DVR/Complete Kits Only)', {
+        ('Kit Details (NVR/DVR/Complete Kits Only)', {
             'fields': (
                 ('number_of_cameras', 'channels'),
                 ('hdd_included_tb',),
@@ -826,7 +894,7 @@ class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             'classes': ('collapse',),
             'description': 'Only fill for kits, NVRs, or DVRs that come with cameras or HDDs.'
         }),
-        ('🤖 Smart Features', {
+        ('Smart Features', {
             'fields': (
                 ('motion_detection', 'two_way_audio'),
                 'ai_detection',
@@ -834,41 +902,42 @@ class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             ),
             'description': 'Weatherproof rating: e.g. IP66, IP67, IK10.'
         }),
-        ('🛡️ Warranty', {
+        ('Warranty', {
             'fields': (('warranty_period',),),
             'classes': ('collapse',)
         }),
-        ('🚦 Product Status', {
+        ('Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
-                ('requires_shipping', 'is_digital'),
+                ('is_sold', 'requires_shipping'),
+                ('is_digital',),
             )
         }),
-        ('💰 Pricing', {
+        ('Pricing', {
             'fields': (
                 ('price', 'compare_price'),
                 ('cost_price', 'barcode'),
             ),
         }),
-        ('📦 Inventory', {
+        ('Inventory', {
             'fields': (
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders'),
             ),
             'description': 'Second inventory section.'
         }),
-        ('🔍 SEO & Marketing', {
+        ('SEO & Marketing', {
             'fields': ('meta_title', 'meta_description', 'tags'),
             'classes': ('collapse',)
         }),
-        ('📐 Physical Properties', {
+        ('Physical Properties', {
             'fields': (
                 ('weight', 'dimensions_length'),
                 ('dimensions_width', 'dimensions_height'),
             ),
             'classes': ('collapse',)
         }),
-        ('🕒 Timestamps', {
+        ('Timestamps', {
             'fields': (('created_date', 'modified_date'),),
             'classes': ('collapse',)
         }),
@@ -893,7 +962,7 @@ class BrandAdmin(admin.ModelAdmin):
         ('Product Groups — Tick all that apply', {
             'fields': ('for_computers', 'for_networking', 'for_ups', 'for_security', 'for_peripherals', 'for_software'),
             'description': mark_safe(
-                '⚠️ Tick the sections this brand belongs to. '
+                'Tick the sections this brand belongs to. '
                 'The brand will only appear in the brand dropdown for the ticked product types.'
             )
         }),

@@ -39,6 +39,7 @@ class Product(models.Model):
     # Product Status
     is_available = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
+    is_sold = models.BooleanField(default=False)
     requires_shipping = models.BooleanField(default=True)
     is_digital = models.BooleanField(default=False)
     
@@ -85,6 +86,14 @@ class Product(models.Model):
             models.Index(fields=['category', 'is_available']),
         ]
 
+    def clean(self):
+        if self.is_sold and self.is_available:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("A product cannot be both 'Sold' and 'Available' at the same time.")
+        if self.is_sold:
+            self.stock = 0
+        super().clean()
+
     def get_url(self):
         return reverse('product_detail', args=[self.category.slug, self.slug])
 
@@ -92,6 +101,8 @@ class Product(models.Model):
         return self.product_name
 
     def is_in_stock(self):
+        if self.is_sold:
+            return False
         if not self.track_inventory:
             return True
         return self.stock > 0 or self.allow_backorders

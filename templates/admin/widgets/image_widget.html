@@ -1,0 +1,20 @@
+<div class="admin-image-widget">
+  <div class="admin-image-preview-wrapper">
+    {% if is_initial %}
+    <div class="admin-image-preview">
+      <img src="{{ widget.value.url }}" alt="Product image" loading="lazy" />
+    </div>
+    {% endif %}
+    <div class="admin-image-controls">
+      <label class="admin-image-file-label">
+        <i class="fas fa-cloud-upload-alt"></i> {% if is_initial %}Change Image{% else %}Upload Image{% endif %}
+        <input type="file" name="{{ widget.name }}" accept="image/*" style="display:none;" />
+      </label>
+      {% if is_initial %}
+      <label class="admin-image-clear-label">
+        <input type="checkbox" name="{{ widget.name }}-clear" /> Remove
+      </label>
+      {% endif %}
+    </div>
+  </div>
+</div>

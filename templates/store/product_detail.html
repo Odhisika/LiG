@@ -49,7 +49,7 @@
         "url": "{{ request.scheme }}://{{ request.get_host }}{{ single_product.get_url }}",
         "priceCurrency": "GHS",
         "price": "{{ single_product.price }}",
-        "availability": "{% if single_product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+        "availability": "{% if single_product.is_sold %}https://schema.org/SoldOut{% elif single_product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
         "itemCondition": "{% if single_product.condition == 'slightly_used' %}https://schema.org/UsedCondition{% else %}https://schema.org/NewCondition{% endif %}"
     }
     {% if single_product.average_review %},
@@ -116,7 +116,9 @@
                         
                         <!-- Stock Status Badge -->
                         <div class="position-absolute top-0 end-0 m-2">
-                            {% if single_product.stock <= 0 %}
+                            {% if single_product.is_sold %}
+                                <span class="badge bg-dark fs-6 px-3 py-2 rounded-pill">Sold</span>
+                            {% elif single_product.stock <= 0 %}
                                 <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">Out of Stock</span>
                             {% elif single_product.is_low_stock %}
                                 <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">Low Stock</span>
@@ -316,7 +318,10 @@
                         <div class="availability-card p-3 border rounded-3 bg-white shadow-sm">
                             <div class="d-flex flex-column gap-3">
                                 <div class="stock-info-premium">
-                                    {% if single_product.stock > 0 %}
+                                    {% if single_product.is_sold %}
+                                        <div class="text-dark h5 fw-bold mb-1">Sold</div>
+                                        <div class="text-muted small">This product has been sold and is no longer available.</div>
+                                    {% elif single_product.stock > 0 %}
                                         <div class="text-success h5 fw-bold mb-1">In Stock</div>
                                         <div class="text-muted small">Available for immediate delivery</div>
                                     {% else %}
@@ -331,7 +336,13 @@
                     </div>
                     
                     <!-- Add to Cart Form -->
-                {% if single_product.id in cart_product_ids %}
+                {% if single_product.is_sold %}
+                <div class="mb-3">
+                    <button type="button" class="btn btn-dark btn-lg w-100" disabled>
+                        <i class="fas fa-tag me-2"></i>Sold
+                    </button>
+                </div>
+                {% elif single_product.id in cart_product_ids %}
                 <a href="{% url 'cart' %}" class="btn btn-success btn-lg w-100 mb-3">
                     <i class="fas fa-check me-2"></i>View in Cart
                 </a>
