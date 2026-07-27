@@ -1532,6 +1532,14 @@
         <li class="nav-item">
             <a href="{% url 'research' %}" class="nav-link">Research Hub</a>
           </li>
+
+        {% if site_settings.internship_portal_enabled %}
+        <li class="nav-item">
+            <a href="{{ site_settings.internship_portal_url }}" class="nav-link" target="_blank">
+                <i class="fa fa-graduation-cap"></i> {{ site_settings.internship_portal_label }}
+            </a>
+        </li>
+        {% endif %}
     </nav>
     </header>
 
@@ -1731,6 +1739,17 @@
                 </div>
             </a>
         </div>
+
+        {% if site_settings.internship_portal_enabled %}
+        <div class="mobile-nav-item">
+            <a href="{{ site_settings.internship_portal_url }}" class="mobile-nav-link" target="_blank">
+                <div>
+                    <i class="fa fa-graduation-cap nav-icon"></i>
+                    {{ site_settings.internship_portal_label }}
+                </div>
+            </a>
+        </div>
+        {% endif %}
 
        
 

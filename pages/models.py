@@ -100,3 +100,27 @@ class HelpArticle(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+
+class SiteSettings(models.Model):
+    internship_portal_enabled = models.BooleanField(default=False)
+    internship_portal_url = models.URLField(default='https://internship.lig.com.gh/')
+    internship_portal_label = models.CharField(max_length=100, default='Internship Portal')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Site Settings'
+        verbose_name_plural = 'Site Settings'
+
+    def __str__(self):
+        return 'Site Settings'
+
+    def save(self, *args, **kwargs):
+        if not self.pk and SiteSettings.objects.exists():
+            raise ValueError('Only one Site Settings instance is allowed.')
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj

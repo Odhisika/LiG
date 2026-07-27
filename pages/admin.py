@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AboutPage, HelpCategory, HelpArticle, PolicyPage
+from .models import AboutPage, HelpCategory, HelpArticle, PolicyPage, SiteSettings
 
 
 class HelpArticleInline(admin.TabularInline):
@@ -73,3 +73,24 @@ class PolicyPageAdmin(admin.ModelAdmin):
     list_editable = ['is_active']
     search_fields = ['title', 'content']
     readonly_fields = ['updated_at']
+
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    list_display = ['internship_portal_label', 'internship_portal_url', 'internship_portal_enabled', 'updated_at']
+    list_editable = ['internship_portal_enabled']
+    fieldsets = (
+        ('Internship Portal', {
+            'fields': ('internship_portal_enabled', 'internship_portal_url', 'internship_portal_label')
+        }),
+        ('Info', {
+            'fields': ('updated_at',)
+        }),
+    )
+    readonly_fields = ['updated_at']
+
+    def has_add_permission(self, request):
+        return not SiteSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
