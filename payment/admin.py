@@ -14,7 +14,7 @@ class PaystackPayment(Payment):
     class Meta:
         proxy = True
         verbose_name = "Paystack Payment"
-        verbose_name_plural = "💳  Paystack Payments"
+        verbose_name_plural = "Paystack Payments"
 
 
 class HubtelPayment(Payment):
@@ -22,14 +22,14 @@ class HubtelPayment(Payment):
     class Meta:
         proxy = True
         verbose_name = "Hubtel Payment"
-        verbose_name_plural = "📱  Hubtel Payments"
+        verbose_name_plural = "Hubtel Payments"
 
 
 # ---------------------------------------------------------------------------
 # Shared admin actions
 # ---------------------------------------------------------------------------
 
-@admin.action(description="✅  Mark selected payments as Verified & Successful")
+@admin.action(description="Mark selected payments as Verified & Successful")
 def mark_as_verified(modeladmin, request, queryset):
     updated = 0
     for payment in queryset.filter(verified=False):
@@ -47,7 +47,7 @@ def mark_as_verified(modeladmin, request, queryset):
     )
 
 
-@admin.action(description="🔄  Re-verify selected payments via gateway API")
+@admin.action(description="Re-verify selected payments via gateway API")
 def reverify_via_api(modeladmin, request, queryset):
     success_count = 0
     fail_count = 0
@@ -79,7 +79,7 @@ def reverify_via_api(modeladmin, request, queryset):
         )
 
 
-@admin.action(description="❌  Mark selected payments as Failed")
+@admin.action(description="Mark selected payments as Failed")
 def mark_as_failed(modeladmin, request, queryset):
     updated = queryset.exclude(status="failed").update(status="failed", verified=False)
     modeladmin.message_user(
@@ -166,33 +166,33 @@ class PaymentAdmin(BasePaymentAdmin):
     ]
 
     fieldsets = (
-        ("📋  Payment Overview", {
+        ("Payment Overview", {
             "fields": ("ref", "user", "order_link", "amount", "email",
                        "gateway_badge", "status_badge", "verified"),
         }),
-        ("⚙️  Edit Status", {
+        ("Edit Status", {
             "fields": ("status",),
             "description": (
                 "You can manually override the payment status here. "
                 "Use the bulk actions above to mark multiple payments at once."
             ),
         }),
-        ("💳  Paystack Data", {
+        ("Paystack Data", {
             "classes": ("collapse",),
             "fields": ("paystack_reference", "authorization_url", "access_code"),
         }),
-        ("📱  Hubtel Data", {
+        ("Hubtel Data", {
             "classes": ("collapse",),
             "fields": ("hubtel_token", "hubtel_checkout_url"),
         }),
-        ("🏦  Transaction Details", {
+        ("Transaction Details", {
             "classes": ("collapse",),
             "fields": (
                 "channel", "currency", "transaction_date",
                 "card_type", "bank", "last4", "paystack_fees",
             ),
         }),
-        ("🕐  Timestamps", {
+        ("Timestamps", {
             "classes": ("collapse",),
             "fields": ("created_at", "updated_at"),
         }),
@@ -220,28 +220,28 @@ class PaystackPaymentAdmin(BasePaymentAdmin):
         return super().get_queryset(request).filter(gateway="paystack")
 
     fieldsets = (
-        ("📋  Payment Overview", {
+        ("Payment Overview", {
             "fields": ("ref", "user", "order_link", "amount", "email",
                        "status_badge", "verified"),
         }),
-        ("⚙️  Edit Status", {
+        ("Edit Status", {
             "fields": ("status",),
             "description": (
                 "Manually override the status, or use 'Re-verify via gateway API' "
                 "to fetch the latest status from Paystack."
             ),
         }),
-        ("💳  Paystack Reference", {
+        ("Paystack Reference", {
             "fields": ("paystack_reference", "authorization_url", "access_code"),
         }),
-        ("🏦  Transaction Details", {
+        ("Transaction Details", {
             "classes": ("collapse",),
             "fields": (
                 "channel", "currency", "transaction_date",
                 "card_type", "bank", "last4", "paystack_fees",
             ),
         }),
-        ("🕐  Timestamps", {
+        ("Timestamps", {
             "classes": ("collapse",),
             "fields": ("created_at", "updated_at"),
         }),
@@ -269,25 +269,25 @@ class HubtelPaymentAdmin(BasePaymentAdmin):
         return super().get_queryset(request).filter(gateway="hubtel")
 
     fieldsets = (
-        ("📋  Payment Overview", {
+        ("Payment Overview", {
             "fields": ("ref", "user", "order_link", "amount", "email",
                        "status_badge", "verified"),
         }),
-        ("⚙️  Edit Status", {
+        ("Edit Status", {
             "fields": ("status",),
             "description": (
                 "Manually override the status, or use 'Re-verify via gateway API' "
                 "to fetch the latest status from Hubtel."
             ),
         }),
-        ("📱  Hubtel Reference", {
+        ("Hubtel Reference", {
             "fields": ("hubtel_token", "hubtel_checkout_url"),
         }),
-        ("🏦  Transaction Details", {
+        ("Transaction Details", {
             "classes": ("collapse",),
             "fields": ("channel", "currency", "transaction_date", "last4"),
         }),
-        ("🕐  Timestamps", {
+        ("Timestamps", {
             "classes": ("collapse",),
             "fields": ("created_at", "updated_at"),
         }),

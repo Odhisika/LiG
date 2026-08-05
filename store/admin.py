@@ -130,9 +130,9 @@ class ProductAdminMixin:
         }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 💻 COMPUTER PRODUCT ADMIN
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
+# COMPUTER PRODUCT ADMIN
+# -----------------------------------------------------------------------------
 
 @admin.register(ComputerProduct)
 class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
@@ -305,9 +305,9 @@ class ComputerProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 💾 SOFTWARE PRODUCT ADMIN
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
+# SOFTWARE PRODUCT ADMIN
+# -----------------------------------------------------------------------------
 
 @admin.register(SoftwareProduct)
 class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
@@ -395,43 +395,43 @@ class SoftwareProductAdmin(ProductAdminMixin, admin.ModelAdmin):
             'description': 'Provide the download link or license key the customer gets after purchase.',
             'classes': ('collapse',)
         }),
-        ('📋 System Requirements', {
+        ('System Requirements', {
             'fields': ('system_requirements',),
             'classes': ('collapse',)
         }),
-        ('💰 Pricing', {
+        ('Pricing', {
             'fields': (
                 ('price', 'compare_price'),
                 ('cost_price', 'barcode'),
             ),
         }),
-        ('📦 Inventory', {
+        ('Inventory', {
             'fields': (
                 ('stock', 'low_stock_threshold'),
                 ('track_inventory', 'allow_backorders'),
             ),
         }),
-        ('🚦 Product Status', {
+        ('Product Status', {
             'fields': (
                 ('is_available', 'is_featured'),
                 ('is_sold', 'requires_shipping'),
                 ('is_digital',),
             )
         }),
-        ('🔍 SEO & Marketing', {
+        ('SEO & Marketing', {
             'fields': ('meta_title', 'meta_description', 'tags'),
             'classes': ('collapse',)
         }),
-        ('🕒 Timestamps', {
+        ('Timestamps', {
             'fields': (('created_date', 'modified_date'),),
             'classes': ('collapse',)
         }),
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 🔌 PERIPHERAL PRODUCT ADMIN
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
+# PERIPHERAL PRODUCT ADMIN
+# -----------------------------------------------------------------------------
 
 @admin.register(PeripheralProduct)
 class PeripheralProductAdmin(ProductAdminMixin, admin.ModelAdmin):
@@ -536,9 +536,9 @@ class PeripheralProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 🌐 NETWORKING PRODUCT ADMIN
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
+# NETWORKING PRODUCT ADMIN
+# -----------------------------------------------------------------------------
 
 @admin.register(NetworkingProduct)
 class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
@@ -668,9 +668,9 @@ class NetworkingProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 🔋 UPS PRODUCT ADMIN
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
+# UPS PRODUCT ADMIN
+# -----------------------------------------------------------------------------
 
 @admin.register(UPSProduct)
 class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
@@ -808,9 +808,9 @@ class UPSProductAdmin(ProductAdminMixin, admin.ModelAdmin):
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 📷 SECURITY CAMERA / CCTV ADMIN
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
+# SECURITY CAMERA / CCTV ADMIN
+# -----------------------------------------------------------------------------
 
 @admin.register(SecurityCameraProduct)
 class SecurityCameraProductAdmin(ProductAdminMixin, admin.ModelAdmin):

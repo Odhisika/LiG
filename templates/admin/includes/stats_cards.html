@@ -1,0 +1,497 @@
+{% load humanize %}
+
+<style>
+/* ─────────────────────────────────────────────────────────────────────────
+   LiG Dashboard Cards — Clean, Professional
+   Sidebar-matching icon style, no multicoloured borders, no avatar boxes
+───────────────────────────────────────────────────────────────────────── */
+.g-dashboard {
+    --g-bg-card:       #202124;
+    --g-bg-card-hover: #26282c;
+    --g-border:        rgba(255,255,255,0.07);
+    --g-text-primary:  #e8eaed;
+    --g-text-secondary:#9aa0a6;
+    --g-text-muted:    #80868b;
+    --g-shadow:        0 1px 4px rgba(0,0,0,0.25);
+    --g-hover-shadow:  0 6px 20px rgba(0,0,0,0.35);
+    font-family: 'Google Sans','Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────────── */
+.g-toolbar {
+    background: var(--g-bg-card);
+    border: 1px solid var(--g-border);
+    border-radius: 12px;
+    padding: 13px 20px;
+    box-shadow: var(--g-shadow);
+}
+.g-toolbar-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--g-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.g-live-dot {
+    width: 7px; height: 7px;
+    background: #34a853;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: g-pulse 2.2s infinite;
+}
+@keyframes g-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(52,168,83,.7); }
+    70%  { box-shadow: 0 0 0 6px rgba(52,168,83,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,168,83,0); }
+}
+.g-select {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--g-text-primary);
+    border-radius: 20px;
+    padding: 6px 32px 6px 14px;
+    font-size: 0.83rem;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 11px center;
+    transition: border-color .2s;
+}
+.g-select:hover, .g-select:focus {
+    border-color: rgba(138,180,248,.5);
+    outline: none;
+}
+.g-select option { background: #202124; color: #e8eaed; }
+
+/* ── Stat Card ────────────────────────────────────────────────────────── */
+.g-card {
+    background: var(--g-bg-card);
+    border: 1px solid var(--g-border);
+    border-radius: 12px;
+    box-shadow: var(--g-shadow);
+    padding: 20px 22px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform .2s cubic-bezier(.4,0,.2,1),
+                box-shadow .2s cubic-bezier(.4,0,.2,1),
+                border-color .2s;
+    position: relative;
+}
+.g-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--g-hover-shadow);
+    border-color: rgba(255,255,255,0.13);
+}
+
+/* ── Card header: icon + label side by side ───────────────────────────── */
+.g-card-header-flex {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+/* Clean sidebar-style icon — no box, no background */
+.g-card-icon {
+    font-size: 1.15rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.g-card-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--g-text-secondary);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.g-card-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--g-text-primary);
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    word-break: break-word;
+}
+
+.g-card-subtext {
+    font-size: 0.775rem;
+    color: var(--g-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+/* ── Trend Pill Badges ────────────────────────────────────────────────── */
+.g-trend-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.g-trend-up {
+    background: rgba(52,168,83,.12);
+    color: #81c995;
+    border: 1px solid rgba(52,168,83,.22);
+}
+.g-trend-down {
+    background: rgba(234,67,53,.12);
+    color: #f28b82;
+    border: 1px solid rgba(234,67,53,.22);
+}
+.g-trend-neutral {
+    background: rgba(255,255,255,.06);
+    color: var(--g-text-secondary);
+    border: 1px solid rgba(255,255,255,.1);
+}
+
+/* ── Bottom section cards ─────────────────────────────────────────────── */
+.g-section-card {
+    background: var(--g-bg-card);
+    border: 1px solid var(--g-border);
+    border-radius: 12px;
+    box-shadow: var(--g-shadow);
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.g-section-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--g-border);
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: var(--g-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.g-list-row {
+    padding: 13px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background .15s;
+}
+.g-list-row:last-child { border-bottom: none; }
+.g-list-row:hover { background: rgba(255,255,255,.025); }
+
+.g-rank-badge {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.g-rank-1 { background: rgba(251,188,4,.15); color: #fde293; border: 1px solid rgba(251,188,4,.3); }
+.g-rank-2 { background: rgba(188,192,196,.15); color: #e8eaed; border: 1px solid rgba(188,192,196,.3); }
+.g-rank-3 { background: rgba(227,116,0,.15); color: #ffb74d; border: 1px solid rgba(227,116,0,.3); }
+.g-rank-default { background: rgba(255,255,255,.06); color: var(--g-text-secondary); }
+
+.g-alert-item {
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.g-alert-item:last-child { margin-bottom: 0; }
+.g-alert-low { background: rgba(251,188,4,.07); border: 1px solid rgba(251,188,4,.18); }
+.g-alert-out { background: rgba(234,67,53,.07); border: 1px solid rgba(234,67,53,.18); }
+
+.g-alert-icon {
+    font-size: 1.05rem;
+    margin-right: 12px;
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.g-pill-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+</style>
+
+<div class="g-dashboard mb-4">
+    <!-- Toolbar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="g-toolbar d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="g-toolbar-title">
+                    <span class="g-live-dot"></span>
+                    <i class="fas fa-chart-line" style="color:#8ab4f8; font-size:1rem;"></i>
+                    <span>Sales &amp; Analytics Overview</span>
+                    <span class="g-trend-pill g-trend-neutral ms-2">Last {{ admin_stats.days }} Days</span>
+                </div>
+                <form method="get" class="d-flex align-items-center">
+                    <select name="period" class="g-select" onchange="this.form.submit()">
+                        <option value="7"   {% if admin_stats.days == 7   %}selected{% endif %}>Last 7 Days</option>
+                        <option value="30"  {% if admin_stats.days == 30  %}selected{% endif %}>Last 30 Days</option>
+                        <option value="90"  {% if admin_stats.days == 90  %}selected{% endif %}>Last 90 Days</option>
+                        <option value="365" {% if admin_stats.days == 365 %}selected{% endif %}>Last Year</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 1 -->
+    <div class="row g-3 mb-3">
+
+        <!-- Total Revenue -->
+        <div class="col-xl-3 col-md-6">
+            <div class="g-card">
+                <div>
+                    <div class="g-card-header-flex">
+                        <i class="fas fa-wallet g-card-icon" style="color:#81c995;"></i>
+                        <h6 class="g-card-label">Total Revenue</h6>
+                    </div>
+                    <div class="g-card-value" style="color:#81c995;">GHS {{ admin_stats.revenue|floatformat:2|intcomma }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    {% include 'admin/includes/_trend.html' with delta=admin_stats.revenue_delta %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="g-card">
+                <div>
+                    <div class="g-card-header-flex">
+                        <i class="fas fa-shopping-bag g-card-icon" style="color:#8ab4f8;"></i>
+                        <h6 class="g-card-label">Total Orders</h6>
+                    </div>
+                    <div class="g-card-value">{{ admin_stats.orders|intcomma }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    <span class="g-trend-pill g-trend-neutral">
+                        <i class="fas fa-check-circle" style="color:#81c995;"></i>{{ admin_stats.completed }} completed
+                    </span>
+                    <span class="g-trend-pill g-trend-neutral">
+                        <i class="fas fa-times-circle" style="color:#f28b82;"></i>{{ admin_stats.cancelled }} cancelled
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Avg Order Value -->
+        <div class="col-xl-3 col-md-6">
+            <div class="g-card">
+                <div>
+                    <div class="g-card-header-flex">
+                        <i class="fas fa-tags g-card-icon" style="color:#c58af9;"></i>
+                        <h6 class="g-card-label">Avg Order Value</h6>
+                    </div>
+                    <div class="g-card-value">GHS {{ admin_stats.aov|floatformat:2|intcomma }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    {% include 'admin/includes/_trend.html' with delta=admin_stats.aov_delta %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Rate -->
+        <div class="col-xl-3 col-md-6">
+            <div class="g-card">
+                <div>
+                    <div class="g-card-header-flex">
+                        <i class="fas fa-chart-pie g-card-icon" style="color:#78d9ec;"></i>
+                        <h6 class="g-card-label">Conversion Rate</h6>
+                    </div>
+                    <div class="g-card-value">{{ admin_stats.conversion_rate|floatformat:2 }}%</div>
+                </div>
+                <div class="g-card-subtext">
+                    {% include 'admin/includes/_trend.html' with delta=admin_stats.conversion_delta %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="row g-3 mb-4">
+
+        <!-- Unique Visitors -->
+        <div class="col-xl-3 col-md-6">
+            <div class="g-card">
+                <div>
+                    <div class="g-card-header-flex">
+                        <i class="fas fa-users g-card-icon" style="color:#9fa8da;"></i>
+                        <h6 class="g-card-label">Unique Visitors</h6>
+                    </div>
+                    <div class="g-card-value">{{ admin_stats.visitors|intcomma }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    <span class="g-trend-pill g-trend-neutral">
+                        <i class="fas fa-user-clock" style="color:#78d9ec;"></i>{{ admin_stats.today_visitors }} today
+                    </span>
+                    <span class="g-trend-pill g-trend-neutral">
+                        <i class="fas fa-eye" style="color:#8ab4f8;"></i>{{ admin_stats.page_views|intcomma }} views
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Customers -->
+        <div class="col-xl-3 col-md-6">
+            <div class="g-card">
+                <div>
+                    <div class="g-card-header-flex">
+                        <i class="fas fa-user-plus g-card-icon" style="color:#81c995;"></i>
+                        <h6 class="g-card-label">New Customers</h6>
+                    </div>
+                    <div class="g-card-value">{{ admin_stats.new_customers|intcomma }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    {% include 'admin/includes/_trend.html' with delta=admin_stats.new_customers_delta %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Success Rate -->
+        <div class="col-xl-3 col-md-6">
+            <div class="g-card">
+                <div>
+                    <div class="g-card-header-flex">
+                        <i class="fas fa-credit-card g-card-icon" style="color:#ffab40;"></i>
+                        <h6 class="g-card-label">Payment Success Rate</h6>
+                    </div>
+                    <div class="g-card-value">{{ admin_stats.payment_success_rate|floatformat:2 }}%</div>
+                </div>
+                <div class="g-card-subtext">
+                    {% include 'admin/includes/_trend.html' with delta=admin_stats.payment_success_delta %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="g-card">
+                <div>
+                    <div class="g-card-header-flex">
+                        <i class="fas fa-clock g-card-icon" style="color:#ffe082;"></i>
+                        <h6 class="g-card-label">Pending Orders</h6>
+                    </div>
+                    <div class="g-card-value">{{ admin_stats.pending|intcomma }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    {% include 'admin/includes/_trend.html' with delta=admin_stats.pending_delta %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section: Top Categories & Stock Alerts -->
+    <div class="row g-3 mb-2">
+
+        <!-- Top Categories -->
+        <div class="col-lg-8">
+            <div class="g-section-card">
+                <div class="g-section-header">
+                    <span>
+                        <i class="fas fa-trophy me-2" style="color:#ffe082; font-size:0.9rem;"></i>Top Selling Categories
+                    </span>
+                    <span class="g-trend-pill g-trend-neutral">By Volume</span>
+                </div>
+                <div class="p-0">
+                    {% if admin_stats.top_categories %}
+                        {% for cat in admin_stats.top_categories %}
+                        <div class="g-list-row">
+                            <div class="d-flex align-items-center">
+                                <span class="g-rank-badge {% if forloop.counter == 1 %}g-rank-1{% elif forloop.counter == 2 %}g-rank-2{% elif forloop.counter == 3 %}g-rank-3{% else %}g-rank-default{% endif %}">
+                                    #{{ forloop.counter }}
+                                </span>
+                                <span style="font-weight:500; color:var(--g-text-primary); font-size:0.88rem;">
+                                    {{ cat.product__category__category_name|default:"Uncategorised"|truncatechars:35 }}
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="g-trend-pill g-trend-up">
+                                    <i class="fas fa-box"></i>{{ cat.units }} sold
+                                </span>
+                                <span style="font-weight:600; color:var(--g-text-primary); font-size:0.9rem;">
+                                    GHS {{ cat.revenue|floatformat:2|intcomma }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5" style="color:var(--g-text-secondary);">
+                            <i class="fas fa-box-open fa-2x mb-3 opacity-50"></i>
+                            <p class="mb-0" style="font-size:0.875rem;">No category sales recorded for this period</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Alerts -->
+        <div class="col-lg-4">
+            <div class="g-section-card">
+                <div class="g-section-header">
+                    <span>
+                        <i class="fas fa-boxes me-2" style="color:#78d9ec; font-size:0.9rem;"></i>Inventory Alerts
+                    </span>
+                    <span class="g-trend-pill g-trend-neutral">Real-time</span>
+                </div>
+                <div class="p-3">
+                    <div class="g-alert-item g-alert-low">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle g-alert-icon" style="color:#ffe082;"></i>
+                            <div>
+                                <div style="font-weight:600; font-size:0.88rem; color:var(--g-text-primary);">Low Stock</div>
+                                <div style="font-size:0.75rem; color:var(--g-text-secondary);">5 or fewer units left</div>
+                            </div>
+                        </div>
+                        <span class="g-pill-badge" style="background:rgba(251,188,4,.18); color:#ffe082; border:1px solid rgba(251,188,4,.35);">
+                            {{ admin_stats.low_stock }}
+                        </span>
+                    </div>
+
+                    <div class="g-alert-item g-alert-out">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-ban g-alert-icon" style="color:#f28b82;"></i>
+                            <div>
+                                <div style="font-weight:600; font-size:0.88rem; color:var(--g-text-primary);">Out of Stock</div>
+                                <div style="font-size:0.75rem; color:var(--g-text-secondary);">0 units remaining</div>
+                            </div>
+                        </div>
+                        <span class="g-pill-badge" style="background:rgba(234,67,53,.18); color:#f28b82; border:1px solid rgba(234,67,53,.35);">
+                            {{ admin_stats.out_of_stock }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

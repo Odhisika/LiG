@@ -276,8 +276,8 @@ class ComputerProduct(Product):
         return f"{self.brand.name} {self.product_name}"
 
     class Meta:
-        verbose_name = '💻 Computer Product'
-        verbose_name_plural = '💻 Computer Products'
+        verbose_name = 'Computer Product'
+        verbose_name_plural = 'Computer Products'
 
 
 # Model for Software
@@ -331,8 +331,8 @@ class SoftwareProduct(Product):
         return f"{category_name} - {self.product_name} ({self.version})"
 
     class Meta:
-        verbose_name = '💾 Software Product'
-        verbose_name_plural = '💾 Software Products'
+        verbose_name = 'Software Product'
+        verbose_name_plural = 'Software Products'
 
 
 # Model for Peripherals
@@ -371,8 +371,8 @@ class PeripheralProduct(Product):
         return f"{self.brand.name} {self.product_name}"
 
     class Meta:
-        verbose_name = '🔌 Peripheral Product'
-        verbose_name_plural = '🔌 Peripheral Products'
+        verbose_name = 'Peripheral Product'
+        verbose_name_plural = 'Peripheral Products'
 
 
 # Model for Networking Products (Switches, Routers & Modems)
@@ -428,8 +428,8 @@ class NetworkingProduct(Product):
         return f"{self.brand.name} {self.product_name}"
 
     class Meta:
-        verbose_name = '🌐 Networking Product'
-        verbose_name_plural = '🌐 Networking Products'
+        verbose_name = 'Networking Product'
+        verbose_name_plural = 'Networking Products'
 
 
 # Model for UPS Products
@@ -492,8 +492,8 @@ class UPSProduct(Product):
         return f"{self.brand.name} {self.product_name}"
 
     class Meta:
-        verbose_name = '🔋 UPS Product'
-        verbose_name_plural = '🔋 UPS Products'
+        verbose_name = 'UPS Product'
+        verbose_name_plural = 'UPS Products'
 
 
 # Model for Security Cameras & Systems
@@ -565,8 +565,8 @@ class SecurityCameraProduct(Product):
         return f"{self.brand.name} {self.product_name}"
 
     class Meta:
-        verbose_name = '📷 Security Camera / CCTV'
-        verbose_name_plural = '📷 Security Cameras & CCTV'
+        verbose_name = 'Security Camera / CCTV'
+        verbose_name_plural = 'Security Cameras & CCTV'
 
 
 # Enhanced Review and Rating System

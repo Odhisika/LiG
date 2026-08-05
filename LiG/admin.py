@@ -15,6 +15,21 @@ from accounts.models import Admin2FA
 
 
 original_login = AdminSite.login
+original_index = AdminSite.index
+
+
+def admin_index(self, request, extra_context=None):
+    try:
+        days = int(request.GET.get('period', 30))
+    except (TypeError, ValueError):
+        days = 30
+    if days not in (7, 30, 90, 365):
+        days = 30
+
+    from analytics.stats import get_index_stats
+    extra_context = extra_context or {}
+    extra_context['admin_stats'] = get_index_stats(days=days)
+    return original_index(self, request, extra_context=extra_context)
 
 
 def _clean_2fa_session(request):
@@ -230,3 +245,4 @@ def admin_login_with_turnstile_and_2fa(self, request, extra_context=None):
 
 
 AdminSite.login = admin_login_with_turnstile_and_2fa
+AdminSite.index = admin_index

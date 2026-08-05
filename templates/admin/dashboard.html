@@ -11,12 +11,245 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<style>
+/* Google Dashboard Cards System */
+.g-dashboard {
+    --g-bg-card: #202124;
+    --g-bg-card-hover: #28292c;
+    --g-border: rgba(255, 255, 255, 0.08);
+    --g-text-primary: #f8f9fa;
+    --g-text-secondary: #9aa0a6;
+    --g-text-muted: #80868b;
+    --g-shadow: 0 2px 6px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3);
+    --g-hover-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.4);
+    font-family: 'Google Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.g-dashboard.g-light,
+body:not(.dark-mode) .g-dashboard:not(.g-force-dark) {
+    --g-bg-card: #ffffff;
+    --g-bg-card-hover: #f8f9fa;
+    --g-border: rgba(0, 0, 0, 0.08);
+    --g-text-primary: #202124;
+    --g-text-secondary: #5f6368;
+    --g-text-muted: #80868b;
+    --g-shadow: 0 1px 3px rgba(60,64,67,0.12), 0 1px 2px rgba(60,64,67,0.24);
+    --g-hover-shadow: 0 4px 12px rgba(60,64,67,0.15), 0 2px 4px rgba(60,64,67,0.2);
+}
+
+.g-toolbar {
+    background: var(--g-bg-card);
+    border: 1px solid var(--g-border);
+    border-radius: 14px;
+    padding: 14px 20px;
+    box-shadow: var(--g-shadow);
+}
+
+.g-toolbar-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--g-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.g-live-dot {
+    width: 8px;
+    height: 8px;
+    background: #34a853;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px #34a853;
+    animation: g-pulse 2s infinite;
+}
+
+@keyframes g-pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 168, 83, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(52, 168, 83, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 168, 83, 0); }
+}
+
+.g-select {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--g-text-primary);
+    border-radius: 20px;
+    padding: 6px 34px 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.g-select:hover, .g-select:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #1a73e8;
+    outline: none;
+}
+
+.g-select option {
+    background: #202124;
+    color: #f8f9fa;
+}
+
+.g-card {
+    background: var(--g-bg-card);
+    border: 1px solid var(--g-border);
+    border-radius: 14px;
+    box-shadow: var(--g-shadow);
+    padding: 20px 22px;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.g-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--g-hover-shadow);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.g-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--card-accent, #1a73e8);
+    opacity: 0.9;
+}
+
+.g-icon-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    line-height: 1;
+    margin-right: 14px;
+    flex-shrink: 0;
+}
+
+.g-accent-emerald { --card-accent: #34a853; }
+.g-icon-emerald { background: rgba(52, 168, 83, 0.15); color: #81c995; }
+
+.g-accent-blue { --card-accent: #1a73e8; }
+.g-icon-blue { background: rgba(26, 115, 232, 0.15); color: #8ab4f8; }
+
+.g-accent-purple { --card-accent: #af52de; }
+.g-icon-purple { background: rgba(175, 82, 222, 0.15); color: #c58af9; }
+
+.g-accent-cyan { --card-accent: #00b8d4; }
+.g-icon-cyan { background: rgba(0, 184, 212, 0.15); color: #78d9ec; }
+
+.g-accent-indigo { --card-accent: #5c6bc0; }
+.g-icon-indigo { background: rgba(92, 107, 192, 0.15); color: #9fa8da; }
+
+.g-accent-amber { --card-accent: #fbbc04; }
+.g-icon-amber { background: rgba(251, 188, 4, 0.15); color: #ffe082; }
+
+.g-card-header-flex {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.g-card-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--g-text-secondary);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.g-card-value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--g-text-primary);
+    line-height: 1.25;
+    letter-spacing: -0.4px;
+    margin-bottom: 10px;
+    word-break: break-word;
+}
+
+.g-card-subtext {
+    font-size: 0.775rem;
+    color: var(--g-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+.g-trend-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.g-trend-neutral {
+    background: rgba(128, 134, 139, 0.15);
+    color: var(--g-text-secondary);
+    border: 1px solid rgba(128, 134, 139, 0.25);
+}
+
+.g-section-card {
+    background: var(--g-bg-card);
+    border: 1px solid var(--g-border);
+    border-radius: 14px;
+    box-shadow: var(--g-shadow);
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.g-section-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--g-border);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--g-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+</style>
+
+<div class="g-dashboard container-fluid py-4">
     <!-- Period Filter -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Sales & Analytics Dashboard</h2>
-        <form method="get" class="d-flex gap-2">
-            <select name="period" class="form-select" onchange="this.form.submit()">
+    <div class="g-toolbar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="g-toolbar-title">
+            <span class="g-live-dot" title="Live Analytics Active"></span>
+            <i class="fas fa-chart-line text-primary"></i>
+            <span>Sales &amp; Analytics Dashboard</span>
+            <span class="g-trend-pill g-trend-neutral ms-2">
+                Last {{ days }} Days
+            </span>
+        </div>
+        <form method="get" class="d-flex align-items-center">
+            <select name="period" class="g-select" onchange="this.form.submit()">
                 <option value="7" {% if period == '7' %}selected{% endif %}>Last 7 Days</option>
                 <option value="30" {% if period == '30' %}selected{% endif %}>Last 30 Days</option>
                 <option value="90" {% if period == '90' %}selected{% endif %}>Last 90 Days</option>
@@ -28,86 +261,88 @@
     <!-- Stats Cards Row 1 -->
     <div class="row g-4 mb-4">
         <!-- Revenue Card -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #28a745;">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-success bg-opacity-10 rounded-3 p-3">
-                                <i class="fas fa-dollar-sign text-success fs-4"></i>
-                            </div>
+        <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="g-card g-accent-emerald">
+                <div>
+                    <div class="g-card-header-flex">
+                        <div class="g-icon-avatar g-icon-emerald">
+                            <i class="fas fa-wallet"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Revenue</h6>
-                            <h3 class="mb-0 text-success">GHS {{ total_revenue|floatformat:2|intcomma }}</h3>
+                        <div>
+                            <h6 class="g-card-label">Total Revenue</h6>
                         </div>
                     </div>
+                    <div class="g-card-value text-success">GHS {{ total_revenue|floatformat:2|intcomma }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    <span class="g-trend-pill g-trend-neutral">Completed orders</span>
                 </div>
             </div>
         </div>
 
         <!-- Orders Card -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #007bff;">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-primary bg-opacity-10 rounded-3 p-3">
-                                <i class="fas fa-shopping-cart text-primary fs-4"></i>
-                            </div>
+        <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="g-card g-accent-blue">
+                <div>
+                    <div class="g-card-header-flex">
+                        <div class="g-icon-avatar g-icon-blue">
+                            <i class="fas fa-shopping-bag"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Orders</h6>
-                            <h3 class="mb-0">{{ total_orders }}</h3>
-                            <small class="text-success">{{ completed_orders }} completed</small>
+                        <div>
+                            <h6 class="g-card-label">Total Orders</h6>
                         </div>
                     </div>
+                    <div class="g-card-value">{{ total_orders }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    <span class="g-trend-pill g-trend-neutral"><i class="fas fa-check-circle text-success me-1"></i>{{ completed_orders }} completed</span>
                 </div>
             </div>
         </div>
 
         <!-- Visitors Card -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #17a2b8;">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-info bg-opacity-10 rounded-3 p-3">
-                                <i class="fas fa-users text-info fs-4"></i>
-                            </div>
+        <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="g-card g-accent-indigo">
+                <div>
+                    <div class="g-card-header-flex">
+                        <div class="g-icon-avatar g-icon-indigo">
+                            <i class="fas fa-users"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Unique Visitors</h6>
-                            <h3 class="mb-0">{{ total_visitors|intcomma }}</h3>
-                            <small class="text-muted">{{ page_views }} page views</small>
+                        <div>
+                            <h6 class="g-card-label">Unique Visitors</h6>
                         </div>
                     </div>
+                    <div class="g-card-value">{{ total_visitors|intcomma }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    <span class="g-trend-pill g-trend-neutral"><i class="fas fa-eye text-primary me-1"></i>{{ page_views }} page views</span>
                 </div>
             </div>
         </div>
 
         <!-- Products Card -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #6f42c1;">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-purple bg-opacity-10 rounded-3 p-3">
-                                <i class="fas fa-box text-purple fs-4"></i>
-                            </div>
+        <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="g-card g-accent-purple">
+                <div>
+                    <div class="g-card-header-flex">
+                        <div class="g-icon-avatar g-icon-purple">
+                            <i class="fas fa-box"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Products</h6>
-                            <h3 class="mb-0">{{ total_products }}</h3>
-                            <small class="{% if out_of_stock > 0 %}text-danger{% else %}text-muted{% endif %}">
-                                {{ out_of_stock }} out of stock
-                            </small>
+                        <div>
+                            <h6 class="g-card-label">Products</h6>
                         </div>
                     </div>
+                    <div class="g-card-value">{{ total_products }}</div>
+                </div>
+                <div class="g-card-subtext">
+                    <span class="g-trend-pill g-trend-neutral">
+                        {% if out_of_stock > 0 %}<i class="fas fa-exclamation-circle text-danger me-1"></i>{{ out_of_stock }} out of stock{% else %}All in stock{% endif %}
+                    </span>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Charts Row -->
     <div class="row g-4 mb-4">

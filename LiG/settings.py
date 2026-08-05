@@ -314,43 +314,289 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
 
 
 JAZZMIN_SETTINGS = {
-    "site_title": "LuckyTech Innovations Groud",
-    "site_header": "LuckyTech Innovation Ground ",
-    "site_brand": "We deliver",
+    "site_title": "LiG Admin",
+    "site_header": "LiG Store Administration",
+    "site_brand": "LiG Admin",
     "site_icon": "./images/favicon.png",
-    "welcome_sign": "welcome to LiG",
-    "copyright": "lig.com",
+    "welcome_sign": "Welcome to LiG Administration",
+    "copyright": "LiG Store",
     "user_avatar": None,
     "topmenu_links": [
         {"name": "Home", "url": "home", "permissions": ["auth.view_user"]},
         {"model": "auth.User"},
     ],
+
+    # Sidebar settings
     "show_sidebar": True,
-    "navigation_expanded": True,
+    "navigation_expanded": False,
+    "sidebar_fixed": True,
+
+    # Defines grouped, ordered sidebar navigation.
+    # Each app string becomes a collapsible section header;
+    # the app.Model strings beneath it become nested child links.
+    "order_with_respect_to": [
+        # -- Analytics -------------------------------------------------------
+        "analytics",
+        "analytics.DailyStats",
+        "analytics.Visitor",
+        "analytics.PageView",
+
+        # -- Products --------------------------------------------------------
+        "store",
+        "store.ComputerProduct",
+        "store.SoftwareProduct",
+        "store.PeripheralProduct",
+        "store.NetworkingProduct",
+        "store.UPSProduct",
+        "store.SecurityCameraProduct",
+        "store.Brand",
+        "store.HomeBanner",
+        "store.ReviewRating",
+
+        # -- Categories ------------------------------------------------------
+        "category",
+        "category.Category",
+        "category.ComputerTypes",
+        "category.SoftwareTypes",
+        "category.ResearchTypes",
+
+        # -- Orders ----------------------------------------------------------
+        "orders",
+        "orders.Order",
+        "orders.OrderProduct",
+        "orders.PaymentProof",
+
+        # -- Payments --------------------------------------------------------
+        "payment",
+        "payment.Payment",
+        "payment.PaystackPayment",
+        "payment.HubtelPayment",
+
+        # -- Accounts & Auth -------------------------------------------------
+        "accounts",
+        "accounts.Account",
+        "accounts.UserProfile",
+        "accounts.NewsletterSubscriber",
+        "auth",
+        "auth.User",
+        "auth.Group",
+        "accounts.Admin2FA",
+        "accounts.AuditLog",
+
+        # -- Content & Pages -------------------------------------------------
+        "pages",
+        "pages.AboutPage",
+        "pages.HelpCategory",
+        "pages.HelpArticle",
+        "pages.PolicyPage",
+        "pages.SiteSettings",
+
+        # -- Research --------------------------------------------------------
+        "research",
+        "research.ResearchProject",
+
+        # -- System ----------------------------------------------------------
+        "admin",
+        "admin.LogEntry",
+    ],
+
     "icons": {
-        "auth": "fas fa-users-cog",
+        # Auth & Accounts
+        "auth": "fas fa-lock",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
-        "admin.LogEntry": "fas fa-file",
+        "accounts": "fas fa-user-circle",
+        "accounts.Account": "fas fa-user-shield",
+        "accounts.UserProfile": "fas fa-id-card",
+        "accounts.Admin2FA": "fas fa-shield-alt",
+        "accounts.AuditLog": "fas fa-history",
+        "accounts.NewsletterSubscriber": "fas fa-envelope-open-text",
+        "admin.LogEntry": "fas fa-clipboard-list",
+        # Analytics
+        "analytics": "fas fa-chart-line",
+        "analytics.Visitor": "fas fa-users",
+        "analytics.PageView": "fas fa-eye",
+        "analytics.DailyStats": "fas fa-chart-bar",
+        # Store Products
+        "store": "fas fa-store",
+        "store.Product": "fas fa-box",
+        "store.ComputerProduct": "fas fa-laptop",
+        "store.SoftwareProduct": "fas fa-compact-disc",
+        "store.PeripheralProduct": "fas fa-keyboard",
+        "store.NetworkingProduct": "fas fa-network-wired",
+        "store.UPSProduct": "fas fa-plug",
+        "store.SecurityCameraProduct": "fas fa-video",
+        "store.Brand": "fas fa-copyright",
+        "store.ReviewRating": "fas fa-star",
+        "store.HomeBanner": "fas fa-images",
+        "store.ProductTag": "fas fa-tags",
+        "store.ProductGallery": "fas fa-photo-video",
+        "store.ProductSpecification": "fas fa-list-ul",
+        "store.ProductVariant": "fas fa-sliders-h",
+        # Category
+        "category": "fas fa-th-large",
+        "category.Category": "fas fa-th-large",
+        "category.ComputerTypes": "fas fa-desktop",
+        "category.SoftwareTypes": "fas fa-code",
+        "category.ResearchTypes": "fas fa-microscope",
+        # Orders & Payments
+        "orders": "fas fa-shopping-cart",
+        "orders.Order": "fas fa-shopping-bag",
+        "orders.OrderProduct": "fas fa-boxes",
+        "orders.PaymentProof": "fas fa-file-invoice-dollar",
+        "payment": "fas fa-credit-card",
+        "payment.Payment": "fas fa-credit-card",
+        "payment.PaystackPayment": "fas fa-credit-card",
+        "payment.HubtelPayment": "fas fa-mobile-alt",
+        # Pages & Content
+        "pages": "fas fa-file-alt",
+        "pages.AboutPage": "fas fa-info-circle",
+        "pages.HelpCategory": "fas fa-life-ring",
+        "pages.HelpArticle": "fas fa-question-circle",
+        "pages.PolicyPage": "fas fa-gavel",
+        "pages.SiteSettings": "fas fa-cog",
+        # Research
+        "research": "fas fa-atom",
+        "research.ResearchProject": "fas fa-atom",
+        # System
+        "admin": "fas fa-tools",
     },
+
+    "custom_links": {
+        "analytics": [
+            {
+                "name": "Analytics Dashboard",
+                "url": "dashboard:index",
+                "icon": "fas fa-chart-pie",
+                "permissions": ["auth.view_user"],
+            },
+        ],
+        "accounts": [
+            {
+                "name": "Security Settings",
+                "url": "admin:2fa_setup",
+                "icon": "fas fa-shield-alt",
+                "permissions": ["auth.view_user"],
+            },
+        ],
+    },
+
     "related_modal_active": False,
+
     "custom_css": """
+        /* ── Sidebar shell ──────────────────────────────────────────── */
+        .main-sidebar {
+            background-color: #1a1d24 !important;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3) !important;
+        }
+        .main-sidebar .brand-link {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+            padding: 14px 16px !important;
+            background-color: #15181e !important;
+        }
+        .main-sidebar .brand-link .brand-text {
+            font-weight: 700 !important;
+            letter-spacing: 0.4px !important;
+            font-size: 1rem !important;
+        }
         .sidebar {
             overflow-y: auto !important;
-            max-height: calc(100vh - 56px) !important;
+            max-height: calc(100vh - 57px) !important;
+            padding: 8px 8px 20px !important;
         }
-        .sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
         .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 4px;
         }
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255,255,255,0.3);
+
+        /* ── Group header row (app-level toggle) ────────────────────── */
+        .nav-sidebar > .nav-item > .nav-link {
+            border-radius: 8px !important;
+            padding: 13px 14px !important;
+            margin-bottom: 4px !important;
+            color: #c2c7d0 !important;
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.2px;
+            transition: background 0.18s ease, color 0.18s ease !important;
         }
-        .main-sidebar .sidebar {
-            height: calc(100vh) !important;
+
+        /* ── All nav links ──────────────────────────────────────────── */
+        .nav-sidebar .nav-item .nav-link {
+            border-radius: 8px !important;
+            padding: 12px 14px !important;
+            margin-bottom: 4px !important;
+            color: #c2c7d0 !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            transition: background 0.18s ease, color 0.18s ease !important;
+            line-height: 1.4;
+        }
+        .nav-sidebar .nav-item .nav-link i {
+            margin-right: 12px !important;
+            font-size: 0.95rem !important;
+            opacity: 0.8;
+            width: 18px;
+            text-align: center;
+        }
+        .nav-sidebar .nav-item .nav-link:hover {
+            background-color: rgba(255,255,255,0.06) !important;
+            color: #e8eaed !important;
+        }
+        .nav-sidebar .nav-item .nav-link.active {
+            background-color: rgba(26, 115, 232, 0.18) !important;
+            color: #8ab4f8 !important;
+            border-left: 3px solid #1a73e8 !important;
+            font-weight: 600 !important;
+        }
+
+        /* ── Nested child items (model rows inside each group) ──────── */
+        .nav-sidebar .nav-treeview {
+            padding-left: 4px !important;
+            background-color: rgba(0,0,0,0.15) !important;
+            border-radius: 0 0 8px 8px !important;
+            margin-bottom: 6px;
+        }
+        .nav-sidebar .nav-treeview .nav-item .nav-link {
+            padding: 10px 14px 10px 22px !important;
+            font-size: 0.84rem !important;
+            color: #9aa0a6 !important;
+            font-weight: 400 !important;
+            border-radius: 6px !important;
+            margin-bottom: 2px !important;
+            line-height: 1.4;
+        }
+        .nav-sidebar .nav-treeview .nav-item .nav-link:hover {
+            background-color: rgba(255,255,255,0.05) !important;
+            color: #e8eaed !important;
+        }
+        .nav-sidebar .nav-treeview .nav-item .nav-link.active {
+            background-color: rgba(26,115,232,0.15) !important;
+            color: #8ab4f8 !important;
+            border-left: 3px solid #1a73e8 !important;
+        }
+
+        /* ── Caret arrows for collapsible groups ────────────────────── */
+        .nav-sidebar .nav-item > .nav-link .right {
+            opacity: 0.45;
+            font-size: 0.72rem;
+            transition: transform 0.2s ease;
+        }
+        .nav-sidebar .nav-item.menu-open > .nav-link .right {
+            transform: rotate(90deg);
+            opacity: 0.9;
+        }
+
+        /* ── Section labels (nav-header) ────────────────────────────── */
+        .nav-sidebar .nav-header {
+            font-size: 0.68rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            color: #5f6368 !important;
+            padding: 18px 14px 6px !important;
+            margin-top: 6px !important;
         }
     """,
 }
@@ -369,42 +615,6 @@ JAZZMIN_UI_TWEAKS = {
     "body_small_text": False,
     "brand_logo": "images/logo.png",
     "brand_logo_class": "brand-image img-circle elevation-3",
-    "brand_logo_alt": "Your Site Logo",
+    "brand_logo_alt": "LiG Admin",
 }
 
-JAZZMIN_SETTINGS["icons"] = {
-    "auth": "fas fa-users-cog",
-    "auth.user": "fas fa-user",
-    "auth.Group": "fas fa-users",
-    "admin.LogEntry": "fas fa-file",
-    "analytics.Visitor": "fas fa-user",
-    "analytics.PageView": "fas fa-eye",
-    "analytics.DailyStats": "fas fa-chart-bar",
-    "store.Product": "fas fa-box",
-    "store.ComputerProduct": "fas fa-laptop",
-    "store.PeripheralProduct": "fas fa-keyboard",
-    "store.SoftwareProduct": "fas fa-download",
-}
-
-JAZZMIN_SETTINGS["custom_links"] = {
-    "LiG": [
-        {
-            "name": "Analytics Dashboard",
-            "url": "dashboard:index",
-            "icon": "fas fa-chart-line",
-            "permissions": ["auth.view_user"],
-        },
-    ],
-    "accounts": [
-        {
-            "name": "Security Settings",
-            "url": "admin:2fa_setup",
-            "icon": "fas fa-shield-alt",
-            "permissions": ["auth.view_user"],
-        },
-    ],
-}
-
-JAZZMIN_SETTINGS["icons"]["accounts.Admin2FA"] = "fas fa-shield-alt"
-JAZZMIN_SETTINGS["icons"]["accounts.AuditLog"] = "fas fa-history"
-JAZZMIN_SETTINGS["icons"]["admin.LogEntry"] = "fas fa-clipboard-list"
