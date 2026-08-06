@@ -214,64 +214,19 @@ class Payment(models.Model):
             self.save()
             return False
 
-    def mark_hubtel_success(self, transaction_data=None):
-        """Mark a Hubtel payment successful from webhook-confirmed data."""
-        transaction_data = transaction_data or {}
-
-        self.verified = True
-        self.status = 'successful'
-        self.channel = (
-            transaction_data.get('channel') or
-            transaction_data.get('paymentMethod') or
-            transaction_data.get('PaymentMethod') or
-            self.channel or
-            'mobile_money'
-        )
-        self.currency = (
-            transaction_data.get('currency') or
-            transaction_data.get('Currency') or
-            self.currency or
-            'GHS'
-        )
-
-        paid_at = (
-            transaction_data.get('paid_at') or
-            transaction_data.get('transaction_date') or
-            transaction_data.get('TransactionDate') or
-            transaction_data.get('TransactionDateTime')
-        )
-        if paid_at:
-            try:
-                self.transaction_date = datetime.fromisoformat(
-                    str(paid_at).replace('Z', '+00:00')
-                )
-            except Exception:
-                pass
-
-        last4 = transaction_data.get('last4') or transaction_data.get('Last4')
-        if last4:
-            self.last4 = last4
-
-        transaction_id = (
-            transaction_data.get('transaction_id') or
-            transaction_data.get('TransactionId') or
-            transaction_data.get('transactionId') or
-            transaction_data.get('checkoutId') or
-            transaction_data.get('CheckoutId')
-        )
-        if transaction_id:
-            self.hubtel_token = transaction_id
-
-        self.save()
-        self._update_order_status()
-
     def _update_order_status(self):
-        """Update order status after successful payment."""
+        """Update order after successful payment and notify the customer."""
         if self.order and not self.order.paid:
             self.order.paid = True
-            self.order.status = "Completed"
+            self.order.status = "Pending"
             self.order.is_ordered = True
             self.order.save()
+
+            try:
+                from orders.emails import send_payment_success_email
+                send_payment_success_email(self)
+            except Exception as e:
+                logger.error("Failed to send payment success email for %s: %s", self.ref, str(e))
 
     def is_successful(self):
         return self.status == 'successful' and self.verified

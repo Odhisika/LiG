@@ -1,0 +1,32 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Payment Confirmed{% endblock %}
+{% block header %}Payment Confirmed - Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+Hi {{ user.first_name }},<br><br>
+
+We are happy to confirm that your payment for <b>Order #{{ order.order_number }}</b> was successful.<br><br>
+
+Here are your payment details:
+<ul>
+  <li><b>Order Number:</b> {{ order.order_number }}</li>
+  <li><b>Amount Paid:</b> GHS {{ payment.amount|floatformat:2 }}</li>
+  <li><b>Payment Reference:</b> {{ payment.ref }}</li>
+  <li><b>Payment Method:</b> {{ payment.get_gateway_display }}</li>
+</ul>
+
+Your order is now <b>{{ order.get_status_display }}</b> and will be processed shortly.
+We will send you an email as soon as your order status changes.
+{% endblock %}
+
+{% block button %}
+<tr>
+  <td align="center" style="padding:20px;">
+    <a href="https://lig.com.gh/accounts/my_orders/" style="background:#0066cc; color:#fff; text-decoration:none;
+                 padding:15px 30px; border-radius:5px; font-size:16px; display:inline-block;">
+       Track My Order
+    </a>
+  </td>
+</tr>
+{% endblock %}

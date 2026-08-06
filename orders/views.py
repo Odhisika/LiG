@@ -38,7 +38,7 @@ def place_order(request):
             order.order_total = grand_total
             order.tax = tax
             order.ip = request.META.get('REMOTE_ADDR', '')
-            order.status = 'Pending Payment'
+            order.status = 'Pending'
             order.expires_at = now() + timedelta(days=7)
             order.save()
 
@@ -62,14 +62,8 @@ def place_order(request):
 
             # Send email
             try:
-                mail_subject = 'Order Placed - Make Payment'
-                context = {'user': current_user, 'order': order}
-                text_content = render_to_string('orders/payment_instructions_email.txt', context)
-                html_content = render_to_string('orders/payment_instructions_email.html', context)
-
-                email_message = EmailMultiAlternatives(mail_subject, text_content, to=[current_user.email])
-                email_message.attach_alternative(html_content, "text/html")
-                email_message.send()
+                from orders.emails import send_order_placed_email
+                send_order_placed_email(current_user, order)
             except Exception as e:
                 print(f"Email sending failed: {e}")
 
@@ -121,7 +115,7 @@ def submit_proof(request, order_number):
                 proof_image=proof_file,
                 note=note
             )
-            order.status = 'New'
+            order.status = 'Pending'
             order.save()
 
             # Redirect to confirmation step

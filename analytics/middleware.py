@@ -19,6 +19,13 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return None
         
+        from analytics.bot_detection import is_bot
+        user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
+        
+        # Skip bots and crawlers - they inflate the stats and are not humans
+        if is_bot(user_agent):
+            return None
+        
         from analytics.models import Visitor, PageView
         
         # Get or create session ID
@@ -29,7 +36,6 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
         
         # Get visitor info
         ip_address = self.get_client_ip(request)
-        user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
         referrer = request.META.get('HTTP_REFERER', '')[:500]
         
         # Create or update visitor

@@ -19,6 +19,7 @@
                             <h1 class="page-title">Order Details</h1>
                             <p class="page-subtitle">Order Reference: <strong>{{ order.order_number }}</strong></p>
                             <p class="page-meta">Placed on {{ order.created_at|date:"F d, Y g:i A" }}</p>
+                            <span class="status-badge status-{{ order.status|lower }} mt-2">{{ order.status }}</span>
                         </div>
                         <div class="header-actions no-print">
                             <a href="{% url 'generate_invoice_pdf' order.order_number %}" class="btn-professional btn-primary" target="_blank">
@@ -32,7 +33,7 @@
                         <div class="payment-status-wrapper no-print">
                             {% with order.payments.last as latest_payment %}
                                 {% if latest_payment %}
-                                    {% if order.paid and order.status == "Completed" %}
+                                    {% if order.paid %}
                                         <div class="status-alert status-success">
                                             <div class="status-icon"><i class="fa-solid fa-circle-check"></i></div>
                                             <div class="status-content">
@@ -96,10 +97,18 @@
                                         <span>Order Status:</span>
                                         <span class="status-badge status-{{ order.status|lower }}">{{ order.status }}</span>
                                     </div>
+                                    {% with order.payments.last as latest_payment %}
+                                    <div class="info-row">
+                                        <span>Payment Status:</span>
+                                        <span class="status-badge status-{% if order.paid %}delivered{% elif latest_payment and latest_payment.status == 'failed' %}cancelled{% else %}pending{% endif %}">
+                                            {% if order.paid %}Paid{% elif latest_payment and latest_payment.status == 'failed' %}Failed{% else %}Payment Due{% endif %}
+                                        </span>
+                                    </div>
                                     <div class="info-row">
                                         <span>Payment Method:</span>
-                                        <span>{{ order.payment.payment_method|default:"Online Payment" }}</span>
+                                        <span>{{ latest_payment.get_gateway_display|default:"Online Payment" }}</span>
                                     </div>
+                                    {% endwith %}
                                     <div class="info-row">
                                         <span>Total Amount:</span>
                                         <span class="text-primary-bold">₵{{ order.order_total }}</span>
@@ -214,6 +223,13 @@
 .btn-retry:hover { background: #7f1d1d; }
 
 .btn-primary-action { margin-left: auto; padding: 0.75rem 1.5rem; background: var(--primary); color: #fff; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; }
+
+/* Status Badges */
+.status-badge { display: inline-flex; padding: 0.3rem 0.85rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: capitalize; }
+.status-pending { background: #fffbeb; color: #d97706; }
+.status-in-transit { background: #eff6ff; color: #1e40af; }
+.status-delivered { background: #ecfdf5; color: #059669; }
+.status-cancelled { background: #fef2f2; color: #dc2626; }
 
 /* Order Info Grid */
 .order-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }

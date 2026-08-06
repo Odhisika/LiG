@@ -15,6 +15,18 @@ def _delta(current, previous):
     return round((float(current) - float(previous)) / float(previous) * 100, 1)
 
 
+def _unique_visitors(queryset):
+    """Count real users: drop bots and collapse sessions by IP + User-Agent."""
+    from .bot_detection import bot_q
+    return queryset.exclude(bot_q()).values('ip_address', 'user_agent').distinct().count()
+
+
+def _real_page_views(queryset):
+    """Count page views from non-bot visitors."""
+    from .bot_detection import bot_q
+    return queryset.exclude(bot_q('visitor__user_agent')).count()
+
+
 def _period_stats(start, end):
     """Aggregate sales/visitor stats for orders in [start, end) date range."""
     from orders.models import Order
@@ -45,14 +57,14 @@ def _period_stats(start, end):
         'pending': orders.filter(status='Pending Payment').count(),
         'cancelled': orders.filter(status='Cancelled').count(),
         'aov': (revenue / completed_count) if completed_count else 0,
-        'visitors': Visitor.objects.filter(
+        'visitors': _unique_visitors(Visitor.objects.filter(
             first_visit__date__gte=start,
             first_visit__date__lt=end,
-        ).count(),
-        'page_views': PageView.objects.filter(
+        )),
+        'page_views': _real_page_views(PageView.objects.filter(
             viewed_at__date__gte=start,
             viewed_at__date__lt=end,
-        ).count(),
+        )),
         'new_customers': Account.objects.filter(
             date_joined__date__gte=start,
             date_joined__date__lt=end,
@@ -86,7 +98,7 @@ def get_index_stats(days=30):
     conversion_rate = (current['completed'] / current['visitors'] * 100) if current['visitors'] else 0
     prev_conversion = (previous['completed'] / previous['visitors'] * 100) if previous['visitors'] else 0
 
-    today_visitors = Visitor.objects.filter(first_visit__date=today).count()
+    today_visitors = _unique_visitors(Visitor.objects.filter(first_visit__date=today))
 
     top_categories = OrderProduct.objects.filter(
         ordered=True,

@@ -5,6 +5,8 @@ from django.db.models import Sum, Count
 from datetime import timedelta
 import uuid
 
+from .bot_detection import bot_q
+
 User = get_user_model()
 
 
@@ -152,6 +154,14 @@ class VisitorAnalytics:
     """Helper class for visitor analytics"""
     
     @staticmethod
+    def _unique_visitors(queryset):
+        return queryset.exclude(bot_q()).values('ip_address', 'user_agent').distinct().count()
+    
+    @staticmethod
+    def _real_page_views(queryset):
+        return queryset.exclude(bot_q('visitor__user_agent')).count()
+    
+    @staticmethod
     def get_visitor_stats(days=30):
         """Get visitor stats for a period"""
         from django.utils import timezone
@@ -163,11 +173,11 @@ class VisitorAnalytics:
         visitors = Visitor.objects.filter(first_visit__date__gte=start_date)
         
         return {
-            'unique_visitors': visitors.filter(is_unique=True).count(),
-            'total_visits': visitors.count(),
-            'page_views': PageView.objects.filter(
+            'unique_visitors': VisitorAnalytics._unique_visitors(visitors),
+            'total_visits': visitors.exclude(bot_q()).count(),
+            'page_views': VisitorAnalytics._real_page_views(PageView.objects.filter(
                 viewed_at__date__gte=start_date
-            ).count(),
+            )),
         }
     
     @staticmethod
@@ -185,8 +195,8 @@ class VisitorAnalytics:
             data.append({
                 'date': date.strftime('%Y-%m-%d'),
                 'label': date.strftime('%b %d'),
-                'visitors': visitors.count(),
-                'page_views': PageView.objects.filter(viewed_at__date=date).count(),
+                'visitors': VisitorAnalytics._unique_visitors(visitors),
+                'page_views': VisitorAnalytics._real_page_views(PageView.objects.filter(viewed_at__date=date)),
             })
         
         return data

@@ -77,6 +77,14 @@ def _record_hubtel_status_check(payment):
     )
 
 
+def _hubtel_webhook_check_due(payment):
+    """True if we may re-verify this payment with Hubtel now (rate-limited)."""
+    last_check = cache.get(_hubtel_status_check_cache_key(payment.id))
+    if not last_check:
+        return True
+    return (timezone.now() - last_check) >= HUBTEL_STATUS_CHECK_DELAY
+
+
 def _render_hubtel_processing(request, payment):
     return render(
         request,
@@ -417,6 +425,11 @@ def payment_status(request, payment_id):
     """AJAX polling endpoint — check payment status and try to verify if pending."""
     try:
         payment = get_object_or_404(Payment, id=payment_id)
+
+        # Prevent IDOR — only the payment owner may poll its status.
+        if payment.user_id != request.user.id:
+            return JsonResponse({'error': 'Permission denied'}, status=403)
+
         next_status_check_in = 0
 
         if payment.status == 'pending' and payment.gateway == 'hubtel':
@@ -453,8 +466,8 @@ def payment_detail(request, payment_id):
     """Display payment details"""
     payment = get_object_or_404(Payment, id=payment_id)
     
-    # Check permissions
-    if request.user.is_authenticated and payment.user != request.user:
+    # Check permissions — only the payment owner may view it
+    if payment.user_id != request.user.id:
         messages.error(request, "You don't have permission to view this payment.")
         return redirect('cart')
     
@@ -486,7 +499,10 @@ def hubtel_webhook(request):
     """
     Hubtel server-to-server callback (callbackUrl).
     Hubtel POSTs the payment result here after the customer completes payment.
-    This is the authoritative source — verify and mark payment immediately.
+
+    SECURITY: this endpoint is unauthenticated (Hubtel does not sign these
+    callbacks), so the payload is never trusted. The callback only triggers a
+    server-to-server re-verification against Hubtel's authenticated status API.
     """
     try:
         raw_body = request.body.decode('utf-8')
@@ -538,27 +554,50 @@ def hubtel_webhook(request):
             logger.warning(f"Hubtel webhook: no payment found for ref='{reference}'")
             return HttpResponse("OK", status=200)
 
-        if payment.verified:
+        if payment.verified and payment.is_successful():
             logger.info(f"Hubtel webhook: payment {reference} already verified — skipping.")
             return HttpResponse("OK", status=200)
 
-        if status in ('success', 'successfull', 'completed', 'approved', '0000'):
-            logger.info(f"Hubtel webhook: marking {reference} successful from callback payload.")
-            payment.mark_hubtel_success({
-                'transaction_id': transaction_id or None,
-                'paymentMethod': payload.get('PaymentMethod') or payload.get('paymentMethod'),
-                'currency': payload.get('Currency') or payload.get('currency'),
-                'TransactionDate': (
-                    payload.get('TransactionDate') or
-                    payload.get('DatePaid') or
-                    payload.get('TransactionDateTime')
-                ),
-                'last4': payload.get('Last4') or payload.get('last4'),
-            })
-        elif status in ('failed', 'cancelled', 'rejected'):
-            payment.status = 'failed'
-            payment.save()
-            logger.info(f"Hubtel webhook: payment {reference} marked as failed.")
+        if payment.gateway != 'hubtel':
+            logger.warning(
+                f"Hubtel webhook: payment {reference} is not a Hubtel payment "
+                f"(gateway='{payment.gateway}') — ignoring."
+            )
+            return HttpResponse("OK", status=200)
+
+        # SECURITY: this endpoint is unauthenticated (Hubtel does not sign these
+        # callbacks), so the payload is NEVER trusted. A success/failure claim only
+        # triggers a server-to-server re-verification against Hubtel's authenticated
+        # status API. The order is only marked paid when Hubtel itself confirms it.
+        claimed_success = status in ('success', 'successfull', 'completed', 'approved', '0000')
+        claimed_failure = status in ('failed', 'cancelled', 'rejected')
+
+        if not (claimed_success or claimed_failure):
+            logger.info(f"Hubtel webhook: status='{status}' is not terminal — ignoring.")
+            return HttpResponse("OK", status=200)
+
+        # Rate-limit server-side checks — Hubtel retries can arrive in bursts.
+        if not _hubtel_webhook_check_due(payment):
+            logger.info(
+                f"Hubtel webhook for {reference}: status check already ran recently — skipping."
+            )
+            return HttpResponse("OK", status=200)
+        _record_hubtel_status_check(payment)
+
+        logger.info(
+            f"Hubtel webhook for {reference} claims status='{status}' — "
+            f"re-verifying server-to-server."
+        )
+        verified = payment.verify_payment(transaction_id or payment.hubtel_token)
+
+        if verified and payment.is_successful():
+            logger.info(f"Hubtel webhook: payment {reference} confirmed successful by Hubtel API.")
+        else:
+            # Never mark failed/cancelled from the unverified webhook claim alone.
+            logger.info(
+                f"Hubtel webhook: payment {reference} claimed '{status}' but Hubtel API "
+                f"did not confirm it — leaving as pending."
+            )
 
         return HttpResponse("OK", status=200)
 

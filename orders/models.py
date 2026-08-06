@@ -21,11 +21,9 @@ def default_expiry():
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('New', 'New'),
-        ('Pending Payment', 'Pending Payment'),
-        ('Expired', 'Expired'),
-        ('Accepted', 'Accepted'),
-        ('Completed', 'Completed'),
+        ('Pending', 'Pending'),
+        ('In Transit', 'In Transit'),
+        ('Delivered', 'Delivered'),
         ('Cancelled', 'Cancelled'),
     ]
 
@@ -44,7 +42,7 @@ class Order(models.Model):
     order_total = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
     paid = models.BooleanField(default=False)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending Payment')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     ip = models.GenericIPAddressField(blank=True, null=True)
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

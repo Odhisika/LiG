@@ -46,7 +46,8 @@
                                             <th>Recipient</th>
                                             <th>Total</th>
                                             <th>Date</th>
-                                            <th>Status</th>
+                                            <th>Payment</th>
+                                            <th>Order Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -59,6 +60,13 @@
                                             <td>{{ order.full_name }}</td>
                                             <td class="amount-cell">₵{{ order.order_total }}</td>
                                             <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if order.paid %}
+                                                    <span class="status-badge status-delivered">Paid</span>
+                                                {% else %}
+                                                    <span class="status-badge status-pending">Payment Due</span>
+                                                {% endif %}
+                                            </td>
                                             <td>
                                                 <span class="status-badge status-{{ order.status|lower }}">
                                                     {{ order.status }}
@@ -267,6 +275,7 @@
 
 .status-completed, .status-delivered { background: var(--success-bg); color: var(--success-text); }
 .status-pending, .status-processing { background: var(--warning-bg); color: var(--warning-text); }
+.status-in-transit { background: #eff6ff; color: #1e40af; }
 .status-cancelled, .status-failed { background: var(--danger-bg); color: var(--danger-text); }
 
 /* Buttons */

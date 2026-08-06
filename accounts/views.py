@@ -17,7 +17,7 @@ def verify_turnstile(request):
     })
     return resp.json().get('success', False)
 from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode, url_has_allowed_host_and_scheme
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
@@ -170,16 +170,19 @@ def login(request):
             messages.success(request, 'You are now logged in.')
             
             # Handle redirect - prioritize checkout if that's where they came from
+            # Validate the 'next' parameter to prevent open redirect attacks.
             next_url = request.GET.get('next')
-            if next_url:
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
                 # If they were trying to access checkout, redirect there
                 if 'checkout' in next_url:
                     return redirect('checkout')
-                else:
-                    return redirect(next_url)
-            else:
-                # Default redirect to cart to show merged items, then to home
-                return redirect('cart')
+                return redirect(next_url)
+            # Default redirect to cart to show merged items, then to home
+            return redirect('cart')
         else:
             attempts = record_failed_attempt(email, ip)
             remaining = LOCKOUT_MAX_ATTEMPTS - attempts

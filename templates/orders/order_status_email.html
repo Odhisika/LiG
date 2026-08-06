@@ -1,0 +1,37 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Order Status Update{% endblock %}
+{% block header %}Order #{{ order.order_number }} is now {{ new_status }}{% endblock %}
+
+{% block content %}
+Hi {{ user.first_name }},<br><br>
+
+The status of your order <b>#{{ order.order_number }}</b> has been updated.<br><br>
+
+<ul>
+  <li><b>Previous Status:</b> {{ old_status }}</li>
+  <li><b>New Status:</b> {{ new_status }}</li>
+  <li><b>Order Total:</b> GHS {{ order.order_total }}</li>
+</ul>
+
+{% if new_status == "In Transit" %}
+Your order is on its way to you! Please keep an eye out for delivery updates.
+{% elif new_status == "Delivered" %}
+Your order has been delivered. We hope you enjoy your purchase!
+{% elif new_status == "Cancelled" %}
+If you did not request this cancellation, please contact our support team as soon as possible.
+{% else %}
+Thank you for shopping with us!
+{% endif %}
+{% endblock %}
+
+{% block button %}
+<tr>
+  <td align="center" style="padding:20px;">
+    <a href="https://lig.com.gh/accounts/my_orders/" style="background:#0066cc; color:#fff; text-decoration:none;
+                 padding:15px 30px; border-radius:5px; font-size:16px; display:inline-block;">
+       View My Order
+    </a>
+  </td>
+</tr>
+{% endblock %}

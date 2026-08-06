@@ -5,6 +5,18 @@ from django.utils import timezone
 from datetime import timedelta
 import json
 
+from .bot_detection import bot_q
+
+
+def _unique_visitors(queryset):
+    """Count real users: drop bots and collapse sessions by IP + User-Agent."""
+    return queryset.exclude(bot_q()).values('ip_address', 'user_agent').distinct().count()
+
+
+def _real_page_views(queryset):
+    """Count page views from non-bot visitors."""
+    return queryset.exclude(bot_q('visitor__user_agent')).count()
+
 
 class DashboardSite(AdminSite):
     site_header = "LiG Store Administration"
@@ -58,8 +70,8 @@ class DashboardSite(AdminSite):
         
         # Visitor Stats
         visitors = Visitor.objects.filter(first_visit__date__gte=start_date)
-        total_visitors = visitors.count()
-        page_views = PageView.objects.filter(viewed_at__date__gte=start_date).count()
+        total_visitors = _unique_visitors(visitors)
+        page_views = _real_page_views(PageView.objects.filter(viewed_at__date__gte=start_date))
         
         # Daily Sales Data for Chart (last 30 days)
         daily_sales = []
@@ -80,8 +92,8 @@ class DashboardSite(AdminSite):
             day_visitors = visitors.filter(first_visit__date=date)
             daily_visitors.append({
                 'date': date.strftime('%Y-%m-%d'),
-                'visitors': day_visitors.count(),
-                'page_views': PageView.objects.filter(viewed_at__date=date).count(),
+                'visitors': _unique_visitors(day_visitors),
+                'page_views': _real_page_views(PageView.objects.filter(viewed_at__date=date)),
             })
         
         # Top Selling Products
