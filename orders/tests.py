@@ -5,7 +5,7 @@ from django.core import mail
 from django.urls import reverse
 from django.contrib import admin as django_admin
 from accounts.models import Account
-from orders.models import Order, OrderProduct, PaymentProof
+from orders.models import Order, OrderProduct
 from orders.admin import OrderAdmin
 from store.models import Product
 from category.models import Category

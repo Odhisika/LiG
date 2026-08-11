@@ -364,7 +364,6 @@ JAZZMIN_SETTINGS = {
         "orders",
         "orders.Order",
         "orders.OrderProduct",
-        "orders.PaymentProof",
 
         # -- Payments --------------------------------------------------------
         "payment",
@@ -443,7 +442,6 @@ JAZZMIN_SETTINGS = {
         "orders": "fas fa-shopping-cart",
         "orders.Order": "fas fa-shopping-bag",
         "orders.OrderProduct": "fas fa-boxes",
-        "orders.PaymentProof": "fas fa-file-invoice-dollar",
         "payment": "fas fa-credit-card",
         "payment.Payment": "fas fa-credit-card",
         "payment.PaystackPayment": "fas fa-credit-card",

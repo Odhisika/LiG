@@ -104,7 +104,7 @@ def initialize_payment(request, order_id, gateway='hubtel'):
         order = get_object_or_404(Order, id=order_id)
         
         # Check if user owns this order
-        if request.user.is_authenticated and order.user != request.user:
+        if not request.user.is_authenticated or order.user != request.user:
             messages.error(request, "You don't have permission to access this order.")
             return redirect('cart')
         

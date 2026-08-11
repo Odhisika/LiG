@@ -10,7 +10,7 @@ from decimal import Decimal
 
 from cart.models import CartItem
 from .forms import OrderForm
-from .models import Order, OrderProduct, PaymentProof
+from .models import Order, OrderProduct
 from django.contrib import messages
 from django.http import HttpResponse
 from xhtml2pdf import pisa
@@ -99,41 +99,6 @@ def order_complete(request, order_number):
         'order_number': order.order_number,
         'subtotal': subtotal,
     })
-
-
-def submit_proof(request, order_number):
-    if request.method == 'POST':
-        order = get_object_or_404(Order, order_number=order_number)
-        user = request.user
-        proof_file = request.FILES.get('proof')
-        note = request.POST.get('note')
-
-        if proof_file:
-            payment_proof = PaymentProof.objects.create(
-                order=order,
-                user=user,
-                proof_image=proof_file,
-                note=note
-            )
-            order.status = 'Pending'
-            order.save()
-
-            # Redirect to confirmation step
-            return redirect('confirm_payment', proof_id=payment_proof.id)
-
-    return redirect('home')
-
-
-
-def confirm_payment(request, proof_id):
-    proof = get_object_or_404(PaymentProof, id=proof_id, user=request.user)
-
-    if request.method == 'POST':
-        messages.success(request, "Thank you! We'll review your order and process it as soon as possible.")
-        return redirect('order_detail', order_id=proof.order.order_number)
-
-    return render(request, 'orders/confirm_payment.html', {'proof': proof})
-
 
 
 def send_order_invoice(user, order, order_detail, subtotal):

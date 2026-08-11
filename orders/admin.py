@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Order, OrderProduct, PaymentProof
+from .models import Order, OrderProduct
 from .emails import send_order_status_email
 
 
@@ -81,13 +81,5 @@ class OrderAdmin(admin.ModelAdmin):
                 pass
 
 
-class PaymentProofAdmin(admin.ModelAdmin):
-    list_display = ['user', 'order', 'proof_image', 'note', 'status', 'submitted_at']
-    list_editable = ['status']
-    list_filter = ['status', 'submitted_at']
-    search_fields = ['user__username', 'order__order_number']
-
-
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderProduct)
-admin.site.register(PaymentProof, PaymentProofAdmin)
