@@ -1,34 +1,25 @@
 #!/usr/bin/env bash
-# Deploys the LiG store + embedded PricePilot app from Docker, with ZERO downtime.
+# Deploys the LiG store + embedded PricePilot app from Docker, ZERO downtime,
+# behind YOUR EXISTING APACHE. Manages containers with PLAIN DOCKER COMMANDS
+# (no compose — the engine on this server bundles a nonstandard compose).
 #
-# Run as the deploy user, from anywhere:
-#   ./deploy.sh
+# Run as the deploy user, from anywhere:   ./deploy.sh
 #
-# How it works (blue-green behind YOUR existing Apache):
-#   build new image -> migrate DB -> boot the STANDBY web container ->
-#   health-check it -> rewrite Apache's proxy include -> graceful reload ->
-#   stop the old one.
-#   Visitors never hit a dead port: Apache keeps serving the old container
-#   until the reload completes, and open connections never drop.
+# Flow: pull -> backup -> build -> migrate -> boot standby -> health check ->
+#       graceful Apache flip -> drain old -> restart PricePilot services.
 #
-# Prerequisites:
-#   - repo cloned at /var/www/LiG (so ./staticfiles ./media match your Apache
-#     Alias lines), Docker + compose plugin installed
-#   - .env.production present (copy .env.production.example)
-#   - ONE-TIME: wire Apache per deploy/apache/vhost-snippet.conf
+# Prerequisites: .env.production present; Apache wired per
+# deploy/apache/vhost-snippet.conf (once).
 #
-# Rollback to the previous release (skips fetch/build/migrate):
-#   ROLLBACK=1 ./deploy.sh
+# Rollback:  docker tag lig-app:previous lig-app:latest && ROLLBACK=1 ./deploy.sh
 set -euo pipefail
 
 APP_ROOT="${APP_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 cd "$APP_ROOT"
 
 # --- self-modification guard -------------------------------------------------
-# This script hard-resets the repo it lives in, and bash streams script files
-# lazily — letting $0 change mid-run corrupts execution (we ran the OLD logic
-# on freshly pulled code). So: copy ourselves to /tmp and exec THAT, carrying
-# APP_ROOT over since BASH_SOURCE will point at the copy.
+# Step 1 hard-resets the repo this script lives in, and bash streams script
+# files lazily — mutating $0 mid-run corrupts execution. Copy to /tmp, exec that.
 if [ -z "${DEPLOY_SELF_COPY:-}" ]; then
     SELF_COPY="$(mktemp /tmp/lig-deploy.XXXXXX)"
     cp "$0" "$SELF_COPY"
@@ -39,12 +30,21 @@ fi
 ENV_FILE="${ENV_FILE:-$APP_ROOT/.env.production}"
 ACTIVE_CONF="$APP_ROOT/deploy/apache/active.conf"
 BACKUP_DIR="$APP_ROOT/backups"
-HEALTH_TIMEOUT=180          # seconds to wait for the standby to go healthy
-
-DC=(docker compose --env-file "$ENV_FILE" -f docker-compose.prod.yml)
+HEALTH_TIMEOUT=180
+NET=lig-prod-net
 
 say() { echo "== $*"; }
 die() { echo "!! $*" >&2; exit 1; }
+get_env() { grep -E "^${1}=" "$ENV_FILE" | head -1 | cut -d= -f2-; }
+
+wait_healthy() {  # $1=container  [$2=timeout]
+    local waited=0 limit="${2:-$HEALTH_TIMEOUT}"
+    until [ "$(docker inspect -f '{{.State.Health.Status}}' "$1" 2>/dev/null)" = healthy ]; do
+        waited=$((waited + 3))
+        [ "$waited" -ge "$limit" ] && return 1
+        sleep 3
+    done
+}
 
 proxy_block() {  # $1 = 8001|8002
     cat <<EOF
@@ -55,6 +55,98 @@ ProxyPassReverse / http://127.0.0.1:$1/
 EOF
 }
 
+reload_apache() {  # $1 = 8001|8002 — installs block, TESTS it, reverts on failure
+    local tmp; tmp="$(mktemp)"
+    proxy_block "$1" > "$tmp"
+    cp "$ACTIVE_CONF" "${ACTIVE_CONF}.bak"
+    sudo cp "$tmp" "$ACTIVE_CONF"; rm -f "$tmp"
+    if ! sudo apache2ctl configtest </dev/null; then
+        sudo cp "${ACTIVE_CONF}.bak" "$ACTIVE_CONF"; rm -f "${ACTIVE_CONF}.bak"
+        return 1
+    fi
+    rm -f "${ACTIVE_CONF}.bak"
+    sudo systemctl reload apache2      # graceful — no dropped connections
+}
+
+start_web() {  # $1=name  $2=hostport
+    docker rm -f "$1" >/dev/null 2>&1 || true
+    docker run -d --name "$1" --restart unless-stopped --network "$NET" \
+        --env-file "$ENV_FILE" -e RUN_MIGRATE=false \
+        -p "127.0.0.1:$2:8000" \
+        -v "$APP_ROOT/staticfiles:/app/staticfiles" \
+        -v "$APP_ROOT/media:/app/media" \
+        -v "$APP_ROOT/logs:/app/logs" \
+        --health-cmd "python -c \"import http.client as c;s=c.HTTPConnection('127.0.0.1',8000,timeout=3);s.request('GET','/');r=s.getresponse();r.read()\"" \
+        --health-interval=5s --health-timeout=5s --health-retries=12 --health-start-period=30s \
+        --stop-timeout=30 \
+        lig-app:latest
+}
+
+start_pp_web() {
+    docker rm -f lig-pp-web >/dev/null 2>&1 || true
+    docker run -d --name lig-pp-web --restart unless-stopped --network "$NET" \
+        --env-file "$ENV_FILE" -e DJANGO_DEBUG=False \
+        -p "127.0.0.1:8003:8000" \
+        -v "$APP_ROOT/media:/var/www/LiG/media" \
+        --health-cmd "curl -fsS -o /dev/null http://localhost:8000/api/ || curl -fsS -o /dev/null http://localhost:8000/ || exit 1" \
+        --health-interval=10s --health-timeout=5s --health-retries=12 --health-start-period=40s \
+        pp-app:latest \
+        sh -c "python manage.py migrate --noinput && exec gunicorn --bind 0.0.0.0:8000 --workers 2 --timeout 120 --access-logfile - config.wsgi:application"
+}
+
+start_pp_worker() {
+    docker rm -f lig-pp-worker >/dev/null 2>&1 || true
+    docker run -d --name lig-pp-worker --restart unless-stopped --network "$NET" \
+        --env-file "$ENV_FILE" \
+        -v "$APP_ROOT/media:/var/www/LiG/media" \
+        --stop-timeout=900 \
+        pp-app:latest celery -A config worker -l info
+}
+
+start_pp_beat() {
+    docker rm -f lig-pp-beat >/dev/null 2>&1 || true
+    docker run -d --name lig-pp-beat --restart unless-stopped --network "$NET" \
+        --env-file "$ENV_FILE" \
+        -v "$APP_ROOT/media:/var/www/LiG/media" \
+        --stop-timeout=30 \
+        pp-app:latest celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+}
+
+ensure_backends() {
+    docker network create "$NET" >/dev/null 2>&1 || true
+    docker volume create lig-pgdata >/dev/null 2>&1 || true
+
+    if [ -z "$(docker ps -aq --filter name=^lig-prod-db$)" ]; then
+        say "Starting Postgres (first time)"
+        docker run -d --name lig-prod-db --restart unless-stopped --network "$NET" \
+            -e "POSTGRES_DB=$(get_env DB_NAME)" \
+            -e "POSTGRES_USER=$(get_env DB_USER)" \
+            -e "POSTGRES_PASSWORD=$(get_env DB_PASSWORD)" \
+            -e "PRICEPILOT_DB_NAME=$(get_env PRICEPILOT_DB_NAME)" \
+            -e "PRICEPILOT_DB_USER=$(get_env PRICEPILOT_DB_USER)" \
+            -e "PRICEPILOT_DB_PASSWORD=$(get_env PRICEPILOT_DB_PASSWORD)" \
+            -v lig-pgdata:/var/lib/postgresql/data \
+            -v "$APP_ROOT/deploy/postgres-init.sh:/docker-entrypoint-initdb.d/10-pricepilot.sh:ro" \
+            --health-cmd "pg_isready -U $(get_env DB_USER) -d $(get_env DB_NAME)" \
+            --health-interval=5s --health-timeout=5s --health-retries=10 \
+            postgres:16-alpine
+    elif [ -z "$(docker ps -q --filter name=^lig-prod-db$)" ]; then
+        docker start lig-prod-db >/dev/null
+    fi
+    wait_healthy lig-prod-db || die "db never became healthy — check: docker logs lig-prod-db"
+
+    if [ -z "$(docker ps -aq --filter name=^lig-prod-redis$)" ]; then
+        say "Starting Redis"
+        docker run -d --name lig-prod-redis --restart unless-stopped --network "$NET" \
+            --health-cmd "redis-cli ping" \
+            --health-interval=5s --health-timeout=5s --health-retries=10 \
+            redis:7-alpine
+    elif [ -z "$(docker ps -q --filter name=^lig-prod-redis$)" ]; then
+        docker start lig-prod-redis >/dev/null
+    fi
+    wait_healthy lig-prod-redis || die "redis never became healthy"
+}
+
 [ -f "$ENV_FILE" ] || die "$ENV_FILE missing — copy .env.production.example and fill it in"
 [ -f "$ACTIVE_CONF" ] || proxy_block 8001 > "$ACTIVE_CONF"
 
@@ -63,15 +155,13 @@ if [ "${ROLLBACK:-0}" != 1 ]; then
     say "Fetching latest code"
     git fetch origin
     git reset --hard origin/main
-    # NOTE: git clean does NOT touch ignored files (.env.production,
-    # active.conf, backups/) so secrets and runtime state survive deploys.
 fi
 
 # ------------------------------------------------------------- 2. safety ----
-if [ -n "$(docker ps -q --filter name=lig-prod-db)" ]; then
+if [ -n "$(docker ps -q --filter name=^lig-prod-db$)" ]; then
     mkdir -p "$BACKUP_DIR"
     say "Backing up database -> $BACKUP_DIR/"
-    $DC exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
+    docker exec lig-prod-db sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
         | gzip > "$BACKUP_DIR/pre-deploy-$(date +%Y%m%d-%H%M%S).sql.gz"
     ls -1t "$BACKUP_DIR"/pre-deploy-*.sql.gz | tail -n +8 | xargs -r rm --
 fi
@@ -86,25 +176,18 @@ if [ "${ROLLBACK:-0}" = 1 ]; then
     say "ROLLBACK mode — skipping fetch/build/migrate, reusing lig-app:previous"
 else
     say "Building images"
-    # Explicit buildx (--load): this server's Docker 29 `build` alias drops
-    # the context argument. Services reference these exact tags.
     docker buildx build -t lig-app:latest --load .
     docker buildx build -t pp-app:latest --load ./pricepilot
+fi
 
-    # ------------------------------------------------ 4. migrate ----
-    # Migrations run ONCE here via PLAIN `docker run` (this server's compose
-    # plugin mishandles both `build` and `run` service resolution). Old
-    # containers keep serving throughout — migrations must stay additive.
-    say "Ensuring db/redis are up"
-    $DC up -d db redis
-    DB_WAITED=0
-    until [ "$(docker inspect -f '{{.State.Health.Status}}' lig-prod-db 2>/dev/null)" = healthy ]; do
-        DB_WAITED=$((DB_WAITED + 2))
-        [ "$DB_WAITED" -ge "$HEALTH_TIMEOUT" ] && die "db never became healthy — check: docker logs lig-prod-db"
-        sleep 2
-    done
+# ------------------------------------------------------------ 4. backends ---
+say "Ensuring db/redis are up"
+ensure_backends
 
-    NET="lig-prod_default"
+# ------------------------------------------------------------ 5. migrate ----
+if [ "${ROLLBACK:-0}" != 1 ]; then
+    # Plain `docker run` against the shared network; old containers keep
+    # serving throughout — migrations must stay additive/backward-compatible.
     say "Migrating LiG database"
     docker run --rm --network "$NET" --env-file "$ENV_FILE" \
         lig-app:latest python manage.py migrate --noinput
@@ -114,7 +197,7 @@ else
         pp-app:latest python manage.py migrate --noinput
 fi
 
-# --------------------------------------------------- 5. blue-green switch ---
+# --------------------------------------------------- 6. blue-green switch ---
 ACTIVE_PORT="$(grep -oE '127\.0\.0\.1:800[12]' "$ACTIVE_CONF" | head -1 | cut -d: -f2)"
 case "$ACTIVE_PORT" in
     8001) ACTIVE_SVC=web-a; STANDBY_SVC=web-b; STANDBY_PORT=8002 ;;
@@ -122,36 +205,17 @@ case "$ACTIVE_PORT" in
     *)    ACTIVE_SVC="";    STANDBY_SVC=web-a; STANDBY_PORT=8001 ;;  # fresh
 esac
 
-A_RUNNING=$($DC ps -q web-a 2>/dev/null | wc -l)
-B_RUNNING=$($DC ps -q web-b 2>/dev/null | wc -l)
-
-reload_apache() {  # $1 = 8001|8002 — installs the block, TESTS it, reverts on failure
-    local tmp
-    tmp="$(mktemp)"
-    proxy_block "$1" > "$tmp"
-    cp "$ACTIVE_CONF" "${ACTIVE_CONF}.bak"
-    sudo cp "$tmp" "$ACTIVE_CONF"
-    rm -f "$tmp"
-    if ! sudo apache2ctl configtest </dev/null; then
-        sudo cp "${ACTIVE_CONF}.bak" "$ACTIVE_CONF"
-        rm -f "${ACTIVE_CONF}.bak"
-        return 1
-    fi
-    rm -f "${ACTIVE_CONF}.bak"
-    sudo systemctl reload apache2      # graceful — no dropped connections
-}
+A_RUNNING=$(docker ps -q --filter name=^lig-web-a$ | wc -l)
+B_RUNNING=$(docker ps -q --filter name=^lig-web-b$ | wc -l)
 
 if [ -z "$ACTIVE_SVC" ] || { [ "$A_RUNNING" = 0 ] && [ "$B_RUNNING" = 0 ]; }; then
     # ---------------------------------------------------- cold bootstrap ---
-    say "No web container up yet — starting the full stack (first deploy)"
-    $DC up -d
+    say "No web container up yet — cold bootstrap (first deploy)"
+    start_web lig-web-a 8001
     say "Waiting for web-a to become healthy"
-    for _ in $(seq 1 $((HEALTH_TIMEOUT / 3))); do
-        [ "$(docker inspect -f '{{.State.Health.Status}}' lig-web-a 2>/dev/null)" = healthy ] && break
-        sleep 3
-    done
-    docker inspect -f '{{.State.Health.Status}}' lig-web-a | grep -q healthy \
-        || die "web-a never went healthy — check: $DC logs web-a"
+    wait_healthy lig-web-a || { docker logs --tail 50 lig-web-a >&2 || true; die "web-a failed its health check"; }
+    say "Starting PricePilot services"
+    start_pp_web; start_pp_worker; start_pp_beat
     if reload_apache 8001; then
         say "Done — site live on web-a via Apache"
     else
@@ -163,19 +227,11 @@ if [ -z "$ACTIVE_SVC" ] || { [ "$A_RUNNING" = 0 ] && [ "$B_RUNNING" = 0 ]; }; th
 fi
 
 say "Active: $ACTIVE_SVC (port $ACTIVE_PORT) — deploying to standby $STANDBY_SVC"
-$DC up -d --no-deps "$STANDBY_SVC"
+start_web "lig-$STANDBY_SVC" "$STANDBY_PORT"
 
-STANDBY_CNAME="lig-$STANDBY_SVC"
 say "Waiting for $STANDBY_SVC to become healthy"
-HEALTHY=0
-for _ in $(seq 1 $((HEALTH_TIMEOUT / 3))); do
-    if [ "$(docker inspect -f '{{.State.Health.Status}}' "$STANDBY_CNAME" 2>/dev/null)" = healthy ]; then
-        HEALTHY=1; break
-    fi
-    sleep 3
-done
-if [ "$HEALTHY" != 1 ]; then
-    $DC logs --tail 50 "$STANDBY_SVC" >&2 || true
+if ! wait_healthy "lig-$STANDBY_SVC"; then
+    docker logs --tail 50 "lig-$STANDBY_SVC" >&2 || true
     die "$STANDBY_SVC failed its health check — $ACTIVE_SVC still serving, NOTHING was switched"
 fi
 
@@ -184,12 +240,12 @@ if ! reload_apache "$STANDBY_PORT"; then
     die "Apache config test/reload failed — reverted, $ACTIVE_SVC still serving"
 fi
 
-# ------------------------------------------------------- 6. old + workers ---
-say "Stopping old $ACTIVE_SVC (drains in-flight requests)"
-$DC stop "$ACTIVE_SVC"
+say "Draining and removing old $ACTIVE_SVC"
+docker stop -t 30 "lig-$ACTIVE_SVC" >/dev/null
+docker rm "lig-$ACTIVE_SVC" >/dev/null
 
 say "Restarting PricePilot web/worker/beat on the new image"
-$DC up -d --no-deps pp-web pp-worker pp-beat
+start_pp_web; start_pp_worker; start_pp_beat
 
 say "Pruning dangling images"
 docker image prune -f >/dev/null

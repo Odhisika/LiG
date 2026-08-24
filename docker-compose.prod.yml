@@ -1,7 +1,6 @@
-# PRODUCTION stack — blue-green zero-downtime deploys, behind YOUR EXISTING APACHE.
-#
-#   Everything runs through deploy.sh:
-#     ./deploy.sh            # build -> migrate -> flip -> graceful reload (no downtime)
+# DEPRECATED for deployment — deploy.sh now manages all containers with plain
+# docker commands (the server's engine bundles a nonstandard compose plugin).
+# This file remains only as a reference description of the production stack.
 #
 # Layout:
 #   web-a / web-b : LiG store (gunicorn). One serves traffic (127.0.0.1:8001),
