@@ -56,7 +56,7 @@ if [ "${ROLLBACK:-0}" != 1 ]; then
 fi
 
 # ------------------------------------------------------------- 2. safety ----
-if [ -n "$(docker ps -q --filter name=lig-prod-db-1)" ]; then
+if [ -n "$(docker ps -q --filter name=lig-prod-db)" ]; then
     mkdir -p "$BACKUP_DIR"
     say "Backing up database -> $BACKUP_DIR/"
     $DC exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
