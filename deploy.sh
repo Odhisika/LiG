@@ -74,7 +74,11 @@ if [ "${ROLLBACK:-0}" = 1 ]; then
     say "ROLLBACK mode — skipping fetch/build/migrate, reusing lig-app:previous"
 else
     say "Building images"
-    $DC build
+    # Plain docker build instead of `compose build`: immune to buildx/bake
+    # delegation quirks across compose versions. Services reference these
+    # exact tags, so `up` picks them up.
+    docker build -t lig-app:latest .
+    docker build -t pp-app:latest ./pricepilot
 
     # ------------------------------------------------------------ 4. migrate ----
     # Migrations run ONCE here, against the shared DB, before any new container
