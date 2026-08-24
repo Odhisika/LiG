@@ -1,8 +1,32 @@
+# Local full-stack development stack: the LiG store site AND the embedded
+# PricePilot monitoring app (API + Celery worker/beat) plus its Postgres,
+# Redis, and the React frontend — all in one command.
+#
+#   docker compose up --build
+#
+# URLs:
+#   LiG store       http://localhost:8000
+#   PricePilot API  http://localhost:8001
+#   React frontend  http://localhost:5173
+#
+# To run only the store:          docker compose up lig
+# PricePilot-only services:       db redis pp-web pp-worker pp-beat frontend
+#
+# PricePilot scrapes suppliers (worker/beat) and seeds the products into
+# LiG's own database (./db.sqlite3) and media (./media) — the two apps share
+# the host files via the bind mounts below.
+#
+# NOTE: this Compose file is for local development only. Production runs on
+# gunicorn + systemd + nginx + postgresql (see docs/SETUP_AND_DEPLOYMENT.md
+# and docs/PRICEPILOT_DEPLOYMENT.md) and ignores everything here.
+#
+# The first build is slow: it downloads Chromium (used by the scrapers) and
+# Node packages. Afterwards everything is cached.
+
 services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  lig:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
     env_file:
       - .env
     ports:
@@ -10,3 +34,110 @@ services:
     volumes:
       - .:/app
     restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: pricepilot
+      POSTGRES_USER: pricepilot
+      POSTGRES_PASSWORD: pricepilot
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pricepilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pp-web:
+    build: ./pricepilot
+    command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./pricepilot:/app
+      - ./db.sqlite3:/data/lig.sqlite3
+      - ./media:/var/www/LiG/media
+    ports:
+      - "8001:8000"
+    env_file: ./pricepilot/.env
+    environment:
+      USE_POSTGRES: "True"
+      USE_REDIS_CACHE: "True"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:8000/ || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  pp-worker:
+    build: ./pricepilot
+    command: celery -A config worker -l info
+    volumes:
+      - ./pricepilot:/app
+      - ./db.sqlite3:/data/lig.sqlite3
+      - ./media:/var/www/LiG/media
+    env_file: ./pricepilot/.env
+    environment:
+      USE_POSTGRES: "True"
+      USE_REDIS_CACHE: "True"
+    restart: unless-stopped
+    depends_on:
+      pp-web:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  pp-beat:
+    build: ./pricepilot
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./pricepilot:/app
+      - ./db.sqlite3:/data/lig.sqlite3
+      - ./media:/var/www/LiG/media
+    env_file: ./pricepilot/.env
+    environment:
+      USE_POSTGRES: "True"
+      USE_REDIS_CACHE: "True"
+    restart: unless-stopped
+    depends_on:
+      pp-web:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./pricepilot/frontend
+    command: npm run dev -- --host
+    volumes:
+      - ./pricepilot/frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8001/api
+    depends_on:
+      - pp-web
+
+volumes:
+  pgdata:

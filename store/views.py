@@ -17,6 +17,8 @@ from .models import Product, ReviewRating
 from django.db.models import Count, Avg
 
 
+PAGE_SIZE = 9
+
 
 def store(request, category_slug=None):
     categories = None
@@ -37,7 +39,7 @@ def store(request, category_slug=None):
         products = products.filter(price__gte=min_price, price__lte=max_price)
     
     # Pagination
-    paginator = Paginator(products, 3 if not category_slug else 1)
+    paginator = Paginator(products, PAGE_SIZE)
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)
     product_count = products.count()

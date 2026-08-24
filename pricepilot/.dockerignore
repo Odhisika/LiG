@@ -1,0 +1,18 @@
+# Keep the PricePilot image lean: no local venv, secrets, DB, or caches.
+.git/
+.venv
+.env
+db.sqlite3
+staticfiles/
+mediafiles/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+node_modules/
+frontend/node_modules/
+frontend/dist/
+*.egg-info/

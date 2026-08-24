@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}{{ page_title }} - PricePilot{% endblock %}
+
+{% block content %}
+<style>
+/* PricePilot Dashboard Styles */
+.pp-dashboard {
+    --pp-bg-card: #ffffff;
+    --pp-border: #e2e8f0;
+    --pp-text-primary: #1e293b;
+    --pp-text-secondary: #64748b;
+    --pp-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --pp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.pp-card {
+    background: var(--pp-bg-card);
+    border: 1px solid var(--pp-border);
+    border-radius: 12px;
+    box-shadow: var(--pp-shadow);
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.pp-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.pp-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pp-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pp-stat-card {
+    background: var(--pp-bg-card);
+    border: 1px solid var(--pp-border);
+    border-radius: 12px;
+    box-shadow: var(--pp-shadow);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pp-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.pp-stat-icon.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.pp-stat-icon.primary { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.pp-stat-icon.warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.pp-stat-icon.danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+.pp-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--pp-text-primary);
+    line-height: 1.2;
+}
+
+.pp-stat-label {
+    font-size: 0.875rem;
+    color: var(--pp-text-secondary);
+}
+
+.pp-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.pp-badge-success { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
+.pp-badge-warning { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+.pp-badge-danger { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+
+.pp-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pp-table th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--pp-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--pp-border);
+}
+
+.pp-table td {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--pp-text-primary);
+    border-bottom: 1px solid var(--pp-border);
+}
+
+.pp-table tr:last-child td {
+    border-bottom: none;
+}
+
+.pp-table tr:hover {
+    background: #f8fafc;
+}
+
+.pp-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--pp-border);
+    border-radius: 8px;
+    background: var(--pp-bg-card);
+    color: var(--pp-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pp-filter-btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.pp-filter-btn.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+.pp-chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.pp-empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--pp-text-secondary);
+}
+
+.pp-empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+</style>
+
+<div class="pp-dashboard container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1 fw-bold">{{ page_title }}</h4>
+            <p class="text-muted mb-0">Track price changes, margins, and supplier trends</p>
+        </div>
+        <div class="d-flex gap-2">
+            <select id="periodFilter" class="form-select form-select-sm" style="width: auto;">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="365">Last Year</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="pp-stat-card">
+                <div class="pp-stat-icon primary">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <div class="pp-stat-value" id="totalChanges">-</div>
+                    <div class="pp-stat-label">Price Changes</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="pp-stat-card">
+                <div class="pp-stat-icon success">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div>
+                    <div class="pp-stat-value" id="productsAffected">-</div>
+                    <div class="pp-stat-label">Products Affected</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="pp-stat-card">
+                <div class="pp-stat-icon warning">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div>
+                    <div class="pp-stat-value" id="avgMargin">-</div>
+                    <div class="pp-stat-label">Average Margin</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="pp-stat-card">
+                <div class="pp-stat-icon danger">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div>
+                    <div class="pp-stat-value" id="maxMargin">-</div>
+                    <div class="pp-stat-label">Max Margin</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="pp-card">
+                <div class="pp-card-header">
+                    <h6 class="pp-card-title">
+                        <i class="fas fa-chart-area text-primary"></i>
+                        Price Trends Over Time
+                    </h6>
+                </div>
+                <div class="pp-chart-container">
+                    <canvas id="priceTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="pp-card">
+                <div class="pp-card-header">
+                    <h6 class="pp-card-title">
+                        <i class="fas fa-chart-pie text-success"></i>
+                        Margin by Category
+                    </h6>
+                </div>
+                <div class="pp-chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables Row -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="pp-card">
+                <div class="pp-card-header">
+                    <h6 class="pp-card-title">
+                        <i class="fas fa-arrow-up text-success"></i>
+                        Top Price Increases
+                    </h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="pp-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Cost</th>
+                                <th>Sell</th>
+                                <th>Margin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topIncreases">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="pp-card">
+                <div class="pp-card-header">
+                    <h6 class="pp-card-title">
+                        <i class="fas fa-arrow-down text-danger"></i>
+                        Lowest Margins
+                    </h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="pp-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Cost</th>
+                                <th>Sell</th>
+                                <th>Margin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topDecreases">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts
+    let priceTrendsChart = null;
+    let categoryChart = null;
+
+    // Fetch data
+    async function fetchData(days) {
+        try {
+            const response = await fetch(`/api/pricing-rules/api/history/?days=${days}`);
+            const result = await response.json();
+            if (result.status === 'success') {
+                updateDashboard(result.data);
+            }
+        } catch (error) {
+            console.error('Error fetching price history:', error);
+        }
+    }
+
+    // Update dashboard
+    function updateDashboard(data) {
+        // Update stats
+        document.getElementById('totalChanges').textContent = 
+            data.stats.total_price_changes.toLocaleString();
+        document.getElementById('productsAffected').textContent = 
+            data.stats.products_affected.toLocaleString();
+        document.getElementById('avgMargin').textContent = 
+            data.stats.avg_margin ? `${data.stats.avg_margin.toFixed(1)}%` : '-';
+        document.getElementById('maxMargin').textContent = 
+            data.stats.max_margin ? `${data.stats.max_margin.toFixed(1)}%` : '-';
+
+        // Update charts
+        updatePriceTrendsChart(data.daily);
+        updateCategoryChart(data.categories);
+
+        // Update tables
+        updateTopIncreases(data.top_increases);
+        updateTopDecreases(data.top_decreases);
+    }
+
+    // Price trends chart
+    function updatePriceTrendsChart(dailyData) {
+        const ctx = document.getElementById('priceTrendsChart').getContext('2d');
+        
+        if (priceTrendsChart) {
+            priceTrendsChart.destroy();
+        }
+
+        priceTrendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dailyData.map(d => d.date),
+                datasets: [
+                    {
+                        label: 'Avg Old Price',
+                        data: dailyData.map(d => d.avg_old_price),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Avg New Price',
+                        data: dailyData.map(d => d.avg_new_price),
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Category chart
+    function updateCategoryChart(categoryData) {
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        
+        if (categoryChart) {
+            categoryChart.destroy();
+        }
+
+        categoryChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: categoryData.map(c => c.product__category || 'Uncategorized'),
+                datasets: [{
+                    data: categoryData.map(c => c.changes || 0),
+                    backgroundColor: [
+                        '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
+                        '#06b6d4', '#f97316', '#10b981', '#6366f1', '#ec4899'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    }
+
+    // Update top increases table
+    function updateTopIncreases(increases) {
+        const tbody = document.getElementById('topIncreases');
+        if (increases.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No data yet</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = increases.map(p => `
+            <tr>
+                <td>${truncate(p.product__name, 30)}</td>
+                <td>GHS ${Number(p.old_price).toLocaleString()}</td>
+                <td>GHS ${Number(p.new_price).toLocaleString()}</td>
+                <td><span class="pp-badge pp-badge-success">+${Number(p.margin_percent).toFixed(1)}%</span></td>
+            </tr>
+        `).join('');
+    }
+
+    // Update top decreases table
+    function updateTopDecreases(decreases) {
+        const tbody = document.getElementById('topDecreases');
+        if (decreases.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No data yet</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = decreases.map(p => `
+            <tr>
+                <td>${truncate(p.product__name, 30)}</td>
+                <td>GHS ${Number(p.old_price).toLocaleString()}</td>
+                <td>GHS ${Number(p.new_price).toLocaleString()}</td>
+                <td><span class="pp-badge pp-badge-danger">${Number(p.margin_percent).toFixed(1)}%</span></td>
+            </tr>
+        `).join('');
+    }
+
+    // Helper: truncate string
+    function truncate(str, len) {
+        if (!str) return '-';
+        return str.length > len ? str.substring(0, len) + '...' : str;
+    }
+
+    // Period filter change
+    document.getElementById('periodFilter').addEventListener('change', function() {
+        fetchData(this.value);
+    });
+
+    // Initial load
+    fetchData(30);
+});
+</script>
+{% endblock %}

@@ -1269,6 +1269,24 @@
                     <div class="mega-sidebar-item" onmouseover="showMegaPane('security')">
                         Security Cameras <i class="fa fa-chevron-right"></i>
                     </div>
+                    <a href="{% url 'projectors_screens' %}" class="mega-sidebar-item" onmouseover="showMegaPane('projectors')">
+                        Projectors &amp; Screens
+                    </a>
+                    <a href="{% url 'cctv_accessories' %}" class="mega-sidebar-item" onmouseover="showMegaPane('cctv-accessories')">
+                        CCTV Accessories
+                    </a>
+                    <a href="{% url 'pos_equipment' %}" class="mega-sidebar-item" onmouseover="showMegaPane('pos')">
+                        POS Equipment
+                    </a>
+                    <a href="{% url 'hdmi_av_cables' %}" class="mega-sidebar-item" onmouseover="showMegaPane('hdmi-av')">
+                        HDMI &amp; AV Cables
+                    </a>
+                    <a href="{% url 'networking_cables' %}" class="mega-sidebar-item" onmouseover="showMegaPane('net-cables')">
+                        Networking Cables
+                    </a>
+                    <a href="{% url 'toner_ink' %}" class="mega-sidebar-item" onmouseover="showMegaPane('toner')">
+                        Toner &amp; Ink
+                    </a>
                 </div>
 
                 <!-- Content Area -->
@@ -1389,6 +1407,96 @@
                                     <li><a href="{% url 'cctv_kits' %}">CCTV Kits</a></li>
                                     <li><a href="{% url 'nvr_dvr' %}">NVR &amp; DVR</a></li>
                                     <li><a href="{% url 'CCTVInstallation' %}">Installation Services</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projectors & Screens Pane -->
+                    <div class="mega-content-pane" id="pane-projectors">
+                        <a href="{% url 'projectors_screens' %}" class="browse-all-btn">Browse All Projectors <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Projectors</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'projectors_screens' %}">Business Projectors</a></li>
+                                    <li><a href="{% url 'projectors_screens' %}">Home Cinema Projectors</a></li>
+                                    <li><a href="{% url 'projectors_screens' %}">Projector Screens</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CCTV Accessories Pane -->
+                    <div class="mega-content-pane" id="pane-cctv-accessories">
+                        <a href="{% url 'cctv_accessories' %}" class="browse-all-btn">Browse All CCTV Accessories <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">CCTV Accessories</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'cctv_accessories' %}">BNC Connectors &amp; Baluns</a></li>
+                                    <li><a href="{% url 'cctv_accessories' %}">CCTV Cables</a></li>
+                                    <li><a href="{% url 'cctv_accessories' %}">Backboxes &amp; Mounts</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- POS Equipment Pane -->
+                    <div class="mega-content-pane" id="pane-pos">
+                        <a href="{% url 'pos_equipment' %}" class="browse-all-btn">Browse All POS Equipment <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">POS Equipment</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'pos_equipment' %}">Cash Drawers</a></li>
+                                    <li><a href="{% url 'pos_equipment' %}">Thermal Paper Rolls</a></li>
+                                    <li><a href="{% url 'pos_equipment' %}">Receipt Printers</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HDMI & AV Cables Pane -->
+                    <div class="mega-content-pane" id="pane-hdmi-av">
+                        <a href="{% url 'hdmi_av_cables' %}" class="browse-all-btn">Browse All HDMI &amp; AV <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">HDMI &amp; AV</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'hdmi_av_cables' %}">HDMI Cables</a></li>
+                                    <li><a href="{% url 'hdmi_av_cables' %}">Splitters &amp; Extenders</a></li>
+                                    <li><a href="{% url 'hdmi_av_cables' %}">Adapters</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Networking Cables Pane -->
+                    <div class="mega-content-pane" id="pane-net-cables">
+                        <a href="{% url 'networking_cables' %}" class="browse-all-btn">Browse All Network Cables <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Networking Cables</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'networking_cables' %}">Cat5e / Cat6 Patch Cords</a></li>
+                                    <li><a href="{% url 'networking_cables' %}">Cable Rolls</a></li>
+                                    <li><a href="{% url 'networking_cables' %}">RJ45 Connectors</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toner & Ink Pane -->
+                    <div class="mega-content-pane" id="pane-toner">
+                        <a href="{% url 'toner_ink' %}" class="browse-all-btn">Browse All Toner &amp; Ink <i class="fa fa-arrow-right"></i></a>
+                        <div class="mega-category-grid">
+                            <div>
+                                <h4 class="mega-group-title">Toner &amp; Ink</h4>
+                                <ul class="mega-links-list">
+                                    <li><a href="{% url 'toner_ink' %}">HP Toner</a></li>
+                                    <li><a href="{% url 'toner_ink' %}">Canon Toner</a></li>
+                                    <li><a href="{% url 'toner_ink' %}">Brother Toner</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -1654,6 +1762,13 @@
                         <a href="{% url 'nvr_dvr' %}" class="mobile-submenu-item">NVR / DVR</a>
                     </div>
                 </div>
+
+                <a href="{% url 'projectors_screens' %}" class="mobile-submenu-item">Projectors &amp; Screens</a>
+                <a href="{% url 'cctv_accessories' %}" class="mobile-submenu-item">CCTV Accessories</a>
+                <a href="{% url 'pos_equipment' %}" class="mobile-submenu-item">POS Equipment</a>
+                <a href="{% url 'hdmi_av_cables' %}" class="mobile-submenu-item">HDMI &amp; AV Cables</a>
+                <a href="{% url 'networking_cables' %}" class="mobile-submenu-item">Networking Cables</a>
+                <a href="{% url 'toner_ink' %}" class="mobile-submenu-item">Toner &amp; Ink</a>
             </div>
         </div>
 

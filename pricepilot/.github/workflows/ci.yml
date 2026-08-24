@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: pricepilot
+          POSTGRES_USER: pricepilot
+          POSTGRES_PASSWORD: pricepilot
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+
+    env:
+      DJANGO_SECRET_KEY: ci-test-key
+      USE_POSTGRES: "True"
+      DATABASE_URL: postgres://pricepilot:pricepilot@localhost:5432/pricepilot
+      USE_REDIS_CACHE: "True"
+      REDIS_CACHE_URL: redis://localhost:6379/1
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_TASK_ALWAYS_EAGER: "True"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements/dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Format check (black)
+        run: black --check .
+
+      - name: Run migrations
+        run: python manage.py migrate
+
+      - name: Run tests
+        run: pytest --cov=apps -q

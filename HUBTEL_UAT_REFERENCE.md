@@ -88,3 +88,26 @@ todo
 4. No 2FA/MFA — admin accounts have no second factor
 5. No audit logging — no logging of admin actions, failed logins, etc.
 6. DEBUG=True in production-ready .env — must be False before going live
+
+
+
+
+docker compose up --build
+- LiG store → http://localhost:8000
+- PricePilot API/admin → http://localhost:8001 (schema /api/schema/, admin /admin/)
+- React frontend → http://localhost:5173
+
+
+dev@example.com
+PricePilot@123
+
+
+
+- Email: odhisika64@gmail.com
+- Password: ChangeMe123! (change this after logging in)
+- Name: Francis Ganyo
+Supplier Added:
+- Name: JRED Technologies
+- Website: https://www.jredtechnologiesltd.com/
+- Scraper: catlog
+- Status: Active 

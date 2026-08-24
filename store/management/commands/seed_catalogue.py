@@ -48,18 +48,34 @@ class Command(BaseCommand):
     # ─────────────────────────────────────────────────────────────────
     def _seed_categories(self):
         categories = [
-            {'name': 'Computers',          'sort_order': 1,  'featured': True},
-            {'name': 'Software',           'sort_order': 2,  'featured': True},
-            {'name': 'Networking',         'sort_order': 3,  'featured': True},
-            {'name': 'Security & CCTV',    'sort_order': 4,  'featured': True},
-            {'name': 'Peripherals',        'sort_order': 5,  'featured': False},
-            {'name': 'Accessories',        'sort_order': 6,  'featured': False},
+            {'name': 'Computers',              'sort_order': 1,  'featured': True},
+            {'name': 'Laptops',                'sort_order': 2,  'featured': True},
+            {'name': 'Desktops',               'sort_order': 3,  'featured': True},
+            {'name': 'Monitors',               'sort_order': 4,  'featured': False},
+            {'name': 'Networking',             'sort_order': 5,  'featured': True},
+            {'name': 'Routers & Modems',       'sort_order': 6,  'featured': True},
+            {'name': 'Switches',               'sort_order': 7,  'featured': False},
+            {'name': 'Security & CCTV',        'sort_order': 8,  'featured': True},
+            {'name': 'Security Cameras',       'sort_order': 9,  'featured': True},
+            {'name': 'UPS',                    'sort_order': 10, 'featured': True},
+            {'name': 'Peripherals',            'sort_order': 11, 'featured': False},
+            {'name': 'Printers',               'sort_order': 12, 'featured': False},
+            {'name': 'Accessories',            'sort_order': 13, 'featured': False},
+            {'name': 'Storage',                'sort_order': 14, 'featured': False},
+            {'name': 'Components',             'sort_order': 15, 'featured': False},
+            {'name': 'Software',               'sort_order': 16, 'featured': True},
+            {'name': 'Projectors & Screens',   'sort_order': 17, 'featured': False},
+            {'name': 'CCTV Accessories',       'sort_order': 18, 'featured': False},
+            {'name': 'POS Equipment',          'sort_order': 19, 'featured': False},
+            {'name': 'HDMI & AV Cables',       'sort_order': 20, 'featured': False},
+            {'name': 'Networking Cables',      'sort_order': 21, 'featured': False},
+            {'name': 'Toner & Ink',            'sort_order': 22, 'featured': False},
         ]
         for cat in categories:
             obj, created = Category.objects.get_or_create(
-                slug=slugify(cat['name']),
+                category_name=cat['name'],
                 defaults={
-                    'category_name': cat['name'],
+                    'slug': slugify(cat['name']),
                     'is_active': True,
                     'is_featured': cat['featured'],
                     'sort_order': cat['sort_order'],
@@ -82,9 +98,9 @@ class Command(BaseCommand):
         parents = {}
         for item in top_level:
             obj, created = ComputerTypes.objects.get_or_create(
-                slug=slugify(item['name']),
+                computer_type=item['name'],
                 defaults={
-                    'computer_type': item['name'],
+                    'slug': slugify(item['name']),
                     'is_active': True,
                     'sort_order': item['sort_order'],
                     'parent': None,
@@ -116,9 +132,9 @@ class Command(BaseCommand):
         for child in children:
             parent_obj = parents.get(child['parent'])
             obj, created = ComputerTypes.objects.get_or_create(
-                slug=slugify(child['name']),
+                computer_type=child['name'],
                 defaults={
-                    'computer_type': child['name'],
+                    'slug': slugify(child['name']),
                     'is_active': True,
                     'sort_order': child['sort_order'],
                     'parent': parent_obj,
@@ -147,9 +163,9 @@ class Command(BaseCommand):
         ]
         for item in software_types:
             obj, created = SoftwareTypes.objects.get_or_create(
-                slug=slugify(item['name']),
+                software_type=item['name'],
                 defaults={
-                    'software_type': item['name'],
+                    'slug': slugify(item['name']),
                     'is_active': True,
                     'sort_order': item['sort_order'],
                 }

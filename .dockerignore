@@ -1,8 +1,12 @@
+# Local Docker build exclusions (production ignores Docker entirely).
+# Keeps the LiG image lean: no local DB, media, logs, or the embedded
+# PricePilot venv/caches.
 .git
 .gitignore
 .codex
 .agents
 .env
+.env.production
 .venv
 venv/
 env/
@@ -13,4 +17,11 @@ __pycache__/
 media/
 logs/
 staticfiles/
-
+node_modules/
+pricepilot/.venv
+**/.venv
+pricepilot/.env
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/

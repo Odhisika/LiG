@@ -1,11 +1,11 @@
-from django.shortcuts import render, get_object_or_404
-from store.models import Product, Category, ReviewRating, ComputerProduct, SoftwareProduct, PeripheralProduct, NetworkingProduct, UPSProduct, SecurityCameraProduct, HomeBanner
+from django.shortcuts import render
+from store.models import Product, HomeBanner
 from research.models import BlogModel
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from research.form import ProjectBookingForm
 from django.db.models import Q
-from category.models import ResearchTypes, ComputerTypes, SoftwareTypes
+from category.models import ResearchTypes
 from accounts.models import NewsletterSubscriber
 from django.core.exceptions import ValidationError
 from accounts.utils.validators import validate_email_domain
@@ -44,221 +44,226 @@ def subscribe_newsletter(request):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# COMPUTERS — filter by computer_type slug or its parent slug
-# The computer_type hierarchy: Laptop > Fresh Laptop / Slightly Used Laptop etc.
+# PRODUCTS BY CATEGORY
+# PricePilot seeds products into the base Product table with a category FK, so
+# these views query Product filtered by category slug (rather than the legacy
+# subtype tables ComputerProduct/NetworkingProduct/... which stay empty for
+# synced rows). Fresh/used sub-pages use the base Product `condition` field.
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _products_in_category(*slugs):
+    return Product.objects.filter(
+        category__slug__in=slugs,
+        is_available=True,
+    ).select_related('category').distinct().order_by('-created_date')
+
+
 def laptops(request):
-    """All laptops — any ComputerProduct where computer_type is 'Laptop' or its child."""
-    products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='laptop') | Q(computer_type__parent__slug='laptop'),
-        is_available=True
-    ).distinct().order_by('-created_date')
+    """All laptops — products in the Laptops category."""
+    products = _products_in_category('laptops')
     context = {'products': products}
     return render(request, 'hardware/laptop.html', context)
 
 
 def fresh_laptops(request):
     """Fresh/new laptops only."""
-    products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='laptop') | Q(computer_type__parent__slug='laptop'),
-        is_available=True
-    ).filter(
-        Q(condition='new') | Q(computer_type__slug='fresh-laptop')
-    ).exclude(
-        computer_type__slug='slightly-used-laptop'
-    ).distinct().order_by('-created_date')
+    products = _products_in_category('laptops').filter(condition='new')
     context = {'products': products}
     return render(request, 'hardware/fresh_laptops.html', context)
 
 
 def used_laptops(request):
     """Slightly used laptops."""
-    products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='laptop') | Q(computer_type__parent__slug='laptop'),
-        is_available=True
-    ).filter(
-        Q(condition='slightly_used') | Q(computer_type__slug='slightly-used-laptop')
-    ).exclude(
-        computer_type__slug='fresh-laptop'
-    ).distinct().order_by('-created_date')
+    products = _products_in_category('laptops').filter(condition='slightly_used')
     context = {'products': products}
     return render(request, 'hardware/used_laptops.html', context)
 
 
 def desktops(request):
-    """All desktops — any ComputerProduct where computer_type is 'Desktop' or its child."""
-    products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='desktop') | Q(computer_type__parent__slug='desktop'),
-        is_available=True
-    ).distinct().order_by('-created_date')
+    """All desktops — products in the Desktops category."""
+    products = _products_in_category('desktops')
     context = {'products': products}
     return render(request, 'hardware/desktop.html', context)
 
 
 def fresh_desktops(request):
     """Fresh/new desktops only."""
-    products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='desktop') | Q(computer_type__parent__slug='desktop'),
-        is_available=True
-    ).filter(
-        Q(condition='new') | Q(computer_type__slug='fresh-desktop')
-    ).exclude(
-        computer_type__slug='slightly-used-desktop'
-    ).distinct().order_by('-created_date')
+    products = _products_in_category('desktops').filter(condition='new')
     context = {'products': products}
     return render(request, 'hardware/fresh_desktops.html', context)
 
 
 def used_desktops(request):
     """Slightly used desktops."""
-    products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='desktop') | Q(computer_type__parent__slug='desktop'),
-        is_available=True
-    ).filter(
-        Q(condition='slightly_used') | Q(computer_type__slug='slightly-used-desktop')
-    ).exclude(
-        computer_type__slug='fresh-desktop'
-    ).distinct().order_by('-created_date')
+    products = _products_in_category('desktops').filter(condition='slightly_used')
     context = {'products': products}
     return render(request, 'hardware/used_desktops.html', context)
 
 
 def peripherals(request):
-    """All peripherals — from the PeripheralProduct model."""
-    products = PeripheralProduct.objects.filter(
-        is_available=True
-    ).order_by('-created_date')
+    """All peripherals — products in the Peripherals category."""
+    products = _products_in_category('peripherals')
     context = {'products': products}
     return render(request, 'hardware/peripherals.html', context)
 
 
 def computers_all(request):
-    """All computer products across laptop, desktop, and related types."""
-    products = ComputerProduct.objects.filter(
-        is_available=True
-    ).order_by('-created_date')
+    """All computer products across laptop, desktop, monitor, and related types."""
+    products = _products_in_category('laptops', 'desktops', 'computers', 'monitors')
     context = {'products': products}
     return render(request, 'hardware/computers.html', context)
 
 
 def all_in_one_computers(request):
     """All-in-one desktops."""
-    products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='all-in-one') | Q(computer_type__slug='all-in-one-desktop'),
-        is_available=True
-    ).distinct().order_by('-created_date')
+    products = _products_in_category('laptops', 'desktops', 'computers').filter(
+        Q(product_name__icontains='all-in-one')
+        | Q(product_name__icontains='all in one')
+        | Q(product_name__icontains='aio')
+    )
     context = {'products': products}
     return render(request, 'hardware/all_in_one.html', context)
 
 
 def monitors(request):
-    """All monitors."""
-    products = ComputerProduct.objects.filter(
-        Q(computer_type__slug='monitor') | Q(computer_type__parent__slug='monitor'),
-        is_available=True
-    ).distinct().order_by('-created_date')
+    """All monitors — products in the Monitors category."""
+    products = _products_in_category('monitors')
     context = {'products': products}
     return render(request, 'hardware/monitors.html', context)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# NETWORKING — filter NetworkingProduct by device_type field
+# NETWORKING — products in the Networking / Routers & Modems / Switches categories
 # ─────────────────────────────────────────────────────────────────────────────
 
 def networking_all(request):
     """All networking products (Switches, Routers, Modems, Access Points)."""
-    products = NetworkingProduct.objects.filter(
-        is_available=True
-    ).order_by('-created_date')
+    products = _products_in_category('networking', 'routers-and-modems', 'switches')
     context = {'products': products}
     return render(request, 'hardware/networking.html', context)
 
+
 def switches(request):
-    """Switches — managed, unmanaged, and PoE."""
-    products = NetworkingProduct.objects.filter(
-        device_type__in=['switch_unmanaged', 'switch_managed', 'switch_poe'],
-        is_available=True
-    ).order_by('-created_date')
+    """Switches — products in the Switches category."""
+    products = _products_in_category('switches')
     context = {'products': products}
     return render(request, 'hardware/switches.html', context)
 
 
 def routers_modems(request):
     """Routers, modems, and modem-router combos."""
-    products = NetworkingProduct.objects.filter(
-        device_type__in=['router', 'modem', 'modem_router'],
-        is_available=True
-    ).order_by('-created_date')
+    products = _products_in_category('routers-and-modems')
     context = {'products': products}
     return render(request, 'hardware/routers_modems.html', context)
 
 
 def access_points(request):
-    """Wireless access points."""
-    products = NetworkingProduct.objects.filter(
-        device_type='access_point',
-        is_available=True
-    ).order_by('-created_date')
+    """Wireless access points (within the Networking category)."""
+    products = _products_in_category('networking').filter(
+        Q(product_name__icontains='access point')
+        | Q(product_name__icontains='access-point')
+        | Q(product_name__icontains='hotspot')
+        | Q(product_name__icontains='unifi')
+    )
     context = {'products': products}
     return render(request, 'hardware/access_points.html', context)
 
 
 def ups(request):
-    """UPS units — standalone product type."""
-    products = UPSProduct.objects.filter(
-        is_available=True
-    ).order_by('-created_date')
+    """UPS units — products in the UPS category."""
+    products = _products_in_category('ups')
     context = {'products': products}
     return render(request, 'hardware/ups.html', context)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECURITY / CCTV — filter SecurityCameraProduct by camera_type
+# SECURITY / CCTV — products in the Security Cameras / Security & CCTV categories
 # ─────────────────────────────────────────────────────────────────────────────
 
 def security_cameras(request):
     """All CCTV and security camera products."""
-    products = SecurityCameraProduct.objects.filter(
-        is_available=True
-    ).order_by('-created_date')
+    products = _products_in_category('security-cameras', 'security-cctv')
     context = {'products': products}
     return render(request, 'hardware/security_cameras.html', context)
 
 
 def ip_cameras(request):
-    """Camera units excluding kits and recorders."""
-    products = SecurityCameraProduct.objects.filter(
-        is_available=True
-    ).exclude(
-        camera_type__in=['cctv_kit', 'nvr', 'dvr']
-    ).order_by('-created_date')
+    """Camera units (the Security Cameras category)."""
+    products = _products_in_category('security-cameras')
     context = {'products': products}
     return render(request, 'hardware/ip_cameras.html', context)
 
 
 def cctv_kits(request):
     """Complete CCTV kits."""
-    products = SecurityCameraProduct.objects.filter(
-        camera_type='cctv_kit',
-        is_available=True
-    ).order_by('-created_date')
+    products = _products_in_category('security-cameras', 'security-cctv').filter(
+        Q(product_name__icontains='kit')
+    )
     context = {'products': products}
     return render(request, 'hardware/cctv_kits.html', context)
 
 
 def nvr_dvr(request):
     """NVR and DVR products."""
-    products = SecurityCameraProduct.objects.filter(
-        camera_type__in=['nvr', 'dvr'],
-        is_available=True
-    ).order_by('-created_date')
+    products = _products_in_category('security-cameras', 'security-cctv').filter(
+        Q(product_name__icontains='nvr')
+        | Q(product_name__icontains='dvr')
+        | Q(product_name__icontains='recorder')
+    )
     context = {'products': products}
     return render(request, 'hardware/nvr_dvr.html', context)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SOFTWARE — filter SoftwareProduct by software_category FK
+# NEW CATEGORIES — JRED-imported product types
+# ─────────────────────────────────────────────────────────────────────────────
+
+def projectors_screens(request):
+    """Projectors and projector screens."""
+    products = _products_in_category('projectors-screens')
+    context = {'products': products}
+    return render(request, 'hardware/projectors_screens.html', context)
+
+
+def cctv_accessories(request):
+    """CCTV accessories — BNC, baluns, cables, backboxes."""
+    products = _products_in_category('cctv-accessories')
+    context = {'products': products}
+    return render(request, 'hardware/cctv_accessories.html', context)
+
+
+def pos_equipment(request):
+    """POS equipment — cash drawers, thermal paper, receipt printers."""
+    products = _products_in_category('pos-equipment')
+    context = {'products': products}
+    return render(request, 'hardware/pos_equipment.html', context)
+
+
+def hdmi_av_cables(request):
+    """HDMI and AV cables, splitters, extenders."""
+    products = _products_in_category('hdmi-av-cables')
+    context = {'products': products}
+    return render(request, 'hardware/hdmi_av_cables.html', context)
+
+
+def networking_cables(request):
+    """Network cables — Cat5/Cat6 patch cords, cable rolls, connectors."""
+    products = _products_in_category('networking-cables')
+    context = {'products': products}
+    return render(request, 'hardware/networking_cables.html', context)
+
+
+def toner_ink(request):
+    """Toner cartridges and ink supplies."""
+    products = _products_in_category('toner-ink')
+    context = {'products': products}
+    return render(request, 'hardware/toner_ink.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SOFTWARE — products in the Software category.
+# Rows that already have a SoftwareProduct subtype use their software_category
+# FK; PricePilot-seeded rows (base Product only) are matched by name keywords.
 # ─────────────────────────────────────────────────────────────────────────────
 
 SOFTWARE_APPLICATION_SLUGS = [
@@ -281,12 +286,39 @@ SOFTWARE_DEVELOPMENT_SLUGS = [
     'database-software',
 ]
 
+SOFTWARE_KEYWORDS = {
+    'operating-system': ['windows', 'linux', 'ubuntu', 'fedora', 'debian', 'kali', 'macos', 'mac os', 'operating system'],
+    'office-suite': ['office', 'word', 'excel', 'powerpoint', 'outlook', 'onenote', 'one note', '365 apps', 'microsoft 365'],
+    'design-creative': ['adobe', 'photoshop', 'illustrator', 'indesign', 'lightroom', 'after effects', 'premiere', 'autocad', 'corel', 'figma', 'canva', 'design'],
+    'accounting-finance': ['quickbooks', 'sage', 'tally', 'pastel', 'xero', 'accounting', 'finance'],
+    'video-editing': ['premiere pro', 'davinci', 'final cut', 'vegas', 'filmora', 'video editing'],
+    'point-of-sale-pos': ['pos', 'point of sale'],
+    'antivirus-security': ['kaspersky', 'antivirus', 'bitdefender', 'avast', 'avira', 'norton', 'mcafee', 'eset', 'malwarebytes', 'total security', 'internet security', 'endpoint'],
+    'remote-desktop-vpn': ['teamviewer', 'anydesk', 'vpn', 'remote desktop'],
+    'backup-recovery': ['veeam', 'acronis', 'backup', 'recovery'],
+    'network-management': ['nmap', 'wireshark', 'network management', 'monitoring', 'snmp'],
+    'development-tools': ['visual studio', 'vs code', 'jetbrains', 'python', 'java', 'docker', 'git', 'developer'],
+    'database-software': ['mysql', 'mariadb', 'postgres', 'mongodb', 'redis', 'sql server', 'oracle', 'database'],
+}
+
 
 def _software_collection_products(*slugs):
-    queryset = SoftwareProduct.objects.filter(is_available=True)
+    queryset = Product.objects.filter(
+        category__slug='software',
+        is_available=True,
+    )
     if slugs:
-        queryset = queryset.filter(software_category__slug__in=slugs)
-    return queryset.order_by('-created_date')
+        subtype_q = Q(
+            softwareproduct__isnull=False,
+            softwareproduct__software_category__slug__in=slugs,
+        )
+        keyword_q = Q()
+        for slug in slugs:
+            for keyword in SOFTWARE_KEYWORDS.get(slug, []):
+                keyword_q |= Q(product_name__icontains=keyword)
+        base_q = Q(softwareproduct__isnull=True) & keyword_q
+        queryset = queryset.filter(subtype_q | base_q)
+    return queryset.distinct().order_by('-created_date')
 
 
 def _render_software_collection(
@@ -301,9 +333,10 @@ def _render_software_collection(
     empty_icon,
 ):
     for product in products:
+        platforms = getattr(product, 'platforms', '')
         product.platforms_list = (
-            [p.strip() for p in product.platforms.split(',') if p.strip()]
-            if product.platforms else []
+            [p.strip() for p in platforms.split(',') if p.strip()]
+            if platforms else []
         )
 
     context = {

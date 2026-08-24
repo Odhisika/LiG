@@ -72,6 +72,12 @@ urlpatterns = [
     path('hardware/ip-cameras/', views.ip_cameras, name='ip_cameras'),
     path('hardware/cctv-kits/', views.cctv_kits, name='cctv_kits'),
     path('hardware/nvr-dvr/', views.nvr_dvr, name='nvr_dvr'),
+    path('hardware/projectors-screens/', views.projectors_screens, name='projectors_screens'),
+    path('hardware/cctv-accessories/', views.cctv_accessories, name='cctv_accessories'),
+    path('hardware/pos-equipment/', views.pos_equipment, name='pos_equipment'),
+    path('hardware/hdmi-av-cables/', views.hdmi_av_cables, name='hdmi_av_cables'),
+    path('hardware/networking-cables/', views.networking_cables, name='networking_cables'),
+    path('hardware/toner-ink/', views.toner_ink, name='toner_ink'),
 
     # Navigation software links
     path('software/all/', views.software_all, name='software_all'),
