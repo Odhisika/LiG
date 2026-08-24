@@ -74,11 +74,10 @@ if [ "${ROLLBACK:-0}" = 1 ]; then
     say "ROLLBACK mode — skipping fetch/build/migrate, reusing lig-app:previous"
 else
     say "Building images"
-    # Plain docker build instead of `compose build`: immune to buildx/bake
-    # delegation quirks across compose versions. Services reference these
-    # exact tags, so `up` picks them up.
-    docker build -t lig-app:latest .
-    docker build -t pp-app:latest ./pricepilot
+    # Explicit buildx (--load): this server's Docker 29 `build` alias drops
+    # the context argument. Services reference these exact tags.
+    docker buildx build -t lig-app:latest --load .
+    docker buildx build -t pp-app:latest --load ./pricepilot
 
     # ------------------------------------------------------------ 4. migrate ----
     # Migrations run ONCE here, against the shared DB, before any new container
