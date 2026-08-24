@@ -119,6 +119,7 @@ ensure_backends() {
     if [ -z "$(docker ps -aq --filter name=^lig-prod-db$)" ]; then
         say "Starting Postgres (first time)"
         docker run -d --name lig-prod-db --restart unless-stopped --network "$NET" \
+            --network-alias db \
             -e "POSTGRES_DB=$(get_env DB_NAME)" \
             -e "POSTGRES_USER=$(get_env DB_USER)" \
             -e "POSTGRES_PASSWORD=$(get_env DB_PASSWORD)" \
@@ -138,6 +139,7 @@ ensure_backends() {
     if [ -z "$(docker ps -aq --filter name=^lig-prod-redis$)" ]; then
         say "Starting Redis"
         docker run -d --name lig-prod-redis --restart unless-stopped --network "$NET" \
+            --network-alias redis \
             --health-cmd "redis-cli ping" \
             --health-interval=5s --health-timeout=5s --health-retries=10 \
             redis:7-alpine
