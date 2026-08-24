@@ -16,8 +16,15 @@ RUN python - <<'PY'
 from pathlib import Path
 
 source = Path("/tmp/requirements.txt.utf16")
-target = Path("/tmp/requirements.txt")
-target.write_text(source.read_text(encoding="utf-16"), encoding="utf-8")
+for encoding in ("utf-8", "utf-16"):
+    try:
+        text = source.read_text(encoding=encoding)
+        break
+    except (UnicodeDecodeError, UnicodeError):
+        continue
+else:
+    raise SystemExit("requirements.txt is neither utf-8 nor utf-16")
+Path("/tmp/requirements.txt").write_text(text, encoding="utf-8")
 PY
 
 RUN pip install --upgrade pip \
@@ -33,6 +40,8 @@ RUN mkdir -p /app/logs /app/media /app/staticfiles
 
 EXPOSE 8000
 
+# Production WSGI server. Dev compose overrides this with runserver.
+# GUNICORN_WORKERS can be tuned via environment (default 3).
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-3} --threads 2 --timeout 120 --access-logfile - --error-logfile - LiG.wsgi:application"]
 

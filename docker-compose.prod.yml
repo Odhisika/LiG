@@ -1,0 +1,160 @@
+# PRODUCTION stack — blue-green zero-downtime deploys, behind YOUR EXISTING APACHE.
+#
+#   Everything runs through deploy.sh:
+#     ./deploy.sh            # build -> migrate -> flip -> graceful reload (no downtime)
+#
+# Layout:
+#   web-a / web-b : LiG store (gunicorn). One serves traffic (127.0.0.1:8001),
+#                   the other is the standby (127.0.0.1:8002); deploy.sh flips
+#                   Apache's ProxyPass between them.
+#   pp-web        : PricePilot API/UI (gunicorn) on 127.0.0.1:8003
+#   pp-worker     : PricePilot scrapers/sync (Celery)
+#   pp-beat       : PricePilot scheduler (Celery beat)
+#   db            : Postgres 16 — hosts BOTH databases (lig + pricepilot),
+#                   created by deploy/postgres-init.sh on first boot
+#   redis         : Celery broker + cache
+#
+# Apache keeps doing what it does today (TLS, certbot, /static/, /media/) —
+# see deploy/apache/vhost-snippet.conf for the ONE-TIME vhost change.
+#
+# Clone this repo to /var/www/LiG so the ./staticfiles ./media ./logs bind
+# mounts land exactly where your existing Apache Alias lines point. If you
+# clone elsewhere, update those Aliases once.
+#
+# All compose commands must pass the prod env file:
+#   docker compose --env-file .env.production -f docker-compose.prod.yml <cmd>
+#
+# Using an existing host-installed Postgres instead of the bundled one?
+# Remove the db service, point DB_HOST/DATABASE_URL/LIG_DATABASE_URL at the
+# host (add `extra_hosts: ["host.docker.internal:host-gateway"]`) and drop pgdata.
+
+name: lig-prod
+
+x-lig-app: &lig-app
+  image: lig-app:latest
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file:
+    - .env.production
+  restart: unless-stopped
+  environment:
+    # deploy.sh migrates explicitly before switching traffic; containers
+    # must never race each other on startup.
+    RUN_MIGRATE: "false"
+    GUNICORN_WORKERS: "3"
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  volumes:
+    # Bind mounts so Apache keeps serving /static/ and /media/ from the same
+    # filesystem paths it uses today (repo is expected at /var/www/LiG).
+    - ./staticfiles:/app/staticfiles
+    - ./media:/app/media
+    - ./logs:/app/logs
+  stop_grace_period: 30s
+
+x-pp-app: &pp-app
+  image: pp-app:latest
+  build:
+    context: ./pricepilot
+    dockerfile: Dockerfile
+  env_file:
+    - .env.production
+  restart: unless-stopped
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  volumes:
+    - ./media:/var/www/LiG/media
+
+services:
+  # ------------------------------------------------------------------ LiG --
+  web-a:
+    <<: *lig-app
+    container_name: lig-web-a
+    ports:
+      - "127.0.0.1:8001:8000"
+    healthcheck:
+      # Any HTTP response (even a redirect) proves gunicorn+Django serve;
+      # http.client is used because it does NOT follow redirects and the
+      # slim image has no curl.
+      test: ["CMD-SHELL", "python -c \"import http.client as c;s=c.HTTPConnection('127.0.0.1',8000,timeout=3);s.request('GET','/');r=s.getresponse();r.read()\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  web-b:
+    <<: *lig-app
+    container_name: lig-web-b
+    ports:
+      - "127.0.0.1:8002:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import http.client as c;s=c.HTTPConnection('127.0.0.1',8000,timeout=3);s.request('GET','/');r=s.getresponse();r.read()\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  # ------------------------------------------------------------ PricePilot --
+  pp-web:
+    <<: *pp-app
+    command: sh -c "python manage.py migrate --noinput && exec gunicorn --bind 0.0.0.0:8000 --workers 2 --timeout 120 --access-logfile - config.wsgi:application"
+    ports:
+      - "127.0.0.1:8003:8000"
+    environment:
+      DJANGO_DEBUG: "False"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://localhost:8000/api/ || curl -fsS -o /dev/null http://localhost:8000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  pp-worker:
+    <<: *pp-app
+    command: celery -A config worker -l info
+    stop_grace_period: 15m
+
+  pp-beat:
+    <<: *pp-app
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    stop_grace_period: 30s
+
+  # ------------------------------------------------------------- Backends --
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-lig}
+      POSTGRES_USER: ${DB_USER:-lig}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env.production}
+      # Consumed by deploy/postgres-init.sh on first boot (empty pgdata only)
+      PRICEPILOT_DB_NAME: ${PRICEPILOT_DB_NAME:-pricepilot}
+      PRICEPILOT_DB_USER: ${PRICEPILOT_DB_USER:-pricepilot}
+      PRICEPILOT_DB_PASSWORD: ${PRICEPILOT_DB_PASSWORD:?set PRICEPILOT_DB_PASSWORD in .env.production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/postgres-init.sh:/docker-entrypoint-initdb.d/10-pricepilot.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-lig} -d ${DB_NAME:-lig}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:

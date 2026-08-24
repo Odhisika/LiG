@@ -1,0 +1,17 @@
+[Unit]
+Description=PricePilot Celery worker (embedded in LiG repo)
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+Type=simple
+User=lig
+Group=lig
+WorkingDirectory=/srv/lig/app/pricepilot
+EnvironmentFile=/srv/lig/app/.env.production
+ExecStart=/srv/lig/app/pricepilot/.venv/bin/celery -A config worker -l info
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -2,8 +2,8 @@
 .env
 .env.production
 .venv
-env/
 venv/
+env/
 ENV/
 env.bak/
 venv.bak/
@@ -12,5 +12,18 @@ db.sqlite3
 media/
 logs/
 staticfiles/
+backups/
+deploy/apache/active.conf
 __pycache__/
 *.py[cod]
+
+# PricePilot (embedded) build/runtime artifacts
+node_modules/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+pricepilot/staticfiles/
+pricepilot/mediafiles/
