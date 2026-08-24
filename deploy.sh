@@ -88,7 +88,7 @@ start_pp_web() {
         --env-file "$ENV_FILE" -e DJANGO_DEBUG=False \
         -p "127.0.0.1:8003:8000" \
         -v "$APP_ROOT/media:/var/www/LiG/media" \
-        --health-cmd "curl -fsS -o /dev/null http://localhost:8000/api/ || curl -fsS -o /dev/null http://localhost:8000/ || exit 1" \
+        --health-cmd "curl -fsS -o /dev/null http://localhost:8000/admin/login/" \
         --health-interval=10s --health-timeout=5s --health-retries=12 --health-start-period=40s \
         pp-app:latest \
         sh -c "python manage.py migrate --noinput && exec gunicorn --bind 0.0.0.0:8000 --workers 2 --timeout 120 --access-logfile - config.wsgi:application"
