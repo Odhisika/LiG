@@ -81,21 +81,23 @@ def used_laptops(request):
 
 def desktops(request):
     """All desktops — products in the Desktops category."""
-    products = _products_in_category('desktops')
+    # 'desktop' is the legacy slug (older rows); 'desktops' is what
+    # PricePilot-seeded rows use. Both are shown.
+    products = _products_in_category('desktops', 'desktop')
     context = {'products': products}
     return render(request, 'hardware/desktop.html', context)
 
 
 def fresh_desktops(request):
     """Fresh/new desktops only."""
-    products = _products_in_category('desktops').filter(condition='new')
+    products = _products_in_category('desktops', 'desktop').filter(condition='new')
     context = {'products': products}
     return render(request, 'hardware/fresh_desktops.html', context)
 
 
 def used_desktops(request):
     """Slightly used desktops."""
-    products = _products_in_category('desktops').filter(condition='slightly_used')
+    products = _products_in_category('desktops', 'desktop').filter(condition='slightly_used')
     context = {'products': products}
     return render(request, 'hardware/used_desktops.html', context)
 
@@ -109,14 +111,14 @@ def peripherals(request):
 
 def computers_all(request):
     """All computer products across laptop, desktop, monitor, and related types."""
-    products = _products_in_category('laptops', 'desktops', 'computers', 'monitors')
+    products = _products_in_category('laptops', 'desktops', 'desktop', 'computers', 'monitors')
     context = {'products': products}
     return render(request, 'hardware/computers.html', context)
 
 
 def all_in_one_computers(request):
     """All-in-one desktops."""
-    products = _products_in_category('laptops', 'desktops', 'computers').filter(
+    products = _products_in_category('laptops', 'desktops', 'desktop', 'computers').filter(
         Q(product_name__icontains='all-in-one')
         | Q(product_name__icontains='all in one')
         | Q(product_name__icontains='aio')

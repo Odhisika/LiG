@@ -72,6 +72,7 @@ start_web() {  # $1=name  $2=hostport
     docker rm -f "$1" >/dev/null 2>&1 || true
     docker run -d --name "$1" --restart unless-stopped --network "$NET" \
         --env-file "$ENV_FILE" -e RUN_MIGRATE=false \
+        -e DJANGO_SETTINGS_MODULE=LiG.settings \
         -p "127.0.0.1:$2:8000" \
         -v "$APP_ROOT/staticfiles:/app/staticfiles" \
         -v "$APP_ROOT/media:/app/media" \
@@ -88,7 +89,7 @@ start_pp_web() {
         --env-file "$ENV_FILE" -e DJANGO_DEBUG=False \
         -p "127.0.0.1:8003:8000" \
         -v "$APP_ROOT/media:/var/www/LiG/media" \
-        --health-cmd "curl -fsS -o /dev/null http://localhost:8000/admin/login/" \
+        --health-cmd "curl -fsS -H 'X-Forwarded-Proto: https' -o /dev/null http://localhost:8000/admin/login/" \
         --health-interval=10s --health-timeout=5s --health-retries=12 --health-start-period=40s \
         pp-app:latest \
         sh -c "python manage.py migrate --noinput && exec gunicorn --bind 0.0.0.0:8000 --workers 2 --timeout 120 --access-logfile - config.wsgi:application"
