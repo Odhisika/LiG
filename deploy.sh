@@ -79,15 +79,27 @@ else
     docker buildx build -t lig-app:latest --load .
     docker buildx build -t pp-app:latest --load ./pricepilot
 
-    # ------------------------------------------------------------ 4. migrate ----
-    # Migrations run ONCE here, against the shared DB, before any new container
-    # starts. Old containers keep serving during this — migrations must therefore
-    # be additive/backward-compatible (Django default practice).
+    # ------------------------------------------------ 4. migrate ----
+    # Migrations run ONCE here via PLAIN `docker run` (this server's compose
+    # plugin mishandles both `build` and `run` service resolution). Old
+    # containers keep serving throughout — migrations must stay additive.
+    say "Ensuring db/redis are up"
+    $DC up -d db redis
+    DB_WAITED=0
+    until [ "$(docker inspect -f '{{.State.Health.Status}}' lig-prod-db 2>/dev/null)" = healthy ]; do
+        DB_WAITED=$((DB_WAITED + 2))
+        [ "$DB_WAITED" -ge "$HEALTH_TIMEOUT" ] && die "db never became healthy — check: docker logs lig-prod-db"
+        sleep 2
+    done
+
+    NET="lig-prod_default"
     say "Migrating LiG database"
-    $DC run --rm web-a python manage.py migrate --noinput
+    docker run --rm --network "$NET" --env-file "$ENV_FILE" \
+        lig-app:latest python manage.py migrate --noinput
 
     say "Migrating PricePilot database"
-    $DC run --rm pp-worker python manage.py migrate --noinput
+    docker run --rm --network "$NET" --env-file "$ENV_FILE" \
+        pp-app:latest python manage.py migrate --noinput
 fi
 
 # --------------------------------------------------- 5. blue-green switch ---
