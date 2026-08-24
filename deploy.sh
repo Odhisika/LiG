@@ -24,6 +24,17 @@ set -euo pipefail
 APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$APP_ROOT"
 
+# --- self-modification guard -------------------------------------------------
+# This script hard-resets the repo it lives in, and bash streams script files
+# lazily — letting $0 change mid-run corrupts execution (we ran the OLD logic
+# on freshly pulled code). So: copy ourselves to /tmp and exec THAT.
+if [ -z "${DEPLOY_SELF_COPY:-}" ]; then
+    SELF_COPY="$(mktemp /tmp/lig-deploy.XXXXXX)"
+    cp "$0" "$SELF_COPY"
+    export DEPLOY_SELF_COPY=1
+    exec bash "$SELF_COPY" "$@"
+fi
+
 ENV_FILE="${ENV_FILE:-$APP_ROOT/.env.production}"
 ACTIVE_CONF="$APP_ROOT/deploy/apache/active.conf"
 BACKUP_DIR="$APP_ROOT/backups"
