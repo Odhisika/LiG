@@ -55,17 +55,32 @@ ProxyPassReverse / http://127.0.0.1:$1/
 EOF
 }
 
+VHOST_CONF="/etc/apache2/sites-enabled/a-le-ssl.conf"
+VHOST_TEMPLATE="$APP_ROOT/deploy/apache/lig-vhost-docker.conf"
+
 reload_apache() {  # $1 = 8001|8002 — installs block, TESTS it, reverts on failure
     local tmp; tmp="$(mktemp)"
     proxy_block "$1" > "$tmp"
     cp "$ACTIVE_CONF" "${ACTIVE_CONF}.bak"
-    sudo cp "$tmp" "$ACTIVE_CONF"; rm -f "$tmp"
+    sudo /usr/bin/tee "$ACTIVE_CONF" < "$tmp" > /dev/null; rm -f "$tmp"
     if ! sudo apache2ctl configtest </dev/null; then
-        sudo cp "${ACTIVE_CONF}.bak" "$ACTIVE_CONF"; rm -f "${ACTIVE_CONF}.bak"
+        sudo /usr/bin/tee "$ACTIVE_CONF" < "${ACTIVE_CONF}.bak" > /dev/null; rm -f "${ACTIVE_CONF}.bak"
         return 1
     fi
     rm -f "${ACTIVE_CONF}.bak"
     sudo systemctl reload apache2      # graceful — no dropped connections
+}
+
+ensure_vhost() {
+    if [ -f "$VHOST_CONF" ] && grep -q 'IncludeOptional.*/var/www/LiG/deploy/apache/active\.conf' "$VHOST_CONF"; then
+        return 0
+    fi
+    say "Installing SSL vhost with IncludeOptional active.conf"
+    sudo /usr/bin/tee "$VHOST_CONF" < "$VHOST_TEMPLATE" > /dev/null
+    if ! sudo apache2ctl configtest </dev/null; then
+        die "Vhost config test failed — check $VHOST_TEMPLATE"
+    fi
+    sudo systemctl reload apache2
 }
 
 start_web() {  # $1=name  $2=hostport
@@ -206,6 +221,7 @@ if [ "${ROLLBACK:-0}" != 1 ]; then
 fi
 
 # --------------------------------------------------- 6. blue-green switch ---
+ensure_vhost
 ACTIVE_PORT="$(grep -oE '127\.0\.0\.1:800[12]' "$ACTIVE_CONF" | head -1 | cut -d: -f2)"
 case "$ACTIVE_PORT" in
     8001) ACTIVE_SVC=web-a; STANDBY_SVC=web-b; STANDBY_PORT=8002 ;;
