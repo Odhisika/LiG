@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Product, ComputerProduct, SoftwareProduct, PeripheralProduct, NetworkingProduct, SecurityCameraProduct
+from pages.models import SiteSettings
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
@@ -189,5 +190,6 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         'cart_items': cart_items,
         'tax'       : tax,
         'grand_total': grand_total,
+        'delivery_fee_koforidua': SiteSettings.get_solo().delivery_fee_koforidua,
     }
     return render(request, 'store/checkout.html', context)

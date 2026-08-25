@@ -27,18 +27,35 @@ class Order(models.Model):
         ('Cancelled', 'Cancelled'),
     ]
 
+    FULFILLMENT_CHOICES = [
+        ('delivery', 'Delivery'),
+        ('pickup', 'Pickup at Office'),
+    ]
+
+    DELIVERY_ZONE_CHOICES = [
+        ('within_koforidua', 'Within Koforidua'),
+        ('outside_koforidua', 'Outside Koforidua'),
+    ]
+
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
     order_number = models.CharField(max_length=20, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15)
     email = models.EmailField()
-    address_line_1 = models.CharField(max_length=255)
+    address_line_1 = models.CharField(max_length=255, blank=True, null=True)
     address_line_2 = models.CharField(max_length=255, blank=True, null=True)
-    country = models.CharField(max_length=50)
-    state = models.CharField(max_length=50)
-    city = models.CharField(max_length=50)
+    country = models.CharField(max_length=50, blank=True, null=True)
+    state = models.CharField(max_length=50, blank=True, null=True)
+    city = models.CharField(max_length=50, blank=True, null=True)
     order_note = models.TextField(blank=True, null=True)
+    fulfillment_method = models.CharField(
+        max_length=10, choices=FULFILLMENT_CHOICES, default='delivery'
+    )
+    delivery_zone = models.CharField(
+        max_length=20, choices=DELIVERY_ZONE_CHOICES, blank=True, null=True
+    )
+    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     order_total = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
     paid = models.BooleanField(default=False)
@@ -58,6 +75,8 @@ class Order(models.Model):
         return f"{self.first_name} {self.last_name}"
 
     def full_address(self):
+        if self.fulfillment_method == 'pickup':
+            return 'Pickup at Office'
         return f"{self.address_line_1}, {self.address_line_2 or ''}, {self.city}, {self.state}, {self.country}".strip(', ')
 
     def __str__(self):

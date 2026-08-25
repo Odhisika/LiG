@@ -27,16 +27,42 @@ def place_order(request):
 
     total = sum(item.product.price * item.quantity for item in cart_items)
     tax = (total * Decimal('0.0')).quantize(Decimal('0.0'))
-    grand_total = total + tax
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
+            fulfillment_method = form.cleaned_data.get('fulfillment_method', 'delivery')
+
+            # Delivery fee: within Koforidua uses the admin-set fee; outside
+            # Koforidua the fee is communicated to the customer later (charged
+            # 0 here). Pickup at the office carries no fee.
+            delivery_fee = Decimal('0')
+            delivery_zone = None
+            if fulfillment_method == 'delivery':
+                from pages.models import SiteSettings
+                city = (form.cleaned_data.get('city') or '').strip().lower()
+                if city == 'koforidua':
+                    delivery_fee = SiteSettings.get_solo().delivery_fee_koforidua
+                    delivery_zone = 'within_koforidua'
+                else:
+                    delivery_zone = 'outside_koforidua'
+
+            grand_total = total + tax + delivery_fee
+
             # Create order
             order = form.save(commit=False)
             order.user = current_user
             order.order_total = grand_total
             order.tax = tax
+            order.fulfillment_method = fulfillment_method
+            order.delivery_zone = delivery_zone
+            order.delivery_fee = delivery_fee
+            if fulfillment_method == 'pickup':
+                order.address_line_1 = ''
+                order.address_line_2 = None
+                order.country = ''
+                order.state = ''
+                order.city = ''
             order.ip = request.META.get('REMOTE_ADDR', '')
             order.status = 'Pending'
             order.expires_at = now() + timedelta(days=7)

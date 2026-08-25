@@ -106,6 +106,10 @@ class SiteSettings(models.Model):
     internship_portal_enabled = models.BooleanField(default=False)
     internship_portal_url = models.URLField(default='https://internship.lig.com.gh/')
     internship_portal_label = models.CharField(max_length=100, default='Internship Portal')
+    delivery_fee_koforidua = models.DecimalField(
+        max_digits=10, decimal_places=2, default=20.00,
+        help_text='Delivery fee charged for deliveries within Koforidua.'
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

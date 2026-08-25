@@ -83,6 +83,9 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         ('Internship Portal', {
             'fields': ('internship_portal_enabled', 'internship_portal_url', 'internship_portal_label')
         }),
+        ('Delivery', {
+            'fields': ('delivery_fee_koforidua',)
+        }),
         ('Info', {
             'fields': ('updated_at',)
         }),

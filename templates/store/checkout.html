@@ -415,14 +415,38 @@
             </a>
         </div>
     {% else %}
-        <form id="checkoutForm" action="{% url 'place_order' %}" method="POST">
+        <form id="checkoutForm" action="{% url 'place_order' %}" method="POST" data-subtotal="{{ total }}" data-fee-koforidua="{{ delivery_fee_koforidua }}">
             {% csrf_token %}
             <div class="checkout-grid">
+                <!-- Fulfillment Method -->
+                <div class="card">
+                    <h4 class="card-title">
+                        <i class="fas fa-truck"></i>
+                        How would you like to get your order?
+                    </h4>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;gap:8px;font-weight:normal;cursor:pointer;">
+                                <input type="radio" name="fulfillment_method" value="delivery" checked>
+                                <i class="fas fa-truck"></i> Delivery &mdash; we bring it to you
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;gap:8px;font-weight:normal;cursor:pointer;">
+                                <input type="radio" name="fulfillment_method" value="pickup">
+                                <i class="fas fa-store"></i> Pickup at Office &mdash; collect it yourself
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Delivery Information -->
                 <div class="card">
                     <h4 class="card-title">
                         <i class="fas fa-map-marker-alt"></i>
-                        Delivery Information
+                        Contact Information
                     </h4>
                     
                     <div class="form-row">
@@ -461,50 +485,56 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="address1">Address Line 1 *</label>
-                            <div class="input-group">
-                                <input type="text" id="address1" name="address_line_1" class="form-control" required>
-                                <div class="error-message">Please enter your address</div>
+                    <div id="deliveryAddressSection">
+                        <h6 class="mt-3 mb-2"><i class="fas fa-map-marker-alt"></i> Delivery Details</h6>
+                        <p class="text-muted small mb-2" id="deliveryZoneNote">
+                            Deliveries within Koforidua: GHS {{ delivery_fee_koforidua|intcomma }}. Outside Koforidua: our team will contact you with the delivery fee.
+                        </p>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="address1">Address Line 1 *</label>
+                                <div class="input-group">
+                                    <input type="text" id="address1" name="address_line_1" class="form-control" required>
+                                    <div class="error-message">Please enter your address</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="address2">Address Line 2</label>
+                                <input type="text" id="address2" name="address_line_2" class="form-control">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="address2">Address Line 2</label>
-                            <input type="text" id="address2" name="address_line_2" class="form-control">
-                        </div>
-                    </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="city">City *</label>
-                            <div class="input-group">
-                                <input type="text" id="city" name="city" class="form-control" required>
-                                <div class="error-message">Please enter your city</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city">City *</label>
+                                <div class="input-group">
+                                    <input type="text" id="city" name="city" class="form-control" required>
+                                    <div class="error-message">Please enter your city</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="state">State/Region *</label>
+                                <div class="input-group">
+                                    <input type="text" id="state" name="state" class="form-control" required>
+                                    <div class="error-message">Please enter your state/region</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="state">State/Region *</label>
-                            <div class="input-group">
-                                <input type="text" id="state" name="state" class="form-control" required>
-                                <div class="error-message">Please enter your state/region</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="form-row single">
-                        <div class="form-group">
-                            <label for="country">Country *</label>
-                            <div class="input-group">
-                                <select id="country" name="country" class="form-control" required>
-                                    <option value="">Select Country</option>
-                                    <option value="Ghana" selected>Ghana</option>
-                                    <option value="Nigeria">Nigeria</option>
-                                    <option value="Kenya">Kenya</option>
-                                    <option value="South Africa">South Africa</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                <div class="error-message">Please select your country</div>
+                        <div class="form-row single">
+                            <div class="form-group">
+                                <label for="country">Country *</label>
+                                <div class="input-group">
+                                    <select id="country" name="country" class="form-control" required>
+                                        <option value="">Select Country</option>
+                                        <option value="Ghana" selected>Ghana</option>
+                                        <option value="Nigeria">Nigeria</option>
+                                        <option value="Kenya">Kenya</option>
+                                        <option value="South Africa">South Africa</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <div class="error-message">Please select your country</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -572,9 +602,9 @@
                             <span>Subtotal ({{ cart_items|length }} item{{ cart_items|length|pluralize }})</span>
                             <span>GHS {{ total|intcomma }}</span>
                         </div>
-                        <div class="summary-row">
-                            <span>Delivery Fee</span>
-                            <span>Free</span>
+                        <div class="summary-row" id="deliveryFeeRow">
+                            <span id="deliveryFeeLabel">Delivery Fee</span>
+                            <span id="deliveryFeeValue">GHS {{ delivery_fee_koforidua|intcomma }}</span>
                         </div>
                         <div class="summary-row">
                             <span>Tax</span>
@@ -582,7 +612,7 @@
                         </div>
                         <div class="summary-row total">
                             <span>Total</span>
-                            <span>GHS {{ grand_total|intcomma }}</span>
+                            <span id="grandTotalValue">GHS {{ total|add:delivery_fee_koforidua|intcomma }}</span>
                         </div>
                     </div>
 
@@ -593,7 +623,7 @@
 
                     <button type="submit" class="btn btn-primary btn-block">
                         <i class="fas fa-credit-card"></i>
-                        Place Order - GHS {{ grand_total|intcomma }}
+                        Place Order - <span id="submitTotal">GHS {{ total|add:delivery_fee_koforidua|intcomma }}</span>
                     </button>
                     <a href="{% url 'cart' %}" class="btn btn-secondary btn-block">
                         <i class="fas fa-arrow-left"></i>
@@ -606,6 +636,67 @@
 </div>
 
 <script>
+    // ---- Fulfillment method (delivery vs pickup) & dynamic totals ----
+    const checkoutForm = document.getElementById('checkoutForm');
+    const deliverySection = document.getElementById('deliveryAddressSection');
+    const feeValueEl = document.getElementById('deliveryFeeValue');
+    const feeLabelEl = document.getElementById('deliveryFeeLabel');
+    const grandTotalEl = document.getElementById('grandTotalValue');
+    const submitTotalEl = document.getElementById('submitTotal');
+    const zoneNote = document.getElementById('deliveryZoneNote');
+
+    const fmtGHS = (n) => 'GHS ' + Number(n).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+    function getFulfillmentMethod() {
+        const checked = checkoutForm.querySelector('input[name="fulfillment_method"]:checked');
+        return checked ? checked.value : 'delivery';
+    }
+
+    function currentDeliveryFee() {
+        const subtotal = parseFloat(checkoutForm.dataset.subtotal) || 0;
+        if (getFulfillmentMethod() !== 'delivery') {
+            return {fee: 0, label: 'Delivery Fee', note: ''};
+        }
+        const cityInput = document.getElementById('city');
+        const city = (cityInput ? cityInput.value : '').trim().toLowerCase();
+        const kofFee = parseFloat(checkoutForm.dataset.feeKoforidua) || 0;
+        if (city === 'koforidua') {
+            return {fee: kofFee, label: 'Delivery Fee (Within Koforidua)', note: ''};
+        }
+        return {
+            fee: 0,
+            label: 'Delivery Fee',
+            note: 'Outside Koforidua — our team will contact you with the delivery fee for your location before dispatch.'
+        };
+    }
+
+    function updateSummary() {
+        const subtotal = parseFloat(checkoutForm.dataset.subtotal) || 0;
+        const isPickup = getFulfillmentMethod() === 'pickup';
+        const info = currentDeliveryFee();
+
+        deliverySection.style.display = isPickup ? 'none' : '';
+        // Disable hidden address inputs so they aren't submitted/validated for pickup
+        deliverySection.querySelectorAll('input, select').forEach(el => el.disabled = isPickup);
+
+        feeLabelEl.textContent = isPickup ? 'Pickup (No Delivery Fee)' : info.label;
+        feeValueEl.textContent = info.fee > 0 ? fmtGHS(info.fee) : (isPickup ? 'Free' : 'To be communicated');
+        zoneNote.textContent = info.note || 'Deliveries within Koforidua: ' + fmtGHS(parseFloat(checkoutForm.dataset.feeKoforidua) || 0) + '. Outside Koforidua: our team will contact you with the delivery fee.';
+
+        const grandTotal = subtotal + info.fee;
+        grandTotalEl.textContent = fmtGHS(grandTotal);
+        submitTotalEl.textContent = fmtGHS(grandTotal);
+    }
+
+    checkoutForm.querySelectorAll('input[name="fulfillment_method"]').forEach(radio => {
+        radio.addEventListener('change', updateSummary);
+    });
+    const cityField = document.getElementById('city');
+    if (cityField) {
+        cityField.addEventListener('input', updateSummary);
+    }
+    updateSummary();
+
     // Phone number validation
     const phoneInput = document.getElementById('phone');
     const form = document.getElementById('checkoutForm');
