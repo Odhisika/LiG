@@ -193,10 +193,12 @@ if [ "${ROLLBACK:-0}" != 1 ]; then
     # serving throughout — migrations must stay additive/backward-compatible.
     say "Migrating LiG database"
     docker run --rm --network "$NET" --env-file "$ENV_FILE" \
+        -e DJANGO_SETTINGS_MODULE=LiG.settings \
         lig-app:latest python manage.py migrate --noinput
 
     say "Migrating PricePilot database"
     docker run --rm --network "$NET" --env-file "$ENV_FILE" \
+        -e DJANGO_SETTINGS_MODULE=config.settings.prod \
         pp-app:latest python manage.py migrate --noinput
 fi
 
