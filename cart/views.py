@@ -58,6 +58,12 @@ def add_cart(request, product_id):
             continue
 
     if not product:
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            pass
+
+    if not product:
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': False, 'error': 'Product not found'}, status=404)
         return redirect(request.META.get('HTTP_REFERER', 'cart'))

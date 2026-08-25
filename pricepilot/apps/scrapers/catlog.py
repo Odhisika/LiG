@@ -194,12 +194,23 @@ def parse_item(item: dict) -> ScrapedProduct:
     else:
         stock = None
 
+    description = item.get("description") or ""
+    if not description:
+        parts = []
+        if item.get("name"):
+            parts.append(item["name"])
+        for key in ("brand", "category", "sku"):
+            val = item.get(key)
+            if val:
+                parts.append(f"{key.title()}: {val}")
+        description = " - ".join(parts) if parts else ""
+
     return ScrapedProduct(
         title=(item.get("name") or "")[:255],
         price=Decimal(str(price)),
         currency=item.get("currency") or "",
         stock=stock,
-        description=item.get("description") or "",
+        description=description,
         images=item.get("images") or [],
     )
 
@@ -275,6 +286,18 @@ class CatlogScraper(PlaywrightRenderMixin, BaseScraper):
         title = _clean_title(raw_title)
 
         description = _extract_meta(soup, "og:description") or ""
+        if not description:
+            description = _extract_meta(soup, "description") or ""
+        if not description and visible_text:
+            lines = [ln.strip() for ln in visible_text.splitlines() if ln.strip()]
+            desc_lines = []
+            for ln in lines:
+                if ln == title or _PRICE_PATTERNS[0][1].search(ln) or _IN_STOCK_RE.search(ln):
+                    continue
+                desc_lines.append(ln)
+                if len(desc_lines) >= 3:
+                    break
+            description = " ".join(desc_lines)
 
         images = []
         image_url = _extract_meta(soup, "og:image")
