@@ -87,6 +87,7 @@ start_pp_web() {
     docker rm -f lig-pp-web >/dev/null 2>&1 || true
     docker run -d --name lig-pp-web --restart unless-stopped --network "$NET" \
         --env-file "$ENV_FILE" -e DJANGO_DEBUG=False \
+        -e DJANGO_SETTINGS_MODULE=config.settings.prod \
         -p "127.0.0.1:8003:8000" \
         -v "$APP_ROOT/media:/var/www/LiG/media" \
         --health-cmd "curl -fsS -H 'X-Forwarded-Proto: https' -o /dev/null http://localhost:8000/admin/login/" \
@@ -99,6 +100,7 @@ start_pp_worker() {
     docker rm -f lig-pp-worker >/dev/null 2>&1 || true
     docker run -d --name lig-pp-worker --restart unless-stopped --network "$NET" \
         --env-file "$ENV_FILE" \
+        -e DJANGO_SETTINGS_MODULE=config.settings.prod \
         -v "$APP_ROOT/media:/var/www/LiG/media" \
         --stop-timeout=900 \
         pp-app:latest celery -A config worker -l info
@@ -108,6 +110,7 @@ start_pp_beat() {
     docker rm -f lig-pp-beat >/dev/null 2>&1 || true
     docker run -d --name lig-pp-beat --restart unless-stopped --network "$NET" \
         --env-file "$ENV_FILE" \
+        -e DJANGO_SETTINGS_MODULE=config.settings.prod \
         -v "$APP_ROOT/media:/var/www/LiG/media" \
         --stop-timeout=30 \
         pp-app:latest celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
