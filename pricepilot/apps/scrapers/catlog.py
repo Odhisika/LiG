@@ -253,7 +253,12 @@ class CatlogScraper(PlaywrightRenderMixin, BaseScraper):
             )
             item = None
         if item is not None:
-            return parse_item(item)
+            try:
+                return parse_item(item)
+            except ScraperError as exc:
+                logger.warning(
+                    "Catlog fast-path parse failed for %s (%s) — falling back to render.", url, exc
+                )
 
         html, visible_text = self._render(url)
         return self.parse(html, visible_text)

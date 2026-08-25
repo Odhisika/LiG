@@ -65,7 +65,7 @@ class PlaywrightRenderMixin:
 
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
+                browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-setuid-sandbox"])
                 try:
                     page = browser.new_page()
                     page.goto(url, wait_until="networkidle", timeout=self.render_timeout_ms)
