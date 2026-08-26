@@ -164,16 +164,8 @@
                     </div>
                     <div class="card-body">
                         <div class="summary-row d-flex justify-content-between py-2">
-                            <span class="text-muted">Subtotal ({{ cart_items|length }} items):</span>
+                            <span class="text-muted">Subtotal ({{ cart_items|length }} item{{ cart_items|length|pluralize }}):</span>
                             <span class="fw-semibold">GHS {{ total|intcomma }}</span>
-                        </div>
-                        <div class="summary-row d-flex justify-content-between py-2">
-                            <span class="text-muted">Tax:</span>
-                            <span class="fw-semibold">GHS {{ tax|intcomma }}</span>
-                        </div>
-                        <div class="summary-row d-flex justify-content-between py-2">
-                            <span class="text-muted">Shipping:</span>
-                            <span class="fw-semibold text-success">Free</span>
                         </div>
                         <hr class="my-3">
                         <div class="summary-total d-flex justify-content-between py-2">
@@ -191,13 +183,9 @@
                             </div>
                         </div>
                         <div class="d-grid gap-2">
-                            <a href="{% url 'checkout' %}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-lock me-2"></i>Secure Checkout
+                            <a href="{% url 'checkout' %}" class="btn btn-primary btn-lg fw-semibold">
+                                Checkout
                             </a>
-                            <small class="text-muted text-center">
-                                <i class="fas fa-shield-alt me-1"></i>
-                                Your information is protected by 256-bit SSL encryption
-                            </small>
                         </div>
                     </div>
                 </div>

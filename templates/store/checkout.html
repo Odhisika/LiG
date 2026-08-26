@@ -394,6 +394,117 @@
         font-size: 0.75rem;
         font-weight: 500;
     }
+
+    /* Amazon / eBay Style Option Cards */
+    .option-card-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .option-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        background: #ffffff;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+    }
+
+    .option-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .option-card.active {
+        border-color: #0d6efd;
+        background-color: #f0f7ff;
+        box-shadow: 0 4px 14px rgba(13, 110, 253, 0.12);
+    }
+
+    .option-card-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .option-card-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .option-card.active .option-card-icon {
+        background: #0d6efd;
+        color: #ffffff;
+    }
+
+    .option-card-title {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 1rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .option-card-subtitle {
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .option-card-radio {
+        width: 22px;
+        height: 22px;
+        border: 2px solid #cbd5e1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .option-card.active .option-card-radio {
+        border-color: #0d6efd;
+        background: #0d6efd;
+    }
+
+    .option-card.active .option-card-radio::after {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #ffffff;
+        border-radius: 50%;
+    }
+
+    /* Pickup Office Box Styling */
+    .pickup-info-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 
 <div class="checkout-container">
@@ -420,32 +531,49 @@
             <div class="checkout-grid">
                 <!-- Fulfillment Method -->
                 <div class="card">
-                    <h4 class="card-title">
-                        <i class="fas fa-truck"></i>
+                    <h4 class="card-title mb-1">
+                        <i class="fas fa-truck text-primary me-2"></i>
                         How would you like to get your order?
                     </h4>
-                    <div class="form-row single">
-                        <div class="form-group">
-                            <label style="display:flex;align-items:center;gap:8px;font-weight:normal;cursor:pointer;">
-                                <input type="radio" name="fulfillment_method" value="delivery" checked>
-                                <i class="fas fa-truck"></i> Delivery &mdash; we bring it to you
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-row single">
-                        <div class="form-group">
-                            <label style="display:flex;align-items:center;gap:8px;font-weight:normal;cursor:pointer;">
-                                <input type="radio" name="fulfillment_method" value="pickup">
-                                <i class="fas fa-store"></i> Pickup at Office &mdash; collect it yourself
-                            </label>
-                        </div>
+                    <p class="text-muted small mb-3">Select your preferred fulfillment method</p>
+
+                    <div class="option-card-group">
+                        <!-- Delivery Card -->
+                        <label class="option-card active" id="cardDelivery">
+                            <input type="radio" name="fulfillment_method" value="delivery" checked class="d-none">
+                            <div class="option-card-content">
+                                <div class="option-card-icon">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                <div>
+                                    <div class="option-card-title">Delivery</div>
+                                    <div class="option-card-subtitle">We bring your order directly to your location</div>
+                                </div>
+                            </div>
+                            <div class="option-card-radio"></div>
+                        </label>
+
+                        <!-- Pickup Card -->
+                        <label class="option-card" id="cardPickup">
+                            <input type="radio" name="fulfillment_method" value="pickup" class="d-none">
+                            <div class="option-card-content">
+                                <div class="option-card-icon">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <div>
+                                    <div class="option-card-title">Pickup at Shop</div>
+                                    <div class="option-card-subtitle">Collect your items directly from our shop</div>
+                                </div>
+                            </div>
+                            <div class="option-card-radio"></div>
+                        </label>
                     </div>
                 </div>
 
-                <!-- Delivery Information -->
+                <!-- Contact & Fulfillment Details Information -->
                 <div class="card">
                     <h4 class="card-title">
-                        <i class="fas fa-map-marker-alt"></i>
+                        <i class="fas fa-user-circle text-primary"></i>
                         Contact Information
                     </h4>
                     
@@ -453,14 +581,14 @@
                         <div class="form-group">
                             <label for="firstName">First Name *</label>
                             <div class="input-group">
-                                <input type="text" id="firstName" name="first_name" class="form-control" required>
+                                <input type="text" id="firstName" name="first_name" class="form-control" value="{% if user.is_authenticated %}{{ user.first_name }}{% endif %}" required>
                                 <div class="error-message">Please enter your first name</div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="lastName">Last Name *</label>
                             <div class="input-group">
-                                <input type="text" id="lastName" name="last_name" class="form-control" required>
+                                <input type="text" id="lastName" name="last_name" class="form-control" value="{% if user.is_authenticated %}{{ user.last_name }}{% endif %}" required>
                                 <div class="error-message">Please enter your last name</div>
                             </div>
                         </div>
@@ -470,7 +598,7 @@
                         <div class="form-group">
                             <label for="email">Email Address *</label>
                             <div class="input-group">
-                                <input type="email" id="email" name="email" class="form-control" required>
+                                <input type="email" id="email" name="email" class="form-control" value="{% if user.is_authenticated %}{{ user.email }}{% endif %}" required>
                                 <i class="fas fa-envelope input-icon"></i>
                                 <div class="error-message">Please enter a valid email address</div>
                             </div>
@@ -478,16 +606,45 @@
                         <div class="form-group">
                             <label for="phone">Phone Number *</label>
                             <div class="input-group phone-input">
-                                <input type="tel" id="phone" name="phone" class="form-control" maxlength="10" required>
+                                <input type="tel" id="phone" name="phone" class="form-control" maxlength="10" value="{% if user.is_authenticated %}{{ user.phone_number }}{% endif %}" required>
                                 <i class="fas fa-phone input-icon"></i>
                                 <div class="error-message">Please enter a valid 10-digit phone number</div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Pickup Shop Location Box (Shown when Pickup at Shop is selected) -->
+                    <div id="officeLocationSection" class="pickup-info-box" style="display: none;">
+                        <h6 class="fw-bold text-dark mb-3">
+                            <i class="fas fa-store text-primary me-2"></i>Pickup Location Details
+                        </h6>
+                        <div class="mb-2 text-dark font-weight-bold">
+                            <strong>LuckyTech Innovation Ground</strong>
+                        </div>
+                        <div class="text-muted small mb-3">
+                            <i class="fas fa-map-marker-alt text-secondary me-2"></i>Adweso-Koforidua Road, Eastern Region, Ghana
+                            <a href="https://maps.app.goo.gl/i6GVwwwpYXZ6XGRV6" target="_blank" class="d-inline-block ms-2 text-primary text-decoration-none fw-semibold">
+                                <i class="fas fa-directions me-1"></i>View Map
+                            </a>
+                        </div>
+                        <div class="row g-2 text-muted small mb-3">
+                            <div class="col-sm-6">
+                                <i class="fas fa-clock text-secondary me-2"></i><strong>Pickup Hours:</strong><br>Mon - Sat: 8:00 AM - 6:00 PM
+                            </div>
+                            <div class="col-sm-6">
+                                <i class="fas fa-phone-alt text-secondary me-2"></i><strong>Contact Lines:</strong><br>+233 59 188 4422 / +233 20 952 2722
+                            </div>
+                        </div>
+                        <div class="p-2.5 rounded bg-white border text-muted small">
+                            <i class="fas fa-info-circle text-primary me-1"></i>
+                            Your contact info is saved with this order. Simply state your name or present your <strong>Order ID</strong> when collecting your item.
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address Box (Shown when Delivery is selected) -->
                     <div id="deliveryAddressSection">
-                        <h6 class="mt-3 mb-2"><i class="fas fa-map-marker-alt"></i> Delivery Details</h6>
-                        <p class="text-muted small mb-2" id="deliveryZoneNote">
+                        <h6 class="mt-4 mb-3 fw-bold text-dark"><i class="fas fa-map-marker-alt text-primary me-2"></i> Delivery Address</h6>
+                        <p class="text-muted small mb-3" id="deliveryZoneNote">
                             Deliveries within Koforidua: GHS {{ delivery_fee_koforidua|intcomma }}. Outside Koforidua: our team will contact you with the delivery fee.
                         </p>
                         <div class="form-row">
@@ -499,7 +656,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="address2">Address Line 2</label>
+                                <label for="address2">Address Line 2 (Optional)</label>
                                 <input type="text" id="address2" name="address_line_2" class="form-control">
                             </div>
                         </div>
@@ -534,7 +691,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group mt-3">
                         <label for="orderNote">Order Notes (Optional)</label>
                         <textarea id="orderNote" name="order_note" class="form-control" placeholder="Any special instructions for your order..."></textarea>
                     </div>
@@ -601,19 +758,10 @@
                             <span id="deliveryFeeLabel">Delivery Fee</span>
                             <span id="deliveryFeeValue">GHS {{ delivery_fee_koforidua|intcomma }}</span>
                         </div>
-                        <div class="summary-row">
-                            <span>Tax</span>
-                            <span>GHS {{ tax|intcomma }}</span>
-                        </div>
                         <div class="summary-row total">
                             <span>Total</span>
                             <span id="grandTotalValue">GHS {{ total|add:delivery_fee_koforidua|intcomma }}</span>
                         </div>
-                    </div>
-
-                    <div class="security-badge">
-                        <i class="fas fa-lock"></i>
-                        <span>Your information is secure and encrypted</span>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block">
@@ -670,13 +818,46 @@
         const isPickup = getFulfillmentMethod() === 'pickup';
         const info = currentDeliveryFee();
 
-        deliverySection.style.display = isPickup ? 'none' : '';
-        // Disable hidden address inputs so they aren't submitted/validated for pickup
-        deliverySection.querySelectorAll('input, select').forEach(el => el.disabled = isPickup);
+        // Option cards active states
+        const cardDelivery = document.getElementById('cardDelivery');
+        const cardPickup = document.getElementById('cardPickup');
+        if (cardDelivery && cardPickup) {
+            if (isPickup) {
+                cardPickup.classList.add('active');
+                cardDelivery.classList.remove('active');
+            } else {
+                cardDelivery.classList.add('active');
+                cardPickup.classList.remove('active');
+            }
+        }
 
-        feeLabelEl.textContent = isPickup ? 'Pickup (No Delivery Fee)' : info.label;
-        feeValueEl.textContent = info.fee > 0 ? fmtGHS(info.fee) : (isPickup ? 'Free' : 'To be communicated');
-        zoneNote.textContent = info.note || 'Deliveries within Koforidua: ' + fmtGHS(parseFloat(checkoutForm.dataset.feeKoforidua) || 0) + '. Outside Koforidua: our team will contact you with the delivery fee.';
+        // Toggle Delivery vs Office sections
+        const officeSection = document.getElementById('officeLocationSection');
+        if (deliverySection) {
+            deliverySection.style.display = isPickup ? 'none' : 'block';
+            deliverySection.querySelectorAll('input, select').forEach(el => {
+                el.disabled = isPickup;
+                if (isPickup) {
+                    el.removeAttribute('required');
+                } else if (el.id !== 'address2') {
+                    el.setAttribute('required', 'required');
+                }
+            });
+        }
+        if (officeSection) {
+            officeSection.style.display = isPickup ? 'block' : 'none';
+        }
+
+        const deliveryFeeRow = document.getElementById('deliveryFeeRow');
+        if (deliveryFeeRow) {
+            deliveryFeeRow.style.display = isPickup ? 'none' : 'flex';
+        }
+
+        feeLabelEl.textContent = info.label;
+        feeValueEl.textContent = info.fee > 0 ? fmtGHS(info.fee) : 'To be communicated';
+        if (zoneNote) {
+            zoneNote.textContent = info.note || 'Deliveries within Koforidua: ' + fmtGHS(parseFloat(checkoutForm.dataset.feeKoforidua) || 0) + '. Outside Koforidua: our team will contact you with the delivery fee.';
+        }
 
         const grandTotal = subtotal + info.fee;
         grandTotalEl.textContent = fmtGHS(grandTotal);
@@ -686,6 +867,21 @@
     checkoutForm.querySelectorAll('input[name="fulfillment_method"]').forEach(radio => {
         radio.addEventListener('change', updateSummary);
     });
+
+    // Also allow clicking option cards directly
+    ['cardDelivery', 'cardPickup'].forEach(id => {
+        const card = document.getElementById(id);
+        if (card) {
+            card.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio && !radio.checked) {
+                    radio.checked = true;
+                    updateSummary();
+                }
+            });
+        }
+    });
+
     const cityField = document.getElementById('city');
     if (cityField) {
         cityField.addEventListener('input', updateSummary);
@@ -736,7 +932,7 @@
     if (form) {
         form.addEventListener('submit', function(e) {
             let isValid = true;
-            const requiredFields = form.querySelectorAll('input[required], select[required]');
+            const requiredFields = form.querySelectorAll('input[required]:not([disabled]), select[required]:not([disabled])');
             
             requiredFields.forEach(field => {
                 if (!field.value.trim()) {
