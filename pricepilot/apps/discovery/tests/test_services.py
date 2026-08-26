@@ -52,9 +52,9 @@ class TestScanSupplier:
         fake = mock_scraper(["https://a.com/products/item-1", "https://a.com/products/item-2"])
 
         with patch("apps.discovery.services.ScraperRegistry.get", return_value=fake):
-            created = DiscoveryService.scan_supplier(supplier)
+            result = DiscoveryService.scan_supplier(supplier)
 
-        assert created == 2
+        assert result["created"] == 2
         assert DiscoveredProduct.objects.filter(supplier=supplier).count() == 2
 
     def test_skips_supplier_with_no_scraper_configured(self, user):
@@ -64,7 +64,7 @@ class TestScanSupplier:
 
         created = DiscoveryService.scan_supplier(supplier)
 
-        assert created == 0
+        assert created["created"] == 0
         assert DiscoveredProduct.objects.count() == 0
 
     def test_does_not_rediscover_already_tracked_product(self, user, supplier):
@@ -78,9 +78,9 @@ class TestScanSupplier:
         fake = mock_scraper(["https://a.com/products/item-1", "https://a.com/products/item-2"])
 
         with patch("apps.discovery.services.ScraperRegistry.get", return_value=fake):
-            created = DiscoveryService.scan_supplier(supplier)
+            result = DiscoveryService.scan_supplier(supplier)
 
-        assert created == 1
+        assert result["created"] == 1
         assert DiscoveredProduct.objects.get().url == "https://a.com/products/item-2"
 
     def test_does_not_reduplicate_across_scans(self, user, supplier):
@@ -90,8 +90,8 @@ class TestScanSupplier:
             first_run = DiscoveryService.scan_supplier(supplier)
             second_run = DiscoveryService.scan_supplier(supplier)
 
-        assert first_run == 1
-        assert second_run == 0
+        assert first_run["created"] == 1
+        assert second_run["created"] == 0
         assert DiscoveredProduct.objects.count() == 1
 
     def test_preview_data_populated_from_fetch(self, user, supplier):
@@ -122,9 +122,9 @@ class TestScanSupplier:
         fake.fetch.side_effect = ScraperError("preview render failed")
 
         with patch("apps.discovery.services.ScraperRegistry.get", return_value=fake):
-            created = DiscoveryService.scan_supplier(supplier)
+            result = DiscoveryService.scan_supplier(supplier)
 
-        assert created == 1
+        assert result["created"] == 1
         discovered = DiscoveredProduct.objects.get()
         assert discovered.title == ""
         assert discovered.price is None
@@ -134,9 +134,9 @@ class TestScanSupplier:
         fake.discover_product_urls.side_effect = ScraperError("catalog page unreachable")
 
         with patch("apps.discovery.services.ScraperRegistry.get", return_value=fake):
-            created = DiscoveryService.scan_supplier(supplier)
+            result = DiscoveryService.scan_supplier(supplier)
 
-        assert created == 0
+        assert result["created"] == 0
 
     def test_records_new_products_found_notification(self, user, supplier):
         fake = mock_scraper(["https://a.com/products/item-1", "https://a.com/products/item-2"])
@@ -156,6 +156,27 @@ class TestScanSupplier:
             DiscoveryService.scan_supplier(supplier)
 
         assert NotificationEvent.objects.count() == 0
+
+    def test_removed_product_is_marked_out_of_stock_and_store_row_deleted(self, user, supplier):
+        product = Product.objects.create(
+            owner=user,
+            supplier=supplier,
+            name="Removed Item",
+            supplier_url="https://a.com/products/item-1",
+            supplier_price=10,
+        )
+        fake = mock_scraper([])
+
+        with (
+            patch("apps.discovery.services.ScraperRegistry.get", return_value=fake),
+            patch("apps.discovery.services.StoreSyncService.delete_product") as mock_delete,
+        ):
+            DiscoveryService.scan_supplier(supplier)
+
+        product.refresh_from_db()
+        assert product.status == Product.Status.OUT_OF_STOCK
+        assert product.stock == 0
+        mock_delete.assert_called_once()
 
 
 class TestImportDiscovery:
@@ -299,4 +320,4 @@ class TestDismissDiscovery:
         with patch("apps.discovery.services.ScraperRegistry.get", return_value=fake):
             created = DiscoveryService.scan_supplier(supplier)
 
-        assert created == 0  # already known, even though dismissed not imported
+        assert created["created"] == 0  # already known, even though dismissed not imported

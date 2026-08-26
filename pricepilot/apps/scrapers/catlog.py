@@ -144,6 +144,17 @@ def _extract_meta(soup: BeautifulSoup, name: str) -> str | None:
     return None
 
 
+def _visible_text_from_html(html: str) -> str:
+    """Best-effort text extraction from raw HTML.
+
+    Catlog pages often expose enough price/title text in the server-
+    rendered markup for `parse()` to succeed without launching a browser.
+    When that works, we avoid the Playwright fallback entirely.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    return soup.get_text("\n", strip=True)
+
+
 def _extract_price(visible_text: str) -> tuple[Decimal, str]:
     for currency, pattern in _PRICE_PATTERNS:
         match = pattern.search(visible_text)
@@ -254,14 +265,27 @@ class CatlogScraper(PlaywrightRenderMixin, BaseScraper):
             item = None
         if item is not None:
             try:
-                return parse_item(item)
+                result = parse_item(item)
+                logger.info("Catlog scrape used embedded item JSON for %s", url)
+                return result
             except ScraperError as exc:
                 logger.warning(
                     "Catlog fast-path parse failed for %s (%s) — falling back to render.", url, exc
                 )
 
+        try:
+            result = self.parse(html, _visible_text_from_html(html))
+            logger.info("Catlog scrape used raw HTML parse for %s", url)
+            return result
+        except ScraperError as exc:
+            logger.warning(
+                "Catlog raw HTML parse failed for %s (%s) — falling back to render.", url, exc
+            )
+
         html, visible_text = self._render(url)
-        return self.parse(html, visible_text)
+        result = self.parse(html, visible_text)
+        logger.info("Catlog scrape used Playwright render for %s", url)
+        return result
 
     def _http_get(self, url: str) -> str:
         """Plain GET for Catlog's server-rendered pages — kept as a

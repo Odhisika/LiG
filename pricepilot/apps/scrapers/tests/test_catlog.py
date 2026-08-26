@@ -393,16 +393,18 @@ class TestFastPathItemParse:
     def test_extract_page_item_none_when_missing(self):
         assert extract_page_item("<html><body>no data</body></html>") is None
 
-    def test_fetch_uses_fast_path_when_item_present(self, scraper):
+    def test_fetch_uses_fast_path_when_item_present(self, scraper, caplog):
         html = make_item_html(sample_item(discount_price=None, quantity=30))
         scraper._http_get = lambda url: html
+        caplog.set_level("INFO")
 
         result = scraper.fetch("https://www.example.com/products/some-item")
 
         assert result.price == Decimal("260.00")
         assert result.stock == 30
+        assert "Catlog scrape used embedded item JSON" in caplog.text
 
-    def test_fetch_falls_back_to_render_when_no_item(self, scraper):
+    def test_fetch_falls_back_to_render_when_no_item(self, scraper, caplog):
         render_html = (
             "<html><head><title>Fallback | Store - Catlog</title>"
             '<meta property="og:title" content="Fallback | Store - Catlog"/>'
@@ -410,12 +412,37 @@ class TestFastPathItemParse:
         )
         scraper._http_get = lambda url: "<html><body>no item embedded</body></html>"
         scraper._render = lambda url: (render_html, "₦5,000\nIn Stock")
+        caplog.set_level("INFO")
 
         result = scraper.fetch("https://www.example.com/products/some-item")
 
         assert result.title == "Fallback"
         assert result.price == Decimal("5000")
         assert result.currency == "NGN"
+        assert "Catlog scrape used Playwright render" in caplog.text
+
+    def test_fetch_uses_raw_html_parse_before_render_when_possible(self, scraper, caplog):
+        html = make_html(title="Fallback Title | Store - Catlog")
+        html = html.replace("<body></body>", "<body>₦5,000\nIn Stock</body>")
+        scraper._http_get = lambda url: html
+        caplog.set_level("INFO")
+
+        render_called = False
+
+        def fake_render(url):
+            nonlocal render_called
+            render_called = True
+            return make_html(title="Should Not Be Used | Store - Catlog"), "₦9,999\nIn Stock"
+
+        scraper._render = fake_render
+
+        result = scraper.fetch("https://www.example.com/products/some-item")
+
+        assert result.title == "Fallback Title"
+        assert result.price == Decimal("5000")
+        assert result.currency == "NGN"
+        assert render_called is False
+        assert "Catlog scrape used raw HTML parse" in caplog.text
 
     def test_fetch_raises_when_both_paths_fail(self, scraper):
         scraper._http_get = lambda url: "<html><body>nothing</body></html>"

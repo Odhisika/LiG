@@ -14,15 +14,27 @@ class ProductsByCategorySerializer(serializers.Serializer):
     count = serializers.IntegerField()
 
 
+class ActivityEventSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", default=None, read_only=True)
+    supplier_name = serializers.CharField(source="supplier.name", default=None, read_only=True)
+
+    class Meta:
+        from apps.dashboard.models import ActivityEvent
+
+        model = ActivityEvent
+        fields = [
+            "id",
+            "event_type",
+            "product",
+            "product_name",
+            "supplier",
+            "supplier_name",
+            "payload",
+            "created_at",
+        ]
+
+
 class DashboardSummarySerializer(serializers.Serializer):
-    """Shape of GET /api/dashboard/summary/.
-
-    Fields marked "Phase 2" are real fields with honest zero/empty
-    values today — they depend on History/ScrapeLog models that don't
-    exist yet. They're included now so the API contract doesn't change
-    shape later; only the values start populating once Phase 2 lands.
-    """
-
     products_monitored = serializers.IntegerField()
     suppliers_count = serializers.IntegerField()
     products_by_status = ProductsByStatusSerializer()
@@ -31,8 +43,6 @@ class DashboardSummarySerializer(serializers.Serializer):
     default_markup = serializers.DecimalField(
         max_digits=5, decimal_places=2, allow_null=True
     )
-
-    # --- Phase 2 (History / ScrapeLog) — placeholders until then ---
     products_changed_today = serializers.IntegerField()
     stock_changes_today = serializers.IntegerField()
     failed_scrapes_today = serializers.IntegerField()

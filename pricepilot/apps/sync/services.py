@@ -9,6 +9,8 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 from django.utils.text import slugify
 
+from apps.dashboard.models import ActivityEvent
+from apps.dashboard.services import ActivityService
 from apps.products.categorizer import CANONICAL_CATEGORIES as CATEGORIZER_CANONICAL_CATEGORIES
 from apps.sync.models import LiGCategory, LiGProduct, LiGProductGallery
 
@@ -186,10 +188,60 @@ class StoreSyncService:
                 pp_product.store_synced_at = timezone.now()
                 pp_product.save(update_fields=fields)
 
+            if action in ("created", "updated"):
+                ActivityService.record(
+                    pp_product.owner,
+                    ActivityEvent.EventType.STORE_SYNCED,
+                    product=pp_product,
+                    action=action,
+                    lig_product_id=lig.id if lig is not None else None,
+                )
+
             return {"action": action, "lig_product_id": lig.id if lig is not None else None}
         except Exception as exc:
             logger.exception("Store sync failed for product %s", pp_product.id)
             return {"action": "failed", "error": str(exc), "lig_product_id": None}
+
+    @staticmethod
+    def delete_product(pp_product) -> dict:
+        """Hard-deletes the merchant-store row for a product the supplier
+        has removed, and clears this side's sync pointers so a future
+        reactivation re-seeds cleanly instead of resurrecting a stale row.
+
+        Returns a result dict {'action': ..., 'deleted': bool} where action
+        is one of: 'deleted', 'noop', 'skipped', 'failed'. Never raises.
+        """
+        if not is_configured():
+            return {"action": "skipped", "reason": "disabled", "deleted": False}
+        try:
+            lig = StoreSyncService._resolve(pp_product)
+            deleted = False
+            if lig is not None:
+                deleted_count, _ = lig.delete()
+                deleted = deleted_count > 0
+                logger.info(
+                    "Store sync: deleted LiG product %s for removed PricePilot product %s",
+                    lig.id,
+                    pp_product.id,
+                )
+
+            if pp_product.store_product_id is not None or pp_product.store_synced_at is not None:
+                pp_product.store_product_id = None
+                pp_product.store_synced_at = None
+                pp_product.save(update_fields=["store_product_id", "store_synced_at"])
+
+            if deleted:
+                ActivityService.record(
+                    pp_product.owner,
+                    ActivityEvent.EventType.STORE_DELETED,
+                    product=pp_product,
+                    lig_product_id=lig.id if lig is not None else None,
+                )
+
+            return {"action": "deleted" if deleted else "noop", "deleted": deleted}
+        except Exception as exc:
+            logger.exception("Store delete failed for product %s", pp_product.id)
+            return {"action": "failed", "error": str(exc), "deleted": False}
 
     @staticmethod
     def _resolve(pp_product) -> LiGProduct | None:

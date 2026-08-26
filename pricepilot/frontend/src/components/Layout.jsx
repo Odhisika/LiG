@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { to: "/history", label: "History" },
   { to: "/notifications", label: "Notifications" },
   { to: "/analytics", label: "Analytics" },
+  { to: "/activity", label: "Activity" },
 ];
 
 export default function Layout() {

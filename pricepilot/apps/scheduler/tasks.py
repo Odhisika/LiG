@@ -17,10 +17,13 @@ from django.db.models.functions import Cast
 from django.utils import timezone
 
 from apps.common.exceptions import NotFoundError, ProductNotFoundOnSupplier, ScraperError, ValidationError
+from apps.dashboard.models import ActivityEvent
+from apps.dashboard.services import ActivityService
 from apps.notifications.models import NotificationEvent
 from apps.notifications.services import NotificationService
 from apps.products.models import Product
 from apps.products.services import PriceMonitorService
+from apps.sync.services import StoreSyncService
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +52,13 @@ def _mark_scrape_failed(product_id: str, reason: str) -> None:
     product.status = Product.Status.SCRAPE_FAILED
     product.last_checked_at = timezone.now()
     product.save(update_fields=["status", "last_checked_at"])
+    ActivityService.record(
+        product.owner,
+        ActivityEvent.EventType.SCRAPE_FAILED,
+        product=product,
+        supplier=product.supplier,
+        reason=reason,
+    )
     NotificationService.record_event(
         product.owner,
         NotificationEvent.EventType.SCRAPE_FAILED,
@@ -70,6 +80,17 @@ def _mark_product_not_found(product_id: str, reason: str) -> None:
     product.stock = 0
     product.last_checked_at = timezone.now()
     product.save(update_fields=["status", "stock", "last_checked_at"])
+    ActivityService.record(
+        product.owner,
+        ActivityEvent.EventType.REMOVED,
+        product=product,
+        supplier=product.supplier,
+        reason=reason,
+    )
+    try:
+        StoreSyncService.delete_product(product)
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.error("Store delete failed while removing product %s: %s", product.id, exc)
     NotificationService.record_event(
         product.owner,
         NotificationEvent.EventType.SUPPLIER_UNAVAILABLE,
@@ -202,3 +223,33 @@ def check_product_task(self, product_id: str) -> None:
             ) from exc
     finally:
         cache.delete(_lock_key(product_id))
+
+
+# ── Catalog sync pipeline ─────────────────────────────────────────────
+
+
+@shared_task(name="apps.scheduler.tasks.sync_jred_catalog_pipeline")
+def sync_jred_catalog_pipeline() -> dict:
+    """Full automated pipeline: Catlog API → PricePilot upsert → LiG store sync.
+
+    Runs periodically via Celery Beat (default: every 6 hours).
+    This replaces the Playwright-based scan_all_suppliers for Catlog stores,
+    since the Catlog public API is faster and more reliable.
+    """
+    from apps.products.catalog_sync import sync_catalog
+    from apps.sync.services import StoreSyncService, is_configured
+
+    logger.info("sync_jred_catalog_pipeline: starting catalog sync...")
+    summary = sync_catalog()
+    logger.info("sync_jred_catalog_pipeline: catalog sync done — %s", summary)
+
+    if is_configured():
+        logger.info("sync_jred_catalog_pipeline: syncing to LiG store...")
+        store_tally = StoreSyncService.sync_all()
+        logger.info("sync_jred_catalog_pipeline: store sync done — %s", store_tally)
+        summary["store_sync"] = store_tally
+    else:
+        logger.info("sync_jred_catalog_pipeline: store sync not configured, skipping.")
+        summary["store_sync"] = None
+
+    return summary

@@ -245,6 +245,31 @@ class TestPricingRuleIntegration:
         product.refresh_from_db()
         assert product.selling_price == Decimal("999.00")
 
+    def test_description_only_change_updates_product_and_triggers_store_sync(
+        self, user, supplier
+    ):
+        product = make_product(user, supplier, description="Old description")
+        fake = MagicMock()
+        fake.fetch.return_value = ScrapedProduct(
+            title="X",
+            price=Decimal("100.00"),
+            currency="NGN",
+            stock=5,
+            description="Fresh supplier description",
+        )
+
+        with (
+            patch("apps.products.services.ScraperRegistry.get", return_value=fake),
+            patch("apps.products.services.StoreSyncService.sync_product") as mock_sync,
+        ):
+            result = PriceMonitorService.check_product(product.id)
+
+        product.refresh_from_db()
+        assert result is None
+        assert PriceHistory.objects.filter(product=product).count() == 0
+        assert product.description == "Fresh supplier description"
+        mock_sync.assert_called_once()
+
 
 class TestNotificationIntegration:
     def test_product_updated_event_recorded_on_price_change(self, user, supplier):

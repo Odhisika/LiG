@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.common.exceptions import ScraperError
+from apps.common.exceptions import ProductNotFoundOnSupplier, ScraperError
 from apps.history.models import PriceHistory
 from apps.products.models import Product
 from apps.scheduler.tasks import (
@@ -213,6 +213,22 @@ class TestCheckProductTaskNoScraperConfigured:
         # Should log and return, not raise — a product could be deleted
         # between being enqueued and the task actually running.
         run_task("00000000-0000-0000-0000-000000000000")
+
+
+class TestCheckProductTaskSupplierRemoval:
+    def test_404_marks_out_of_stock_and_deletes_store_row(self, user, supplier):
+        product = make_product(user, supplier)
+
+        with (
+            patch("apps.products.services.PriceMonitorService.check_product", side_effect=ProductNotFoundOnSupplier("gone")),
+            patch("apps.scheduler.tasks.StoreSyncService.delete_product") as mock_delete,
+        ):
+            run_task(str(product.id))
+
+        product.refresh_from_db()
+        assert product.status == Product.Status.OUT_OF_STOCK
+        assert product.stock == 0
+        mock_delete.assert_called_once()
 
 
 class TestCheckProductTaskPriceMonitoring:

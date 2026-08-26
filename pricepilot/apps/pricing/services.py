@@ -1,3 +1,4 @@
+import logging
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Iterable
 
@@ -7,6 +8,8 @@ from apps.accounts.models import User
 from apps.common.exceptions import NotFoundError, ValidationError
 from apps.pricing.models import DefaultMarkup, PricingRule, PricingRuleStep
 from apps.pricing.serializers import PricingRuleSerializer
+
+logger = logging.getLogger(__name__)
 
 TWO_PLACES = Decimal("0.01")
 
@@ -135,6 +138,36 @@ class PricingRuleService:
         )
 
     @staticmethod
+    def _reprice_and_sync_products(rule: PricingRule) -> int:
+        """Recompute stored selling_price for products using this rule and
+        push existing LiG rows immediately.
+
+        We update every product attached to the rule so future syncs stay
+        correct, but only seed/sync rows that already have a LiG identity.
+        """
+        from apps.products.models import Product
+        from apps.sync.services import StoreSyncService
+
+        all_products = Product.objects.filter(owner=rule.owner, pricing_rule=rule)
+        syncable_products = all_products.filter(store_product_id__isnull=False)
+
+        updated = 0
+        for product in all_products.iterator():
+            product.selling_price = PricingService.compute_selling_price(
+                product.supplier_price, rule
+            )
+            product.save(update_fields=["selling_price"])
+            updated += 1
+
+        if updated:
+            StoreSyncService.sync_all(syncable_products)
+            logger.info(
+                "Repriced and synced %d product(s) for pricing rule %s.", updated, rule.id
+            )
+
+        return updated
+
+    @staticmethod
     def create(owner: User, data: dict) -> PricingRule:
         serializer = PricingRuleSerializer(data=data)
         if not serializer.is_valid():
@@ -152,7 +185,9 @@ class PricingRuleService:
         return rule
 
     @staticmethod
-    def update(owner: User, rule_id, data: dict, partial: bool = True) -> PricingRule:
+    def update(
+        owner: User, rule_id, data: dict, partial: bool = True, *, sync_lig: bool = False
+    ) -> PricingRule:
         rule = PricingRuleService.get_for_owner(owner, rule_id)
         serializer = PricingRuleSerializer(rule, data=data, partial=partial)
         if not serializer.is_valid():
@@ -168,6 +203,8 @@ class PricingRuleService:
             raise ValidationError(
                 f"A pricing rule named '{data.get('name')}' already exists."
             ) from exc
+        if sync_lig:
+            PricingRuleService._reprice_and_sync_products(rule)
         return rule
 
     @staticmethod

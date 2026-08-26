@@ -208,9 +208,17 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.sync.tasks.sync_all_to_store",
         "schedule": 86400.0,  # once a day — per-change pushes already keep the store fresh
     },
+    "sync-jred-catalog": {
+        "task": "apps.scheduler.tasks.sync_jred_catalog_pipeline",
+        "schedule": 21600.0,  # every 6 hours — keeps catalog fresh without hammering the API
+    },
 }
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="notifications@pricepilot.app")
+
+# Owner account used by the automated Jred Catlog import. If unset, the
+# importer falls back to the first PricePilot user for backward compatibility.
+JRED_CATALOG_OWNER_EMAIL = env("JRED_CATALOG_OWNER_EMAIL", default="")
 
 # --- CORS -----------------------------------------------------------------
 # The frontend (frontend/) runs on its own dev server (Vite, default

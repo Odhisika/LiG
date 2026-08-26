@@ -5,6 +5,8 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.common.exceptions import NotFoundError, ScraperError, ValidationError
+from apps.dashboard.models import ActivityEvent
+from apps.dashboard.services import ActivityService
 from apps.discovery.models import DiscoveredProduct
 from apps.notifications.models import NotificationEvent
 from apps.notifications.services import NotificationService
@@ -67,6 +69,12 @@ class DiscoveryService:
             discovery = DiscoveryService._create_with_preview(supplier, url)
             if discovery is not None:
                 created_count += 1
+                ActivityService.record(
+                    supplier.owner,
+                    ActivityEvent.EventType.DISCOVERED,
+                    supplier=supplier,
+                    url=url,
+                )
 
         # Detect products removed from the supplier's catalog.
         tracked_urls = set(
@@ -84,6 +92,18 @@ class DiscoveryService:
                 product.stock = 0
                 product.last_checked_at = timezone.now()
                 product.save(update_fields=["status", "stock", "last_checked_at"])
+                ActivityService.record(
+                    supplier.owner,
+                    ActivityEvent.EventType.REMOVED,
+                    product=product,
+                    supplier=supplier,
+                    reason="Product no longer found on supplier catalog during scan",
+                    supplier_url=url,
+                )
+                try:
+                    StoreSyncService.delete_product(product)
+                except Exception as exc:  # pragma: no cover - defensive
+                    logger.error("Store delete failed while removing product %s: %s", product.id, exc)
                 NotificationService.record_event(
                     supplier.owner,
                     NotificationEvent.EventType.SUPPLIER_UNAVAILABLE,
@@ -187,6 +207,14 @@ class DiscoveryService:
         discovery.status = DiscoveredProduct.Status.IMPORTED
         discovery.imported_product = product
         discovery.save(update_fields=["status", "imported_product"])
+
+        ActivityService.record(
+            owner,
+            ActivityEvent.EventType.IMPORTED,
+            product=product,
+            supplier=discovery.supplier,
+            discovery_id=str(discovery.id),
+        )
 
         return product
 

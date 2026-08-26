@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.urls import reverse
 from rest_framework import status
@@ -215,12 +217,14 @@ class TestDefaultMarkup:
             selling_price=20,
         )
 
-        response = api_client.put(url, {"markup_percent": "25"}, format="json")
+        with patch("apps.pricing.views.StoreSyncService.sync_all") as mock_sync:
+            response = api_client.put(url, {"markup_percent": "25"}, format="json")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data["data"]["markup_percent"] == "25.00"
         # only the product without a manual price is affected
         assert response.data["data"]["affected_products"] == 1
+        mock_sync.assert_called_once()
 
         fetched = api_client.get(url)
         assert fetched.data["data"]["markup_percent"] == "25.00"

@@ -1,3 +1,4 @@
+import logging
 import json
 from datetime import timedelta
 
@@ -15,6 +16,7 @@ from rest_framework.views import APIView
 from apps.common.api import envelope
 from apps.history.models import PriceHistory
 from apps.notifications.models import NotificationEvent
+from apps.products.models import Product
 from apps.pricing.serializers import (
     DefaultMarkupSerializer,
     PricingRuleSerializer,
@@ -23,6 +25,9 @@ from apps.pricing.services import (
     DefaultMarkupService,
     PricingRuleService,
 )
+from apps.sync.services import StoreSyncService
+
+logger = logging.getLogger(__name__)
 
 
 class PricingRuleListCreateView(APIView):
@@ -58,7 +63,9 @@ class PricingRuleDetailView(APIView):
 
     @extend_schema(request=PricingRuleSerializer, responses=PricingRuleSerializer)
     def patch(self, request: Request, rule_id) -> Response:
-        rule = PricingRuleService.update(request.user, rule_id, request.data, partial=True)
+        rule = PricingRuleService.update(
+            request.user, rule_id, request.data, partial=True, sync_lig=True
+        )
         return Response(envelope(data=PricingRuleSerializer(rule).data))
 
     @extend_schema(responses=None)
@@ -95,6 +102,19 @@ class DefaultMarkupView(APIView):
 
         markup, affected = DefaultMarkupService.set_markup(
             request.user, serializer.validated_data["markup_percent"]
+        )
+        synced = StoreSyncService.sync_all(
+            Product.objects.filter(
+                owner=request.user,
+                pricing_rule__isnull=True,
+                selling_price__isnull=True,
+                store_product_id__isnull=False,
+            )
+        )
+        logger.info(
+            "Default markup updated for user %s; sync result=%s",
+            request.user.id,
+            synced,
         )
         return Response(
             envelope(

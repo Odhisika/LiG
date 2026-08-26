@@ -269,6 +269,80 @@ input:focus, select:focus, textarea:focus {
   color: var(--text-dim);
 }
 
+/* Activity feed badges */
+.badge-check_ok {
+  background: rgba(62, 207, 142, 0.15);
+  color: var(--success);
+}
+.badge-price_change, .badge-stock_change, .badge-status_change {
+  background: rgba(91, 140, 255, 0.15);
+  color: var(--primary);
+}
+.badge-scrape_failed, .badge-removed, .badge-store_deleted {
+  background: rgba(240, 85, 90, 0.15);
+  color: var(--danger);
+}
+.badge-store_synced {
+  background: rgba(62, 207, 142, 0.15);
+  color: var(--success);
+}
+.badge-discovered, .badge-imported {
+  background: rgba(245, 185, 66, 0.15);
+  color: var(--warning);
+}
+
+/* Activity feed */
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border-radius: 50%;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-target {
+  font-weight: 500;
+}
+
+.activity-meta {
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+.activity-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 14px;
+}
+
 .alert {
   padding: 10px 14px;
   border-radius: var(--radius);

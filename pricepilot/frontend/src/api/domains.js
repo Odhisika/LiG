@@ -8,6 +8,7 @@ function toQuery(params) {
 
 export const dashboardApi = {
   summary: () => api.get("/dashboard/summary/"),
+  activity: (params) => api.get(`/dashboard/activity/${toQuery(params)}`),
 };
 
 export const pricingApi = {

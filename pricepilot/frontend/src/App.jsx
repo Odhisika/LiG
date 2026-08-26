@@ -12,6 +12,7 @@ import HistoryPage from "./pages/HistoryPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import DiscoveriesPage from "./pages/DiscoveriesPage";
+import ActivityPage from "./pages/ActivityPage";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="history" element={<HistoryPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="activity" element={<ActivityPage />} />
           </Route>
         </Routes>
       </AuthProvider>

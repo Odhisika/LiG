@@ -1,16 +1,45 @@
+import logging
 from decimal import Decimal
 
 from django.db.models import Count
+from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.products.models import Product
 from apps.suppliers.models import Supplier
 
+logger = logging.getLogger(__name__)
+
+
+class ActivityService:
+    """Thin write helper for the ActivityEvent audit trail.
+
+    Every instrumentation point (scraper check, store sync, discovery,
+    etc.) calls ``ActivityService.record(...)`` so the event stays
+    decoupled from the caller and the dashboard can query a single table
+    for the full activity feed.
+    """
+
+    @staticmethod
+    def record(owner, event_type, *, product=None, supplier=None, **payload):
+        from apps.dashboard.models import ActivityEvent
+
+        try:
+            ActivityEvent.objects.create(
+                owner=owner,
+                event_type=event_type,
+                product=product,
+                supplier=supplier,
+                payload=payload,
+            )
+        except Exception:  # pragma: no cover — never break the caller
+            logger.exception("Failed to record activity event %s", event_type)
+
 
 class DashboardService:
-    """Read-only aggregation over Product/Supplier (and, from Phase 2,
-    History/ScrapeLog) for the current user. No models of its own —
-    this is intentionally a pure query layer.
+    """Read-only aggregation over Product/Supplier and ActivityEvent
+    for the current user. No models of its own — this is intentionally
+    a pure query layer.
     """
 
     @staticmethod
@@ -67,9 +96,15 @@ class DashboardService:
 
     @staticmethod
     def get_summary(owner: User) -> dict:
+        from apps.dashboard.models import ActivityEvent
+        from apps.dashboard.serializers import ActivityEventSerializer
         from apps.pricing.services import DefaultMarkupService
 
         markup = DefaultMarkupService.get_markup_percent(owner)
+
+        today = timezone.now().date()
+        today_qs = ActivityEvent.objects.filter(owner=owner, created_at__date=today)
+
         return {
             "products_monitored": Product.objects.filter(
                 owner=owner, status=Product.Status.ACTIVE
@@ -79,10 +114,32 @@ class DashboardService:
             "products_by_category": DashboardService._products_by_category(owner),
             "average_profit": DashboardService._average_profit(owner),
             "default_markup": str(markup) if markup is not None else None,
-            # --- Phase 2 (History / ScrapeLog) placeholders ---
-            "products_changed_today": 0,
-            "stock_changes_today": 0,
-            "failed_scrapes_today": 0,
-            "todays_checks": 0,
-            "recent_activity": [],
+            "todays_checks": today_qs.filter(
+                event_type__in=[
+                    ActivityEvent.EventType.CHECK_OK,
+                    ActivityEvent.EventType.PRICE_CHANGE,
+                    ActivityEvent.EventType.STOCK_CHANGE,
+                    ActivityEvent.EventType.SCRAPE_FAILED,
+                ]
+            ).count(),
+            "products_changed_today": today_qs.filter(
+                event_type__in=[
+                    ActivityEvent.EventType.PRICE_CHANGE,
+                    ActivityEvent.EventType.STOCK_CHANGE,
+                ]
+            )
+            .values("product")
+            .distinct()
+            .count(),
+            "stock_changes_today": today_qs.filter(
+                event_type=ActivityEvent.EventType.STOCK_CHANGE,
+            ).count(),
+            "failed_scrapes_today": today_qs.filter(
+                event_type=ActivityEvent.EventType.SCRAPE_FAILED,
+            ).count(),
+            "recent_activity": ActivityEventSerializer(
+                ActivityEvent.objects.filter(owner=owner)
+                .select_related("product", "supplier")[:20],
+                many=True,
+            ).data,
         }

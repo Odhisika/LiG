@@ -4,6 +4,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
+from apps.dashboard.models import ActivityEvent
+from apps.dashboard.services import ActivityService
 from apps.products.models import Product
 from apps.suppliers.models import Supplier
 
@@ -58,17 +60,27 @@ class TestDashboardSummary:
             "archived": 0,
         }
 
-    def test_phase_2_fields_are_honest_placeholders(self, api_client):
-        url = reverse("dashboard:summary")
+    def test_activity_fields_populated_from_events(self, api_client, user):
+        from apps.products.models import Product
+        from apps.suppliers.models import Supplier
 
+        s = Supplier.objects.create(owner=user, name="A", website="https://a.com")
+        p = Product.objects.create(
+            owner=user, supplier=s, name="W",
+            supplier_url="https://a.com/1", supplier_price=10,
+        )
+        ActivityService.record(user, ActivityEvent.EventType.CHECK_OK)
+        ActivityService.record(user, ActivityEvent.EventType.PRICE_CHANGE, product=p)
+        ActivityService.record(user, ActivityEvent.EventType.SCRAPE_FAILED)
+
+        url = reverse("dashboard:summary")
         response = api_client.get(url)
 
         data = response.data["data"]
-        assert data["products_changed_today"] == 0
-        assert data["stock_changes_today"] == 0
-        assert data["failed_scrapes_today"] == 0
-        assert data["todays_checks"] == 0
-        assert data["recent_activity"] == []
+        assert data["todays_checks"] == 3
+        assert data["products_changed_today"] == 1
+        assert data["failed_scrapes_today"] == 1
+        assert len(data["recent_activity"]) == 3
 
     def test_products_monitored_counts_only_active(self, api_client, user, supplier):
         Product.objects.create(
@@ -275,3 +287,94 @@ class TestDashboardSummary:
 
         # 100 -> 110 with 10% markup, profit 10.00
         assert str(response.data["data"]["average_profit"]) == "10.00"
+
+
+class TestActivityFeed:
+    def test_requires_auth(self):
+        client = APIClient()
+        url = reverse("dashboard:activity")
+        response = client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_returns_paginated_events(self, api_client, user):
+        for _ in range(30):
+            ActivityService.record(user, ActivityEvent.EventType.CHECK_OK)
+
+        url = reverse("dashboard:activity")
+        response = api_client.get(url)
+
+        assert response.data["count"] == 30
+        assert len(response.data["results"]) == 25
+        assert response.data["next"] is not None
+
+    def test_filter_by_event_type(self, api_client, user):
+        ActivityService.record(user, ActivityEvent.EventType.CHECK_OK)
+        ActivityService.record(user, ActivityEvent.EventType.PRICE_CHANGE)
+        ActivityService.record(user, ActivityEvent.EventType.SCRAPE_FAILED)
+
+        url = reverse("dashboard:activity")
+        response = api_client.get(url, {"event_type": "price_change"})
+
+        assert response.data["count"] == 1
+        assert response.data["results"][0]["event_type"] == "price_change"
+
+    def test_filter_by_product(self, api_client, user):
+        from apps.products.models import Product
+        from apps.suppliers.models import Supplier
+
+        s = Supplier.objects.create(owner=user, name="A", website="https://a.com")
+        p = Product.objects.create(
+            owner=user, supplier=s, name="W",
+            supplier_url="https://a.com/1", supplier_price=10,
+        )
+        ActivityService.record(user, ActivityEvent.EventType.PRICE_CHANGE, product=p)
+        ActivityService.record(user, ActivityEvent.EventType.CHECK_OK)
+
+        url = reverse("dashboard:activity")
+        response = api_client.get(url, {"product": str(p.id)})
+
+        assert response.data["count"] == 1
+
+    def test_filter_by_date_range(self, api_client, user):
+        from datetime import date, timedelta
+
+        ActivityService.record(user, ActivityEvent.EventType.CHECK_OK)
+        url = reverse("dashboard:activity")
+        today = date.today().isoformat()
+        response = api_client.get(url, {"date_from": today, "date_to": today})
+        assert response.data["count"] == 1
+
+    def test_only_own_events(self, api_client, user, other_user):
+        ActivityService.record(user, ActivityEvent.EventType.CHECK_OK)
+        ActivityService.record(other_user, ActivityEvent.EventType.SCRAPE_FAILED)
+
+        url = reverse("dashboard:activity")
+        response = api_client.get(url)
+
+        assert response.data["count"] == 1
+
+    def test_event_serializer_fields(self, api_client, user):
+        from apps.products.models import Product
+        from apps.suppliers.models import Supplier
+
+        s = Supplier.objects.create(owner=user, name="Ali", website="https://a.com")
+        p = Product.objects.create(
+            owner=user, supplier=s, name="Widget",
+            supplier_url="https://a.com/1", supplier_price=10,
+        )
+        ActivityService.record(
+            user, ActivityEvent.EventType.PRICE_CHANGE,
+            product=p, supplier=s,
+            old_price="10.00", new_price="12.00",
+        )
+
+        url = reverse("dashboard:activity")
+        response = api_client.get(url)
+
+        ev = response.data["results"][0]
+        assert ev["event_type"] == "price_change"
+        assert ev["product_name"] == "Widget"
+        assert ev["supplier_name"] == "Ali"
+        assert ev["payload"]["old_price"] == "10.00"
+        assert ev["payload"]["new_price"] == "12.00"
+        assert ev["created_at"] is not None
