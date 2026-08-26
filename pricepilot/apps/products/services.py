@@ -165,11 +165,20 @@ class PriceMonitorService:
 
         price_changed = scraped.price != product.supplier_price
         stock_changed = scraped.stock != product.stock
+        description_changed = bool(scraped.description) and scraped.description != product.description
+        images_changed = bool(scraped.images) and scraped.images != product.images
+        content_changed = description_changed or images_changed
         now = timezone.now()
 
         if not price_changed and not stock_changed:
             product.last_checked_at = now
             update_fields = ["last_checked_at"]
+            if description_changed:
+                product.description = scraped.description
+                update_fields.append("description")
+            if images_changed:
+                product.images = scraped.images
+                update_fields.append("images")
             if product.status == Product.Status.SCRAPE_FAILED:
                 # A successful scrape means the product is monitored fine
                 # again — clear the failure flag so the scheduler's
@@ -177,6 +186,8 @@ class PriceMonitorService:
                 product.status = Product.Status.ACTIVE
                 update_fields.append("status")
             product.save(update_fields=update_fields)
+            if content_changed:
+                StoreSyncService.sync_product(product)
             return None
 
         with transaction.atomic():
@@ -197,6 +208,10 @@ class PriceMonitorService:
 
             product.supplier_price = scraped.price
             product.stock = scraped.stock
+            if description_changed:
+                product.description = scraped.description
+            if images_changed:
+                product.images = scraped.images
             product.last_checked_at = now
             if price_changed and product.pricing_rule_id:
                 product.selling_price = PricingService.compute_selling_price(

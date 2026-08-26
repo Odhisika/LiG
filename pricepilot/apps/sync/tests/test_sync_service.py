@@ -479,3 +479,34 @@ class TestDashboardDrivenRepricing:
         lig.refresh_from_db()
         assert product.selling_price == Decimal("125.00")
         assert lig.price == Decimal("125.00")
+
+    def test_pricing_rule_update_syncs_product_without_store_id(self, user, supplier):
+        rule = PricingRule.objects.create(owner=user, name="Markup")
+        PricingRuleStep.objects.create(
+            rule=rule, order=0, step_type=PricingRuleStep.StepType.MARKUP_PCT, value="10"
+        )
+        product = make_product(
+            user,
+            supplier,
+            pricing_rule=rule,
+            supplier_price=Decimal("100.00"),
+            selling_price=Decimal("110.00"),
+            store_product_id=None,
+        )
+
+        with patch("apps.sync.services.StoreSyncService.sync_all") as mock_sync:
+            PricingRuleService.update(
+                user,
+                rule.id,
+                {
+                    "name": "Markup",
+                    "is_active": True,
+                    "steps": [{"step_type": "markup_pct", "value": "25"}],
+                },
+                sync_lig=True,
+            )
+
+        product.refresh_from_db()
+        synced_products = list(mock_sync.call_args.args[0])
+        assert product.selling_price == Decimal("125.00")
+        assert product in synced_products

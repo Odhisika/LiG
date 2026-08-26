@@ -37,6 +37,11 @@ def supplier(owner):
     return Supplier.objects.create(owner=owner, name="Jred Technologies", default_scraper="catlog")
 
 
+@pytest.fixture(autouse=True)
+def default_jred_owner_setting(settings):
+    settings.JRED_CATALOG_OWNER_EMAIL = ""
+
+
 @patch("apps.products.catalog_sync._fetch_all_items")
 def test_sync_catalog_creates_product(mock_fetch, owner, supplier):
     mock_fetch.return_value = [api_item()]

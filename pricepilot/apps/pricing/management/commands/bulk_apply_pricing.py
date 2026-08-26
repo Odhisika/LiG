@@ -100,9 +100,7 @@ class Command(BaseCommand):
         from apps.pricing.services import DefaultMarkupService
 
         percent = Decimal(str(markup_pct))
-        affected = Product.objects.filter(
-            owner=owner, pricing_rule__isnull=True, selling_price__isnull=True
-        ).count()
+        affected = DefaultMarkupService.eligible_products(owner).count()
 
         if dry_run:
             self.stdout.write(

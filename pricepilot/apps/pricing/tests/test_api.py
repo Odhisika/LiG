@@ -229,6 +229,62 @@ class TestDefaultMarkup:
         fetched = api_client.get(url)
         assert fetched.data["data"]["markup_percent"] == "25.00"
 
+    def test_default_markup_sync_includes_products_without_store_id(
+        self, api_client, user, supplier
+    ):
+        url = reverse("pricing:default-markup")
+        product = Product.objects.create(
+            owner=user,
+            supplier=supplier,
+            name="No store identity yet",
+            supplier_url="https://a.com",
+            sku="sku-1",
+            supplier_price=10,
+            selling_price=None,
+            store_product_id=None,
+        )
+
+        with patch("apps.pricing.views.StoreSyncService.sync_all") as mock_sync:
+            response = api_client.put(url, {"markup_percent": "25"}, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        synced_products = list(mock_sync.call_args.args[0])
+        assert product in synced_products
+
+    def test_default_markup_includes_jred_scraped_products_without_store_pointer(
+        self, api_client, user
+    ):
+        from apps.suppliers.models import Supplier
+
+        jred = Supplier.objects.create(
+            owner=user,
+            name="JRED Technologies",
+            website="https://www.jredtechnologiesltd.com/",
+            default_scraper="catlog",
+        )
+        product = Product.objects.create(
+            owner=user,
+            supplier=jred,
+            name="JRED imported laptop",
+            supplier_url="https://jredtechnologiesltd.com/products/imported-laptop",
+            sku="imported-laptop",
+            supplier_price=100,
+            selling_price=None,
+            store_product_id=None,
+        )
+
+        with patch("apps.pricing.views.StoreSyncService.sync_all") as mock_sync:
+            response = api_client.put(
+                reverse("pricing:default-markup"),
+                {"markup_percent": "15"},
+                format="json",
+            )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["data"]["affected_products"] == 1
+        synced_products = list(mock_sync.call_args.args[0])
+        assert product in synced_products
+
     def test_negative_markup_rejected(self, api_client):
         url = reverse("pricing:default-markup")
 

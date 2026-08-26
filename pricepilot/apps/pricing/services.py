@@ -82,6 +82,23 @@ class DefaultMarkupService:
         return markup.markup_percent
 
     @staticmethod
+    def eligible_products(owner: User):
+        """Products that should use the owner's default markup.
+
+        Scraped/imported products are included even before they have a
+        remembered LiG store_product_id; StoreSyncService can seed or match
+        them during sync. Manual selling prices and product-specific rules
+        are intentionally excluded.
+        """
+        from apps.products.models import Product
+
+        return Product.objects.filter(
+            owner=owner,
+            pricing_rule__isnull=True,
+            selling_price__isnull=True,
+        )
+
+    @staticmethod
     def set_markup(owner: User, markup_percent) -> tuple[DefaultMarkup, int]:
         """Upsert the owner's default markup.
 
@@ -98,11 +115,7 @@ class DefaultMarkupService:
             defaults={"markup_percent": percent, "is_active": True},
         )
 
-        from apps.products.models import Product
-
-        affected = Product.objects.filter(
-            owner=owner, pricing_rule__isnull=True, selling_price__isnull=True
-        ).count()
+        affected = DefaultMarkupService.eligible_products(owner).count()
         return markup, affected
 
 
@@ -140,17 +153,15 @@ class PricingRuleService:
     @staticmethod
     def _reprice_and_sync_products(rule: PricingRule) -> int:
         """Recompute stored selling_price for products using this rule and
-        push existing LiG rows immediately.
+        push affected products to LiG immediately.
 
-        We update every product attached to the rule so future syncs stay
-        correct, but only seed/sync rows that already have a LiG identity.
+        We sync every product attached to the rule because the sync service
+        can update by remembered store id, resolve by sku, or seed a new row.
         """
         from apps.products.models import Product
         from apps.sync.services import StoreSyncService
 
         all_products = Product.objects.filter(owner=rule.owner, pricing_rule=rule)
-        syncable_products = all_products.filter(store_product_id__isnull=False)
-
         updated = 0
         for product in all_products.iterator():
             product.selling_price = PricingService.compute_selling_price(
@@ -160,7 +171,7 @@ class PricingRuleService:
             updated += 1
 
         if updated:
-            StoreSyncService.sync_all(syncable_products)
+            StoreSyncService.sync_all(all_products)
             logger.info(
                 "Repriced and synced %d product(s) for pricing rule %s.", updated, rule.id
             )

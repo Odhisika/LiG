@@ -103,14 +103,7 @@ class DefaultMarkupView(APIView):
         markup, affected = DefaultMarkupService.set_markup(
             request.user, serializer.validated_data["markup_percent"]
         )
-        synced = StoreSyncService.sync_all(
-            Product.objects.filter(
-                owner=request.user,
-                pricing_rule__isnull=True,
-                selling_price__isnull=True,
-                store_product_id__isnull=False,
-            )
-        )
+        synced = StoreSyncService.sync_all(DefaultMarkupService.eligible_products(request.user))
         logger.info(
             "Default markup updated for user %s; sync result=%s",
             request.user.id,
