@@ -31,6 +31,8 @@ class ProductSerializer(serializers.ModelSerializer):
             "description",
             "category",
             "check_frequency_minutes",
+            "publish_to_store",
+            "use_supplier_images",
             "last_checked_at",
             "created_at",
             "updated_at",

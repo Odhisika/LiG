@@ -98,6 +98,20 @@ class Product(SoftDeleteModel):
         null=True, blank=True, help_text="Last time values were synced to the merchant store."
     )
 
+    # Storefront publishing controls (apps.sync). Owner-facing toggles.
+    publish_to_store = models.BooleanField(
+        default=True,
+        help_text="When off, the product is hidden from the storefront on the "
+        "next sync and is never seeded there. The single authoritative "
+        "'show on our site' switch.",
+    )
+    use_supplier_images = models.BooleanField(
+        default=True,
+        help_text="When off, the supplier's product images are not copied to "
+        "the storefront. Use when the supplier's logo/branding is baked into "
+        "their photos — the store then falls back to its own/placeholder image.",
+    )
+
     class Meta:
         ordering = ["-created_at"]
         constraints = [

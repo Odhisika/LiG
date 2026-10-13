@@ -112,6 +112,13 @@ LIG_DEFAULT_CATEGORY_SLUG = env("LIG_DEFAULT_CATEGORY_SLUG", default="")
 LIG_SYNC_STOCK = env.bool("LIG_SYNC_STOCK", default=True)
 # Default ON: download supplier images into MEDIA_ROOT when seeding.
 LIG_SYNC_IMAGES = env.bool("LIG_SYNC_IMAGES", default=True)
+# Categories whose supplier images must never be published to the storefront
+# (comma-separated, case-insensitive against the product's free-text category).
+# Defaults to "software" because supplier logos/branding are often baked into
+# software product photos, which would reveal our supplier on our own site.
+LIG_SYNC_IMAGES_EXCLUDED_CATEGORIES = env.list(
+    "LIG_SYNC_IMAGES_EXCLUDED_CATEGORIES", default=["software"]
+)
 
 # Where synced product images land. Point this at the merchant site's media
 # directory (e.g. /var/www/LiG/media) when the two apps don't share one.

@@ -117,6 +117,26 @@ Copy the block from `.env.production.example` into
 - `LIG_MEDIA_ROOT=/srv/lig/app/media`
 - `LIG_SYNC_ENABLED=True`
 
+### 4b. Storefront publishing controls
+
+Each product has two owner-facing toggles (PricePilot UI and admin):
+
+- **Show on our storefront** (`publish_to_store`) — when off, the product is
+  hidden from the store on the next sync and is never seeded there.
+- **Use supplier images** (`use_supplier_images`) — turn off when the
+  supplier's logo/branding is baked into their photos; the store then falls
+  back to its own/placeholder image.
+
+Supplier images are additionally never copied for any category listed in
+`LIG_SYNC_IMAGES_EXCLUDED_CATEGORIES` (default: `software`), so supplier logos
+in software photos can't appear on the site. To clean up images that were
+already attached before that gate existed:
+
+```bash
+sudo -u lig /srv/lig/app/pricepilot/.venv/bin/python /srv/lig/app/pricepilot/manage.py strip_storefront_images
+# add --apply to actually clear them (dry-run by default)
+```
+
 ### 5. Install the systemd units
 
 ```bash

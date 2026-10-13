@@ -131,17 +131,41 @@ def _effective_selling(pp_product) -> Decimal | None:
 def _is_available(pp_product) -> bool:
     """Whether the product should stay on sale in the store.
 
-    Only a confirmed stock-out (or an archived product) takes it off the
-    store. A failed scrape means the price couldn't be refreshed this round —
-    it must NOT hide the product or its last known price, otherwise one
-    transient supplier hiccup would pull a whole catalog offline.
+    The owner's `publish_to_store` toggle always wins: an unpublished product
+    is never on sale. Otherwise only a confirmed stock-out (or an archived
+    product) takes it off the store. A failed scrape means the price couldn't
+    be refreshed this round — it must NOT hide the product or its last known
+    price, otherwise one transient supplier hiccup would pull a whole catalog
+    offline.
     """
     from apps.products.models import Product
+
+    if not pp_product.publish_to_store:
+        return False
 
     return pp_product.status not in (
         Product.Status.OUT_OF_STOCK,
         Product.Status.ARCHIVED,
     )
+
+
+def _should_sync_images(pp_product) -> bool:
+    """Whether this product's supplier images may be copied into the store.
+
+    Three gates, all of which must pass: the global image-sync switch
+    (LIG_SYNC_IMAGES), the per-product `use_supplier_images` toggle, and the
+    category exclusion list (default: software — its product photos often
+    carry the supplier's logo, which must not appear on our site).
+    """
+    if not settings.LIG_SYNC_IMAGES or not pp_product.use_supplier_images:
+        return False
+
+    excluded = {
+        str(entry).strip().casefold()
+        for entry in settings.LIG_SYNC_IMAGES_EXCLUDED_CATEGORIES
+        if str(entry).strip()
+    }
+    return (pp_product.category or "").strip().casefold() not in excluded
 
 
 class StoreSyncService:
@@ -174,6 +198,12 @@ class StoreSyncService:
             return {"action": "skipped", "reason": "disabled", "lig_product_id": None}
         try:
             lig = StoreSyncService._resolve(pp_product)
+            if lig is None and not pp_product.publish_to_store:
+                return {
+                    "action": "skipped",
+                    "reason": "unpublished",
+                    "lig_product_id": None,
+                }
             if lig is not None:
                 action = StoreSyncService._update_existing(pp_product, lig)
             else:
@@ -306,7 +336,7 @@ class StoreSyncService:
         Runs from the update path too (not just seeding), so rows seeded
         before images existed get backfilled on the next sync.
         """
-        if not settings.LIG_SYNC_IMAGES or lig.images or not pp_product.images:
+        if not _should_sync_images(pp_product) or lig.images or not pp_product.images:
             return False
         StoreSyncService._attach_images(lig, pp_product.images)
         return True
@@ -338,7 +368,7 @@ class StoreSyncService:
             category=category,
         )
 
-        if settings.LIG_SYNC_IMAGES and pp_product.images:
+        if _should_sync_images(pp_product) and pp_product.images:
             StoreSyncService._attach_images(lig, pp_product.images)
 
         logger.info("Store sync: seeded LiG product %s (%s)", lig.id, lig.product_name)

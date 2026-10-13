@@ -278,6 +278,40 @@ class TestProductDetail:
         assert product.stock == 42
         assert product.status == "out_of_stock"
 
+    def test_patch_toggles_publish_to_store(self, api_client, user, supplier):
+        product = Product.objects.create(
+            owner=user,
+            supplier=supplier,
+            name="Mine",
+            supplier_url="https://a.com",
+            supplier_price=1,
+        )
+        url = reverse("products:detail", args=[product.id])
+
+        response = api_client.patch(url, {"publish_to_store": False})
+
+        assert response.status_code == status.HTTP_200_OK
+        product.refresh_from_db()
+        assert product.publish_to_store is False
+        assert response.data["data"]["publish_to_store"] is False
+
+    def test_patch_toggles_use_supplier_images(self, api_client, user, supplier):
+        product = Product.objects.create(
+            owner=user,
+            supplier=supplier,
+            name="Mine",
+            supplier_url="https://a.com",
+            supplier_price=1,
+        )
+        url = reverse("products:detail", args=[product.id])
+
+        response = api_client.patch(url, {"use_supplier_images": False})
+
+        assert response.status_code == status.HTTP_200_OK
+        product.refresh_from_db()
+        assert product.use_supplier_images is False
+        assert response.data["data"]["use_supplier_images"] is False
+
     def test_patch_cannot_reassign_to_another_owners_supplier(
         self, api_client, user, supplier, other_supplier
     ):

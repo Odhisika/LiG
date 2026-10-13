@@ -375,6 +375,108 @@ class TestDeletion:
         assert result["action"] == "skipped"
 
 
+class TestPublishingToggle:
+    def test_unpublished_product_is_not_seeded(self, user, supplier, lig_store):
+        seed_category("UPS", "ups")
+        product = make_product(user, supplier, publish_to_store=False)
+
+        from apps.sync.services import StoreSyncService
+
+        result = StoreSyncService.sync_product(product)
+        assert result["action"] == "skipped"
+        assert result["reason"] == "unpublished"
+        assert LiGProduct.objects.count() == 0
+
+    def test_unpublishing_hides_existing_store_row(self, user, supplier, lig_store):
+        seed_category("UPS", "ups")
+        product = make_product(user, supplier)
+
+        from apps.sync.services import StoreSyncService
+
+        seeded = StoreSyncService.sync_product(product)
+        product.publish_to_store = False
+        product.save(update_fields=["publish_to_store"])
+
+        result = StoreSyncService.sync_product(product)
+        lig = LiGProduct.objects.get(id=seeded["lig_product_id"])
+        assert result["action"] == "updated"
+        assert lig.is_available is False
+
+    def test_republishing_restores_store_visibility(self, user, supplier, lig_store):
+        seed_category("UPS", "ups")
+        product = make_product(user, supplier)
+
+        from apps.sync.services import StoreSyncService
+
+        seeded = StoreSyncService.sync_product(product)
+        product.publish_to_store = False
+        product.save(update_fields=["publish_to_store"])
+        StoreSyncService.sync_product(product)
+
+        product.publish_to_store = True
+        product.save(update_fields=["publish_to_store"])
+        result = StoreSyncService.sync_product(product)
+
+        lig = LiGProduct.objects.get(id=seeded["lig_product_id"])
+        assert result["action"] == "updated"
+        assert lig.is_available is True
+
+
+class TestSupplierImagePublishing:
+    def test_software_excluded_by_default(self, user, supplier):
+        from apps.sync.services import _should_sync_images
+
+        product = make_product(user, supplier, category="Software")
+        with override_settings(LIG_SYNC_IMAGES=True):
+            assert _should_sync_images(product) is False
+
+    def test_per_product_toggle_disables_images(self, user, supplier):
+        from apps.sync.services import _should_sync_images
+
+        product = make_product(user, supplier, category="UPS", use_supplier_images=False)
+        with override_settings(LIG_SYNC_IMAGES=True):
+            assert _should_sync_images(product) is False
+
+    def test_allowed_for_non_excluded_category(self, user, supplier):
+        from apps.sync.services import _should_sync_images
+
+        product = make_product(user, supplier, category="UPS")
+        with override_settings(LIG_SYNC_IMAGES=True):
+            assert _should_sync_images(product) is True
+
+    def test_seed_skips_attach_for_excluded_category(self, user, supplier, lig_store):
+        seed_category("Software", "software")
+        product = make_product(user, supplier, category="Software")
+        product.images = ["https://supplier.example/logo.jpg"]
+        product.save(update_fields=["images"])
+
+        from apps.sync.services import StoreSyncService
+
+        with (
+            override_settings(LIG_SYNC_IMAGES=True),
+            patch.object(StoreSyncService, "_attach_images") as mock_attach,
+        ):
+            StoreSyncService.sync_product(product)
+
+        mock_attach.assert_not_called()
+
+    def test_seed_attaches_for_allowed_category(self, user, supplier, lig_store):
+        seed_category("UPS", "ups")
+        product = make_product(user, supplier, category="UPS")
+        product.images = ["https://supplier.example/ups.jpg"]
+        product.save(update_fields=["images"])
+
+        from apps.sync.services import StoreSyncService
+
+        with (
+            override_settings(LIG_SYNC_IMAGES=True),
+            patch.object(StoreSyncService, "_attach_images") as mock_attach,
+        ):
+            StoreSyncService.sync_product(product)
+
+        mock_attach.assert_called_once()
+
+
 class TestMonitorHook:
     def test_check_product_triggers_store_sync_on_change(self, user, supplier):
         product = make_product(user, supplier)
@@ -418,7 +520,7 @@ class TestMonitorHook:
         mock_sync.assert_not_called()
 
 
-class TestDeletion:
+class TestDeletionById:
     def test_delete_product_hard_deletes_lig_row(self, user, supplier, lig_store):
         seed_category("UPS", "ups")
         product = make_product(user, supplier)

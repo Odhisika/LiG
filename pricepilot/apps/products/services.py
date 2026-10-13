@@ -112,11 +112,28 @@ class ProductService:
                 ProductService._assert_pricing_rule_owned(owner, rule.id)
 
         try:
-            return serializer.save()
+            product = serializer.save()
         except IntegrityError as exc:
             raise ValidationError(
                 f"A product with SKU '{data.get('sku')}' already exists."
             ) from exc
+
+        if {"publish_to_store", "use_supplier_images"} & set(serializer.validated_data):
+            ProductService._resync_to_store(product)
+
+        return product
+
+    @staticmethod
+    def _resync_to_store(product: Product) -> None:
+        """Push the storefront-affecting toggles to the merchant store right
+        away, so hiding/showing a product or swapping its image source does
+        not wait for the daily reconcile. Never lets a store failure break
+        the API response — the scheduled sync will retry anyway.
+        """
+        try:
+            StoreSyncService.sync_product(product)
+        except Exception:  # pragma: no cover - sync catches its own errors
+            logger.exception("Store re-sync after toggle failed for product %s", product.id)
 
     @staticmethod
     def delete(owner: User, product_id) -> None:

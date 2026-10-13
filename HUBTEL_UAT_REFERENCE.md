@@ -101,6 +101,7 @@ docker compose up --build
 dev@example.com
 PricePilot@123
 
+jredtechnologiesltd.com
 
 
 - Email: odhisika64@gmail.com

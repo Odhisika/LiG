@@ -22,6 +22,8 @@ function emptyForm(suppliers) {
     stock: "",
     category: "",
     check_frequency_minutes: 60,
+    publish_to_store: true,
+    use_supplier_images: true,
   };
 }
 
@@ -154,6 +156,28 @@ function ProductForm({ initial, suppliers, pricingRules, onSave, onCancel, error
           />
         </div>
       </div>
+      <div className="form-row">
+        <label>
+          <input
+            type="checkbox"
+            checked={!!form.publish_to_store}
+            onChange={(e) => update("publish_to_store", e.target.checked)}
+            style={{ marginRight: 6 }}
+          />
+          Show on our storefront
+        </label>
+      </div>
+      <div className="form-row">
+        <label>
+          <input
+            type="checkbox"
+            checked={!!form.use_supplier_images}
+            onChange={(e) => update("use_supplier_images", e.target.checked)}
+            style={{ marginRight: 6 }}
+          />
+          Use supplier images (turn off if their logo is baked into the photos)
+        </label>
+      </div>
       <div className="modal-actions">
         <button type="button" className="btn" onClick={onCancel}>
           Cancel
@@ -176,6 +200,7 @@ export default function ProductsPage() {
   const [formError, setFormError] = useState("");
   const [editing, setEditing] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get("category") || "";
@@ -227,6 +252,18 @@ export default function ProductsPage() {
       load();
     } catch (err) {
       setFormError(err.message);
+    }
+  }
+
+  async function handleTogglePublish(product) {
+    setTogglingId(product.id);
+    try {
+      await productsApi.update(product.id, { publish_to_store: !product.publish_to_store });
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTogglingId(null);
     }
   }
 
@@ -313,6 +350,7 @@ export default function ProductsPage() {
                 <th>Selling price</th>
                 <th>Stock</th>
                 <th>Status</th>
+                <th>On store</th>
                 <th></th>
               </tr>
             </thead>
@@ -328,6 +366,15 @@ export default function ProductsPage() {
                   <td>{p.stock ?? "—"}</td>
                   <td>
                     <Badge value={p.status} />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={!!p.publish_to_store}
+                      disabled={togglingId === p.id}
+                      onChange={() => handleTogglePublish(p)}
+                      title="Show this product on the storefront"
+                    />
                   </td>
                   <td>
                     <button className="btn btn-sm" onClick={() => openEdit(p)}>
