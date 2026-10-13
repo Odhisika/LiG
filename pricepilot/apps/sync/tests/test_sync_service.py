@@ -421,6 +421,33 @@ class TestPublishingToggle:
         assert result["action"] == "updated"
         assert lig.is_available is True
 
+    def test_unpublish_hides_unlinked_software_row_by_name(self, user, supplier, lig_store):
+        seed_category("Software", "software")
+        LiGProduct.objects.create(
+            product_name="Microsoft Windows 11 Pro",
+            slug="microsoft-windows-11-pro",
+            sku="SKU-SOFTWARE-1",
+            price=Decimal("120.00"),
+            category=LiGCategory.objects.get(slug="software"),
+        )
+        product = make_product(
+            user,
+            supplier,
+            name="Microsoft Windows 11 Pro",
+            category="Software",
+            sku="",
+            publish_to_store=False,
+        )
+
+        from apps.sync.services import StoreSyncService
+
+        result = StoreSyncService.sync_product(product)
+
+        lig = LiGProduct.objects.get(sku="SKU-SOFTWARE-1")
+        assert result["action"] == "updated"
+        assert lig.is_available is False
+        assert product.store_product_id == lig.id
+
 
 class TestSupplierImagePublishing:
     def test_software_excluded_by_default(self, user, supplier):

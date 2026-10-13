@@ -21,6 +21,15 @@ from apps.sync.services import StoreSyncService
 logger = logging.getLogger(__name__)
 
 
+def is_software_category(category: str | None) -> bool:
+    """True when a free-text category refers to the store's Software
+    department. Scraped software is held back from the storefront by default
+    (prices/titles/images are rarely publish-ready), so the owner reviews and
+    flips it live deliberately.
+    """
+    return "software" in (category or "").strip().casefold()
+
+
 class ProductService:
     """Business logic for product CRUD, kept out of the view layer.
 
@@ -78,6 +87,11 @@ class ProductService:
             data["category"] = categorize_product(
                 data.get("name") or "", data.get("description") or ""
             )
+        # Software stays OFF the storefront until the owner deliberately
+        # publishes it, so a scraped title/price/image is never shown as-is.
+        # Only applied when the caller didn't set the switch explicitly.
+        if "publish_to_store" not in data and is_software_category(data.get("category")):
+            data["publish_to_store"] = False
         serializer = ProductSerializer(data=data)
         if not serializer.is_valid():
             raise ValidationError(str(serializer.errors))

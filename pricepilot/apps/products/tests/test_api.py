@@ -119,6 +119,33 @@ class TestProductCreate:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+    def test_software_defaults_to_hidden_from_storefront(self, api_client, supplier):
+        url = reverse("products:list-create")
+
+        response = api_client.post(url, product_payload(supplier, category="Software"))
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["data"]["publish_to_store"] is False
+        assert Product.objects.get(sku="WE-001").publish_to_store is False
+
+    def test_software_explicit_publish_is_respected(self, api_client, supplier):
+        url = reverse("products:list-create")
+
+        response = api_client.post(
+            url, product_payload(supplier, category="Software", publish_to_store=True)
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["data"]["publish_to_store"] is True
+
+    def test_non_software_defaults_to_published(self, api_client, supplier):
+        url = reverse("products:list-create")
+
+        response = api_client.post(url, product_payload(supplier, category="UPS"))
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["data"]["publish_to_store"] is True
+
 
 class TestProductList:
     def test_list_only_returns_own_products(

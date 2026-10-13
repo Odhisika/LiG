@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { productsApi } from "../api/products";
 import { suppliersApi } from "../api/suppliers";
@@ -7,6 +7,10 @@ import { Badge, EmptyState, ErrorAlert, Modal, Spinner } from "../components/ui"
 
 const STATUSES = ["active", "paused", "out_of_stock", "scrape_failed", "archived"];
 const CURRENCIES = ["USD", "EUR", "GBP", "CNY", "GHS", "NGN", "OTHER"];
+
+function isSoftwareCategory(value) {
+  return String(value || "").toLowerCase().includes("software");
+}
 
 function emptyForm(suppliers) {
   return {
@@ -30,9 +34,23 @@ function emptyForm(suppliers) {
 function ProductForm({ initial, suppliers, pricingRules, onSave, onCancel, error }) {
   const [form, setForm] = useState(initial);
   const [saving, setSaving] = useState(false);
+  const publishTouched = useRef(false);
+  const isNew = !initial?.id;
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
+  }
+
+  function updateCategory(value) {
+    setForm((f) => {
+      const next = { ...f, category: value };
+      // New software products stay off the storefront until the owner
+      // deliberately ticks "Show on our storefront".
+      if (isNew && !publishTouched.current) {
+        next.publish_to_store = !isSoftwareCategory(value);
+      }
+      return next;
+    });
   }
 
   async function handleSubmit(e) {
@@ -144,7 +162,7 @@ function ProductForm({ initial, suppliers, pricingRules, onSave, onCancel, error
       <div className="form-grid">
         <div className="form-row">
           <label>Category</label>
-          <input value={form.category} onChange={(e) => update("category", e.target.value)} />
+          <input value={form.category} onChange={(e) => updateCategory(e.target.value)} />
         </div>
         <div className="form-row">
           <label>Check frequency (minutes)</label>
@@ -161,7 +179,10 @@ function ProductForm({ initial, suppliers, pricingRules, onSave, onCancel, error
           <input
             type="checkbox"
             checked={!!form.publish_to_store}
-            onChange={(e) => update("publish_to_store", e.target.checked)}
+            onChange={(e) => {
+              publishTouched.current = true;
+              update("publish_to_store", e.target.checked);
+            }}
             style={{ marginRight: 6 }}
           />
           Show on our storefront

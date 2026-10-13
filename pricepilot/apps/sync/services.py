@@ -275,11 +275,26 @@ class StoreSyncService:
 
     @staticmethod
     def _resolve(pp_product) -> LiGProduct | None:
-        """Find the matching LiG row. Prefer the remembered id, then sku."""
+        """Find the matching LiG row.
+
+        Prefer the remembered id, then sku. Software rows are often created
+        by LiG's own catalogue importer with no link back to PricePilot (no
+        store_product_id, no SKU), so fall back to an exact product-name
+        match for them — otherwise a dashboard "On store" toggle silently
+        does nothing and the product keeps showing on the storefront.
+        """
         if pp_product.store_product_id:
-            return LiGProduct.objects.filter(id=pp_product.store_product_id).first()
+            lig = LiGProduct.objects.filter(id=pp_product.store_product_id).first()
+            if lig is not None:
+                return lig
         if pp_product.sku:
-            return LiGProduct.objects.filter(sku=pp_product.sku).first()
+            lig = LiGProduct.objects.filter(sku=pp_product.sku).first()
+            if lig is not None:
+                return lig
+        if "software" in (pp_product.category or "").strip().casefold():
+            name = (pp_product.name or "").strip()
+            if name:
+                return LiGProduct.objects.filter(product_name=name).first()
         return None
 
     @staticmethod
