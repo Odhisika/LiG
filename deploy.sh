@@ -32,6 +32,9 @@ ACTIVE_CONF="$APP_ROOT/deploy/apache/active.conf"
 BACKUP_DIR="$APP_ROOT/backups"
 HEALTH_TIMEOUT=180
 NET=lig-prod-net
+# Served same-origin behind the pilot vhost, so a relative base works for any
+# domain. Override with VITE_API_BASE_URL=... to bake in an absolute API URL.
+VITE_API_BASE_URL="${VITE_API_BASE_URL:-/api}"
 
 say() { echo "== $*"; }
 die() { echo "!! $*" >&2; exit 1; }
@@ -131,6 +134,27 @@ start_pp_beat() {
         pp-app:latest celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 }
 
+build_frontend() {
+    # The production SPA is served by Apache straight from
+    # pricepilot/frontend/dist (see deploy/apache/pilot-vhost.conf) — it is
+    # NOT baked into pp-app and NOT built by any container. Rebuilding images
+    # alone therefore leaves the old UI live, so build the frontend here.
+    local fe_dir="$APP_ROOT/pricepilot/frontend"
+    [ -f "$fe_dir/package.json" ] || { say "No PricePilot frontend to build — skipping"; return 0; }
+    say "Building PricePilot frontend (VITE_API_BASE_URL=$VITE_API_BASE_URL)"
+    # Build inside a throwaway node container so the deploy host needs no Node.
+    # node_modules lives in a named volume so the build never litters the host
+    # with root-owned files; only dist/ is written back to the repo.
+    docker run --rm \
+        -v "$fe_dir:/app" \
+        -v lig-pp-frontend-node:/app/node_modules \
+        -w /app \
+        -e "VITE_API_BASE_URL=$VITE_API_BASE_URL" \
+        node:22-slim \
+        sh -c "npm ci --no-audit --no-fund && npm run build" \
+        || die "PricePilot frontend build failed — the previous UI is still live"
+}
+
 ensure_backends() {
     docker network create "$NET" >/dev/null 2>&1 || true
     docker volume create lig-pgdata >/dev/null 2>&1 || true
@@ -199,6 +223,7 @@ else
     say "Building images"
     docker buildx build -t lig-app:latest --load .
     docker buildx build -t pp-app:latest --load ./pricepilot
+    build_frontend
 fi
 
 # ------------------------------------------------------------ 4. backends ---
