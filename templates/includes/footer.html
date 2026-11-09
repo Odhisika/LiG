@@ -1,3 +1,4 @@
+{% load static %}
 <style>
     * {
         margin: 0;
@@ -76,8 +77,10 @@
         gap: 0.5rem;
     }
 
-    .company-logo i {
-        color: #3b82f6;
+    .company-logo .footer-logo-img {
+        height: 42px;
+        width: auto;
+        object-fit: contain;
     }
 
     .company-description {
@@ -237,7 +240,10 @@
             <!-- Company Info -->
             <div class="footer-section company-info">
                 <div class="company-logo">
-                    <i class="fas fa-bolt"></i>
+                    <a href="{% url 'home' %}">
+                        <img src="{% static 'images/logo.jpg' %}" alt="LuckyTech Innovation Ground logo"
+                            class="footer-logo-img">
+                    </a>
                     LuckyTech Innovation Ground
                 </div>
                 <p class="company-description">

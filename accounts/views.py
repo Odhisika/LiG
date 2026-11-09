@@ -75,6 +75,18 @@ def transfer_guest_cart_to_user(request, user):
         pass
 
 
+def redirect_after_auth(user):
+    """
+    Where to send a user right after logging in.
+
+    Users who have something in their cart go to the cart so they can review
+    or check out; everyone else lands on the homepage.
+    """
+    if CartItem.objects.filter(user=user, is_active=True).exists():
+        return redirect('cart')
+    return redirect('home')
+
+
 
 @ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def register(request):
@@ -181,8 +193,8 @@ def login(request):
                 if 'checkout' in next_url:
                     return redirect('checkout')
                 return redirect(next_url)
-            # Default redirect to cart to show merged items, then to home
-            return redirect('cart')
+            # No explicit destination: cart if it has items, otherwise home.
+            return redirect_after_auth(user)
         else:
             attempts = record_failed_attempt(email, ip)
             remaining = LOCKOUT_MAX_ATTEMPTS - attempts
